@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { findPayment, isQualifyingPayment, paymentUrl, solToLamports, type PaymentTerms } from '../src/license/license'
+import { findPayment, isQualifyingPayment, paymentUrl, solToLamports, usdcToRaw, type PaymentTerms } from '../src/license/license'
 import { RpcClient } from '../src/rpc/client'
 import type { RpcTransaction } from '../src/engine/types'
 import { tx, W, W2 } from './helpers'
@@ -71,5 +71,48 @@ describe('findPayment', () => {
       [payment(W, 2e8, 'nomemo'), payment(W, 2e8, 'failed'), payment(W, 2e8, 'old', NOW - 400 * 86_400)],
     )
     await expect(findPayment(rpc, [W], terms, NOW * 1000)).resolves.toBeNull()
+  })
+})
+
+describe('USDC payments', () => {
+  const USDC = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+  const withUsdc: PaymentTerms = { ...terms, priceUsdc: '39' }
+
+  function usdcPayment(from: string, raw: number, merchantAtaExisted = true): RpcTransaction {
+    return tx({
+      accounts: [
+        { key: from, pre: 5e9, post: 5e9 - 5000 },
+        { key: 'FromAta', pre: 2_039_280, post: 2_039_280 },
+        { key: 'MerchAta', pre: merchantAtaExisted ? 2_039_280 : 0, post: 2_039_280 },
+      ],
+      pre: [
+        { account: 'FromAta', mint: USDC, owner: from, amount: '100000000' },
+        ...(merchantAtaExisted ? [{ account: 'MerchAta', mint: USDC, owner: M, amount: '5000000' }] : []),
+      ],
+      post: [
+        { account: 'FromAta', mint: USDC, owner: from, amount: String(100_000_000 - raw) },
+        { account: 'MerchAta', mint: USDC, owner: M, amount: String((merchantAtaExisted ? 5_000_000 : 0) + raw) },
+      ],
+    })
+  }
+
+  it('builds a USDC Solana Pay URL', () => {
+    const url = paymentUrl(withUsdc, new Date('2026-10-22T00:00:00Z'), 'USDC')
+    expect(url).toBe(`solana:${M}?amount=39&spl-token=${USDC}&label=SolTax+Cleaner&memo=STC-2026`)
+  })
+
+  it('accepts the full USDC price from an analysed wallet, even into a new merchant account', () => {
+    const wallets = new Set([W])
+    expect(isQualifyingPayment(usdcPayment(W, 39_000_000), wallets, withUsdc)).toBe(true)
+    expect(isQualifyingPayment(usdcPayment(W, 39_000_000, false), wallets, withUsdc)).toBe(true)
+    expect(isQualifyingPayment(usdcPayment(W, 38_990_000), wallets, withUsdc)).toBe(false)
+    expect(isQualifyingPayment(usdcPayment(W2, 39_000_000), wallets, withUsdc)).toBe(false)
+    expect(isQualifyingPayment(usdcPayment(W, 39_000_000), wallets, terms)).toBe(false)
+  })
+
+  it('converts USDC amounts exactly', () => {
+    expect(usdcToRaw('39')).toBe(39_000_000n)
+    expect(usdcToRaw('0.5')).toBe(500_000n)
+    expect(() => usdcToRaw('0.0000001')).toThrow()
   })
 })

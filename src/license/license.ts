@@ -2,33 +2,52 @@ import { accountKeys } from '../engine/deltas'
 import type { RpcTransaction } from '../engine/types'
 import { getSignaturesForAddress, getTransaction, type RpcClient } from '../rpc/client'
 
+export const USDC_MINT = 'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v'
+
+export type PayCurrency = 'SOL' | 'USDC'
+
 export interface PaymentTerms {
   merchant: string
   priceSol: string
+  /** Price in USDC; when set, paying in USDC is accepted too. */
+  priceUsdc?: string
   memoPrefix: string
   label: string
   validDays: number
 }
 
+function toRaw(value: string, decimals: number): bigint {
+  const m = new RegExp(`^(\\d+)(?:\\.(\\d{0,${decimals}}))?$`).exec(value.trim())
+  if (!m) throw new Error(`Bad amount: ${value}`)
+  return BigInt(m[1]) * 10n ** BigInt(decimals) + BigInt((m[2] ?? '').padEnd(decimals, '0'))
+}
+
 /** "0.2" → 200000000n lamports. */
 export function solToLamports(sol: string): bigint {
-  const m = /^(\d+)(?:\.(\d{0,9}))?$/.exec(sol.trim())
-  if (!m) throw new Error(`Bad SOL amount: ${sol}`)
-  return BigInt(m[1]) * 1_000_000_000n + BigInt((m[2] ?? '').padEnd(9, '0'))
+  return toRaw(sol, 9)
+}
+
+/** "39" → 39000000n (USDC has 6 decimals). */
+export function usdcToRaw(usdc: string): bigint {
+  return toRaw(usdc, 6)
 }
 
 export function memoFor(terms: PaymentTerms, now = new Date()): string {
   return `${terms.memoPrefix}-${now.getUTCFullYear()}`
 }
 
-/** Solana Pay transfer request (https://docs.solanapay.com/spec). */
-export function paymentUrl(terms: PaymentTerms, now = new Date()): string {
-  const q = new URLSearchParams({ amount: terms.priceSol, label: terms.label, memo: memoFor(terms, now) })
+/** Solana Pay transfer request (https://docs.solanapay.com/spec), in SOL or USDC. */
+export function paymentUrl(terms: PaymentTerms, now = new Date(), currency: PayCurrency = 'SOL'): string {
+  const usdc = currency === 'USDC' && terms.priceUsdc
+  const q = new URLSearchParams({ amount: usdc ? terms.priceUsdc! : terms.priceSol })
+  if (usdc) q.set('spl-token', USDC_MINT)
+  q.set('label', terms.label)
+  q.set('memo', memoFor(terms, now))
   return `solana:${terms.merchant}?${q.toString()}`
 }
 
 /**
- * True when `tx` moved at least the price from one of `wallets` to the merchant.
+ * True when `tx` moved at least the price, in SOL or (if priced) USDC, from one of `wallets` to the merchant.
  * Uses balance changes so it works however the wallet app built the transfer.
  */
 export function isQualifyingPayment(tx: RpcTransaction, wallets: Set<string>, terms: PaymentTerms): boolean {
@@ -38,8 +57,22 @@ export function isQualifyingPayment(tx: RpcTransaction, wallets: Set<string>, te
   const price = solToLamports(terms.priceSol)
   const delta = (i: number) => BigInt(meta.postBalances[i] ?? 0) - BigInt(meta.preBalances[i] ?? 0)
   const m = keys.indexOf(terms.merchant)
-  if (m < 0 || delta(m) < price) return false
-  return keys.some((k, i) => wallets.has(k) && -delta(i) >= price)
+  if (m >= 0 && delta(m) >= price && keys.some((k, i) => wallets.has(k) && -delta(i) >= price)) return true
+  if (!terms.priceUsdc) return false
+
+  // USDC: net change per owner across their USDC token accounts.
+  const usdcPrice = usdcToRaw(terms.priceUsdc)
+  const byOwner = new Map<string, bigint>()
+  const addUsdc = (list: typeof meta.preTokenBalances, sign: bigint) => {
+    for (const tb of list ?? []) {
+      if (tb.mint !== USDC_MINT || !tb.owner) continue
+      byOwner.set(tb.owner, (byOwner.get(tb.owner) ?? 0n) + sign * BigInt(tb.uiTokenAmount.amount))
+    }
+  }
+  addUsdc(meta.postTokenBalances, 1n)
+  addUsdc(meta.preTokenBalances, -1n)
+  if ((byOwner.get(terms.merchant) ?? 0n) < usdcPrice) return false
+  return [...byOwner].some(([owner, d]) => wallets.has(owner) && -d >= usdcPrice)
 }
 
 /** Payment-memo marker as returned by getSignaturesForAddress, e.g. "[8] STC-2026". */
