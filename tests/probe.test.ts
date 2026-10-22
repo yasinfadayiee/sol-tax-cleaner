@@ -93,6 +93,24 @@ describe.skipIf(!RUN)('probe escrow programs', () => {
     out.stakers = stakers
     const json = JSON.stringify(out, null, 1)
     writeFileSync('probe-report.json', json)
-    console.log(json)
+    // Compact digest for reading from the job log: one line per transaction.
+    const line = (r: ReturnType<typeof summary>, user?: string) =>
+      [
+        r.time?.slice(0, 16),
+        r.signer === user ? 'USER' : r.signer.slice(0, 6),
+        r.instr.join('+') || '-',
+        'lam:' + r.lamports.map((l) => `${l.k}${l.d > 0 ? '+' : ''}${l.d}`).join(','),
+        'tok:' + r.tokens.map((t) => `${t.acct.slice(0, 6)}(${t.owner === user ? 'USER' : t.owner?.slice(0, 6)})${t.mint}:${t.pre}->${t.post}`).join(','),
+      ].join(' | ')
+    const digest: string[] = []
+    for (const name of Object.keys(PROGRAMS)) {
+      const o = out[name] as { recentCount: number; recent: ReturnType<typeof summary>[]; lifecycle: ReturnType<typeof summary>[] }
+      const u = (out[`${name}:user`] as { user: string } | undefined)?.user
+      digest.push(`== ${name}: ${o.recentCount} recent; user ${u ?? 'none'}`)
+      digest.push(...o.recent.slice(0, 6).map((r) => '  R ' + line(r, u)))
+      digest.push(...o.lifecycle.slice(0, 15).map((r) => '  L ' + line(r, u)))
+    }
+    digest.push(`== stakers: ${JSON.stringify(out.stakers)}`)
+    console.log('DIGEST\n' + digest.join('\n'))
   })
 })
