@@ -48,6 +48,7 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
 - Export formats (`src/export/formats.ts`): Koinly, CoinTracker (exact 8-column template, MM/DD/YYYY UTC) and
   CoinLedger (universal template, Type blank for trades). Picker in the download box, remembered per browser; the
   report's import steps follow the chosen tool. Tested in `tests/formats.test.ts`.
+- 11 guide pages in `content/` (added CoinTracker, CoinLedger, pump.fun, Phantom, WSOL on 2026-10-22).
 - Launch kit with ready-to-post texts (Reddit, Koinly board, X): `docs/launch-posts.md`. Yasin posts them himself.
 - Bugs found by the mainnet check and fixed: transaction version 1 support (auto-upgrades
   `maxSupportedTransactionVersion`); mistyped Token-2022 program ID.
