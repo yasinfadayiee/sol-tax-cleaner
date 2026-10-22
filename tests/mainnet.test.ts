@@ -111,8 +111,17 @@ describe.skipIf(!RUN)('mainnet reconciliation', () => {
       const lines = csv.trimEnd().split('\r\n')
       expect(lines[0]).toBe(KOINLY_COLUMNS.join(','))
 
+      const versions: Record<string, number> = {}
+      for (const t of history.txs) {
+        const v = String((t as { version?: unknown }).version ?? 'none')
+        versions[v] = (versions[v] ?? 0) + 1
+      }
+      const newest = history.txs.find((t) => ![undefined, 'legacy', 0].includes((t as { version?: string | number }).version))
+      if (newest) console.log('newer-version tx shape:', JSON.stringify(newest).slice(0, 1500))
+
       const entry = {
         wallet,
+        versions,
         seconds: Math.round((Date.now() - t0) / 1000),
         txs: history.txs.length,
         missing: history.missing.length,

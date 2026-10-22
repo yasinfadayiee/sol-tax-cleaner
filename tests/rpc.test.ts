@@ -1,7 +1,7 @@
 import 'fake-indexeddb/auto'
 import { describe, expect, it } from 'vitest'
 import { IdbCache, MemoryCache } from '../src/rpc/cache'
-import { RpcClient, RpcError, TOKEN_PROGRAM } from '../src/rpc/client'
+import { getTransaction, RpcClient, RpcError, TOKEN_PROGRAM } from '../src/rpc/client'
 import { fetchHistory, isValidAddress } from '../src/rpc/history'
 import type { RpcTransaction } from '../src/engine/types'
 import { RENT, USDC, tx } from './helpers'
@@ -13,6 +13,32 @@ function jsonResponse(body: unknown, status = 200, headers: Record<string, strin
 }
 
 describe('RpcClient', () => {
+  it('asks again with a newer maxSupportedTransactionVersion when the RPC requires it', async () => {
+    const versions: number[] = []
+    const rpc = new RpcClient({
+      url: 'x',
+      ratePerSec: 1000,
+      sleep: noSleep,
+      fetchImpl: async (_url, init) => {
+        const v = JSON.parse(String(init?.body)).params[1].maxSupportedTransactionVersion as number
+        versions.push(v)
+        return v < 2
+          ? jsonResponse({
+              jsonrpc: '2.0',
+              id: 1,
+              error: {
+                code: -32015,
+                message: 'Transaction version (2) is not supported by the requesting client. Please try the request again with the following configuration parameter: "maxSupportedTransactionVersion": 2',
+              },
+            })
+          : jsonResponse({ jsonrpc: '2.0', id: 1, result: { ok: true } })
+      },
+    })
+    await expect(getTransaction(rpc, 'sig')).resolves.toEqual({ ok: true })
+    await getTransaction(rpc, 'sig2')
+    expect(versions).toEqual([1, 2, 2])
+  })
+
   it('retries on HTTP 429 and then succeeds', async () => {
     let calls = 0
     const waits: number[] = []

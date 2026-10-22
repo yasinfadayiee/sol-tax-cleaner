@@ -131,11 +131,23 @@ export function getSignaturesForAddress(
   ])
 }
 
-export function getTransaction<T>(rpc: RpcClient, signature: string) {
-  return rpc.call<T | null>('getTransaction', [
-    signature,
-    { encoding: 'jsonParsed', maxSupportedTransactionVersion: 0, commitment: 'confirmed' },
-  ])
+/** Highest transaction version we ask for. Raised automatically when the RPC reports a newer one. */
+let maxTxVersion = 1
+
+export async function getTransaction<T>(rpc: RpcClient, signature: string): Promise<T | null> {
+  for (;;) {
+    try {
+      return await rpc.call<T | null>('getTransaction', [
+        signature,
+        { encoding: 'jsonParsed', maxSupportedTransactionVersion: maxTxVersion, commitment: 'confirmed' },
+      ])
+    } catch (e) {
+      // -32015: "Transaction version (N) is not supported ... maxSupportedTransactionVersion: N"
+      const wanted = e instanceof RpcError && e.code === -32015 ? Number(/version \((\d+)\)/.exec(e.message)?.[1]) : NaN
+      if (!(wanted > maxTxVersion)) throw e
+      maxTxVersion = wanted
+    }
+  }
 }
 
 export const TOKEN_PROGRAM = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
