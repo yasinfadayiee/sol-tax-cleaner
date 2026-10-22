@@ -51,10 +51,13 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
 - Native staking: stake accounts the user controls join the estate; rewards per epoch come from
   `getInflationReward` and export as staking income (Koinly tag `reward`). If reading rewards fails, the analysis
   continues and the results/report warn. Tested in `tests/staking.test.ts`; not yet checked on a real staker.
-- Export formats (`src/export/formats.ts`): Koinly, CoinTracker (exact 8-column template, MM/DD/YYYY UTC) and
+- Export formats (`src/export/formats.ts`): Koinly, Awaken, CoinTracker (exact 8-column template, MM/DD/YYYY UTC) and
   CoinLedger (universal template, Type blank for trades). Picker in the download box, remembered per browser; the
   report's import steps follow the chosen tool. Tested in `tests/formats.test.ts`.
-- 11 guide pages in `content/` (added CoinTracker, CoinLedger, pump.fun, Phantom, WSOL on 2026-10-22).
+- Awaken export (simple template, max 8 decimals) added (#10). USD price next to SOL from CoinGecko, cached per
+  session and hidden if it can't load (#9).
+- Mainnet check green after staking + escrow support (run 39797075653).
+- 13 guide pages in `content/` (Awaken and staking rewards added in #10) (added CoinTracker, CoinLedger, pump.fun, Phantom, WSOL on 2026-10-22).
 - Launch kit with ready-to-post texts (Reddit, Koinly board, X): `docs/launch-posts.md`. Yasin posts them himself.
 - Bugs found by the mainnet check and fixed: transaction version 1 support (auto-upgrades
   `maxSupportedTransactionVersion`); mistyped Token-2022 program ID.
@@ -63,7 +66,7 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
 1. Watch the scheduled "Mainnet check"; fix any mismatches it reports.
 2. **Waiting on Yasin:**
    - Optional: Google Search Console verification tag (see `docs/launch-posts.md`).
-3. Next product ideas, in order: Awaken export, USD price next to SOL, USDC payment, privacy-friendly analytics
+3. Next product ideas, in order: USDC payment, privacy-friendly analytics
    (needs Yasin's signup), a real staker wallet in the mainnet check.
 4. After launch: distribution (Reddit r/CryptoTax, r/solana, Koinly community; SEO guides), check real exports in
    Koinly.
