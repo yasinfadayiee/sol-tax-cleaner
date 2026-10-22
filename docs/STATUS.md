@@ -37,6 +37,9 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
 - Payments configured: `MERCHANT_ADDRESS` = C6fwRzwGVLBhBnLmiWqKgR25qBz4U3ysNuEKse519G6V (Yasin's public wallet).
   Price 0.25 SOL (≈ $25–35), 365 days, up to 5 wallets; Yasin let Claude choose (below Koinly's $49 entry plan).
 - Mainnet check is green: all 3 real wallets reconcile exactly to on-chain balances (run 39780634996).
+- Design overhaul (2026-10-22): logo, gradient hero with a 3D 'rows merge into one' visual, trust strip, feature
+  cards, pricing card, FAQ cards, guide cards, self-hosted Inter, og.png + apple-touch-icon (`scripts/brand/`).
+  Analysis of next steps (Persian): https://claude.ai/artifact/SgNWp4qj7eZ4BffkYKqnX1
 - Launch kit with ready-to-post texts (Reddit, Koinly board, X): `docs/launch-posts.md`. Yasin posts them himself.
 - Bugs found by the mainnet check and fixed: transaction version 1 support (auto-upgrades
   `maxSupportedTransactionVersion`); mistyped Token-2022 program ID.
@@ -45,7 +48,9 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
 1. Watch the scheduled "Mainnet check"; fix any mismatches it reports.
 2. **Waiting on Yasin:**
    - Optional: Google Search Console verification tag (see `docs/launch-posts.md`).
-3. After launch: distribution (Reddit r/CryptoTax, r/solana, Koinly community; SEO guides), check real exports in
+3. Next product ideas (from the analysis, in order): 'try a sample wallet' demo button, CoinTracker/CoinLedger/
+   Awaken exports, staking rewards, USDC payment, USD price next to SOL, privacy-friendly analytics.
+4. After launch: distribution (Reddit r/CryptoTax, r/solana, Koinly community; SEO guides), check real exports in
    Koinly, maybe staking rewards and a CoinTracker format.
 
 ## Environment notes for Claude

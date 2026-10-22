@@ -83,11 +83,14 @@ function page({ title, description, url, body }) {
 <link rel="canonical" href="${url}" />
 <meta property="og:title" content="${esc(title)}" />
 <meta property="og:description" content="${esc(description)}" />
+<meta property="og:image" content="${SITE_URL}og.png" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="apple-touch-icon" href="../apple-touch-icon.png" />
 <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
 <link rel="stylesheet" href="../pages.css" />
 </head>
 <body>
-<header class="site-header"><div class="wrap"><a class="brand" href="../">${APP_NAME}</a><nav><a href="../#analyse">Analyse free</a></nav></div></header>
+<header class="site-header"><div class="wrap"><a class="brand" href="../"><img src="../favicon.svg" width="28" height="28" alt="" />${APP_NAME}</a><nav><a class="nav-cta" href="../#analyse">Analyse free</a></nav></div></header>
 <main class="wrap prose">
 ${body}
 <p class="cta"><a class="button" href="../#analyse">Analyse your wallet free</a></p>
