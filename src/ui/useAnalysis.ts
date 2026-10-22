@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react'
+import { SAMPLE_TOKENS, SAMPLE_WALLET, sampleResult } from '../demo/sample'
 import { collectDecimals, processHistory, type Result } from '../engine'
 import { makeCache } from '../rpc/cache'
 import { makeClient, type RpcClient } from '../rpc/client'
@@ -11,6 +12,8 @@ export interface Analysis extends Result {
   missing: string[]
   rpc: RpcClient
   finishedAt: Date
+  /** True for the built-in sample wallet: no payment, free download. */
+  sample?: boolean
 }
 
 export type AnalysisState =
@@ -55,6 +58,22 @@ export function useAnalysis() {
     }
   }, [])
 
+  const startSample = useCallback(() => {
+    abort.current?.abort()
+    setState({
+      status: 'done',
+      analysis: {
+        ...sampleResult(),
+        wallets: [SAMPLE_WALLET],
+        tokens: new Map(SAMPLE_TOKENS),
+        missing: [],
+        rpc: makeClient(),
+        finishedAt: new Date(),
+        sample: true,
+      },
+    })
+  }, [])
+
   const cancel = useCallback(() => {
     abort.current?.abort()
     setState({ status: 'idle' })
@@ -64,7 +83,7 @@ export function useAnalysis() {
     setState((s) => (s.status === 'done' ? { status: 'done', analysis: { ...s.analysis, tokens } } : s))
   }, [])
 
-  return { state, start, cancel, updateTokens }
+  return { state, start, startSample, cancel, updateTokens }
 }
 
 function friendlyError(message: string): string {
