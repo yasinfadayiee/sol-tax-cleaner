@@ -28,7 +28,7 @@ export function Results({ analysis, onTokensChange }: { analysis: Analysis; onTo
 
   const csv = () => format.toCsv(rows, tokens)
   const report = () =>
-    buildReport({ wallets: analysis.wallets, stats, rows, tokens, missing: analysis.missing, generatedAt: analysis.finishedAt, format: formatId })
+    buildReport({ wallets: analysis.wallets, stats, rows, tokens, missing: analysis.missing, generatedAt: analysis.finishedAt, format: formatId, stakingIncomplete: analysis.stakingIncomplete })
 
   return (
     <div className="results">
@@ -49,6 +49,12 @@ export function Results({ analysis, onTokensChange }: { analysis: Analysis; onTo
       {analysis.missing.length > 0 && (
         <p className="warn">
           {analysis.missing.length} transaction(s) could not be fetched. Run the analysis again (cached ones are instant) or use another RPC endpoint.
+        </p>
+      )}
+
+      {analysis.stakingIncomplete && (
+        <p className="warn">
+          Some staking rewards could not be read from the RPC endpoint. Run the analysis again, or use your own RPC URL under "Advanced", to include them.
         </p>
       )}
 

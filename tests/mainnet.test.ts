@@ -110,7 +110,9 @@ describe.skipIf(!RUN)('mainnet reconciliation', () => {
         const before = (await getSignaturesForAddress(rpc, wallet, { limit: 1 }))[0]?.signature
         history = await fetchHistory(rpc, [wallet], { cache })
         const base = processHistory(history.txs, [wallet], history.estate)
-        processed = withExtraRows(base, await fetchStakingRewards(rpc, history.txs, base.estate))
+        const rewards = await fetchStakingRewards(rpc, history.txs, base.estate)
+        if (rewards.failedEpochs.length) console.log(`${wallet}: reward epochs failed: ${rewards.failedEpochs.join(',')}`)
+        processed = withExtraRows(base, rewards.rows)
         held = await currentHoldings(wallet, [...processed.estate.tokenAccounts, ...processed.estate.stakeAccounts])
         const after = (await getSignaturesForAddress(rpc, wallet, { limit: 1 }))[0]?.signature
         quiet = before === after

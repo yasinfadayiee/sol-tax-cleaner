@@ -74,10 +74,12 @@ describe('native staking', () => {
           return [{ epoch, effectiveSlot: (epoch + 1) * 432_000, amount: 100_000_000, postBalance: 0 }]
         }
         if (method === 'getBlockTime') return 1_760_000_000 + (params[0] as number)
+        if (method === 'getSlot') return 400_000_000
         throw new Error(method)
       },
     } as unknown as RpcClient
-    const rewards = await fetchStakingRewards(rpc, [stakeTx, withdrawTx], result.estate)
+    const { rows: rewards, failedEpochs } = await fetchStakingRewards(rpc, [stakeTx, withdrawTx], result.estate)
+    expect(failedEpochs).toEqual([])
     expect(rewards).toHaveLength(3)
     expect(rewards[0]).toMatchObject({ kind: 'deposit', tag: 'staking', received: { mint: 'SOL', amount: 100_000_000n } })
 
@@ -90,8 +92,32 @@ describe('native staking', () => {
     expect(toCoinLedgerCsv(all.rows, tokens)).toContain(',SOL,0.1,,,Staking,')
   })
 
+  it('keeps going when an epoch cannot be read and reports it', async () => {
+    const result = processHistory([stakeTx], [W])
+    const first = Math.floor(stakeTx.slot / 432_000)
+    const rpc = {
+      call: async (method: string, params: unknown[]) => {
+        if (method === 'getEpochSchedule') return { slotsPerEpoch: 432_000, firstNormalEpoch: 0, firstNormalSlot: 0 }
+        if (method === 'getEpochInfo') return { epoch: first + 2 }
+        if (method === 'getInflationReward') {
+          const epoch = (params[1] as { epoch: number }).epoch
+          if (epoch === first) throw new Error('HTTP 500')
+          return [{ epoch, effectiveSlot: (epoch + 1) * 432_000, amount: 7, postBalance: 0 }]
+        }
+        if (method === 'getSlot') return 400_000_000
+        // Only the current block's time is known; reward times are estimated from it.
+        if (method === 'getBlockTime') return params[0] === 400_000_000 ? 1_800_000_000 : null
+        return null
+      },
+    } as unknown as RpcClient
+    const { rows, failedEpochs } = await fetchStakingRewards(rpc, [stakeTx], result.estate)
+    expect(failedEpochs).toEqual([first])
+    expect(rows).toHaveLength(1)
+    expect(rows[0].blockTime).toBeGreaterThan(0)
+  })
+
   it('makes no calls when there are no stake accounts', async () => {
     const rpc = { call: async () => { throw new Error('should not call') } } as unknown as RpcClient
-    expect(await fetchStakingRewards(rpc, [], processHistory([], [W]).estate)).toEqual([])
+    expect(await fetchStakingRewards(rpc, [], processHistory([], [W]).estate)).toEqual({ rows: [], failedEpochs: [] })
   })
 })

@@ -37,20 +37,27 @@ export function epochOfSlot(slot: number, s: EpochSchedule): number {
   return s.firstNormalEpoch + Math.floor((slot - s.firstNormalSlot) / s.slotsPerEpoch)
 }
 
+export interface StakingRewards {
+  rows: Row[]
+  /** Epochs the RPC could not answer for; their rewards are missing. */
+  failedEpochs: number[]
+}
+
 export async function fetchStakingRewards(
   rpc: RpcClient,
   txs: RpcTransaction[],
   estate: Estate,
   opts: { signal?: AbortSignal; onProgress?: (p: StakingProgress) => void } = {},
-): Promise<Row[]> {
+): Promise<StakingRewards> {
+  const none = { rows: [], failedEpochs: [] }
   const accounts = [...estate.stakeAccounts]
-  if (!accounts.length) return []
+  if (!accounts.length) return none
 
   let firstSlot = Infinity
   for (const tx of txs) {
     if (tx.slot < firstSlot && accountKeys(tx).some((k) => estate.stakeAccounts.has(k))) firstSlot = tx.slot
   }
-  if (!Number.isFinite(firstSlot)) return []
+  if (!Number.isFinite(firstSlot)) return none
 
   const schedule = await rpc.call<EpochSchedule>('getEpochSchedule', [])
   const { epoch: current } = await rpc.call<{ epoch: number }>('getEpochInfo', [{ commitment: 'confirmed' }])
@@ -58,29 +65,41 @@ export async function fetchStakingRewards(
   const epochs = Array.from({ length: Math.max(0, current - first) }, (_, i) => first + i)
 
   const found: Array<InflationReward & { account: string }> = []
+  const failedEpochs: number[] = []
   let done = 0
   await Promise.all(
     epochs.map(async (epoch) => {
       if (opts.signal?.aborted) throw new DOMException('Aborted', 'AbortError')
-      for (let i = 0; i < accounts.length; i += 100) {
-        const batch = accounts.slice(i, i + 100)
-        const res = await rpc.call<Array<InflationReward | null>>('getInflationReward', [batch, { epoch, commitment: 'confirmed' }])
-        res.forEach((r, j) => {
-          if (r && r.amount > 0) found.push({ ...r, account: batch[j] })
-        })
+      try {
+        const rewards: Array<InflationReward & { account: string }> = []
+        for (let i = 0; i < accounts.length; i += 100) {
+          const batch = accounts.slice(i, i + 100)
+          const res = await rpc.call<Array<InflationReward | null>>('getInflationReward', [batch, { epoch, commitment: 'confirmed' }])
+          res.forEach((r, j) => {
+            if (r && r.amount > 0) rewards.push({ ...r, account: batch[j] })
+          })
+        }
+        found.push(...rewards)
+      } catch (e) {
+        if (opts.signal?.aborted) throw e
+        failedEpochs.push(epoch)
       }
       opts.onProgress?.({ epochsDone: ++done, epochsTotal: epochs.length })
     }),
   )
 
+  // Reward time = the block that paid it. If that lookup fails, fall back to an estimate from the epoch length.
   const times = new Map<number, number>()
+  const slotNow = await rpc.call<number>('getSlot', [{ commitment: 'confirmed' }]).catch(() => 0)
+  const now = slotNow ? await rpc.call<number | null>('getBlockTime', [slotNow]).catch(() => null) : null
   await Promise.all(
     [...new Set(found.map((r) => r.effectiveSlot))].map(async (slot) => {
-      times.set(slot, (await rpc.call<number | null>('getBlockTime', [slot])) ?? 0)
+      const t = await rpc.call<number | null>('getBlockTime', [slot]).catch(() => null)
+      times.set(slot, t ?? (now && slotNow ? Math.round(now - (slotNow - slot) * 0.4) : 0))
     }),
   )
 
-  return found
+  const rows = found
     .map(
       (r): Row => ({
         signature: `staking-reward-${r.account}-epoch-${r.epoch}`,
@@ -93,4 +112,5 @@ export async function fetchStakingRewards(
       }),
     )
     .sort((a, b) => a.blockTime - b.blockTime)
+  return { rows, failedEpochs: failedEpochs.sort((a, b) => a - b) }
 }

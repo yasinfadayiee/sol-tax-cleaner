@@ -13,6 +13,8 @@ export interface Analysis extends Result {
   missing: string[]
   rpc: RpcClient
   finishedAt: Date
+  /** Some staking rewards could not be read from the RPC. */
+  stakingIncomplete?: boolean
   /** True for the built-in sample wallet: no payment, free download. */
   sample?: boolean
 }
@@ -43,6 +45,7 @@ export function useAnalysis() {
         },
       })
       const base = processHistory(history.txs, wallets, history.estate)
+      // Rewards come from extra RPC calls; if they fail, keep the transaction rows and say what's missing.
       const rewards = await fetchStakingRewards(rpc, history.txs, base.estate, {
         signal: ctrl.signal,
         onProgress: ({ epochsDone, epochsTotal }) => {
@@ -53,13 +56,24 @@ export function useAnalysis() {
             })
           }
         },
+      }).catch((e: unknown) => {
+        if (ctrl.signal.aborted) throw e
+        return { rows: [], failedEpochs: [], failed: true }
       })
-      const result = withExtraRows(base, rewards)
+      const result = withExtraRows(base, rewards.rows)
       const tokens = await resolveTokens(rpc, collectDecimals(history.txs))
       if (ctrl.signal.aborted) return
       setState({
         status: 'done',
-        analysis: { ...result, wallets, tokens, missing: history.missing, rpc, finishedAt: new Date() },
+        analysis: {
+          ...result,
+          wallets,
+          tokens,
+          missing: history.missing,
+          rpc,
+          finishedAt: new Date(),
+          stakingIncomplete: 'failed' in rewards || rewards.failedEpochs.length > 0,
+        },
       })
     } catch (e) {
       if (ctrl.signal.aborted) {
