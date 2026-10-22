@@ -21,6 +21,13 @@ export interface ParsedAccountKey {
   source?: string
 }
 
+/** An instruction as returned with "jsonParsed" encoding; `parsed` is set for programs the RPC can decode. */
+export interface ParsedInstruction {
+  program?: string
+  programId: string
+  parsed?: { type: string; info: Record<string, unknown> } | string
+}
+
 export interface TxMeta {
   err: unknown
   fee: number
@@ -29,6 +36,7 @@ export interface TxMeta {
   preTokenBalances?: TokenBalance[] | null
   postTokenBalances?: TokenBalance[] | null
   loadedAddresses?: { writable: string[]; readonly: string[] } | null
+  innerInstructions?: Array<{ index: number; instructions: ParsedInstruction[] }> | null
 }
 
 export interface RpcTransaction {
@@ -39,6 +47,7 @@ export interface RpcTransaction {
     signatures: string[]
     message: {
       accountKeys: Array<ParsedAccountKey | string>
+      instructions?: ParsedInstruction[]
     }
   }
 }
@@ -57,7 +66,7 @@ export interface Leg {
 export type RowKind = 'swap' | 'deposit' | 'withdrawal' | 'fee' | 'complex'
 
 /** Koinly tags we emit. */
-export type KoinlyTag = 'cost' | ''
+export type KoinlyTag = 'cost' | 'staking' | ''
 
 export interface Row {
   signature: string
@@ -72,12 +81,22 @@ export interface Row {
   note?: string
 }
 
-/** The user's accounts: wallet addresses plus token accounts they own. */
+/**
+ * The user's accounts: wallet addresses, token accounts they own, native stake accounts they control, and escrow
+ * accounts their Jupiter DCA / limit orders created (the order account and the token accounts it owns).
+ */
 export interface Estate {
   wallets: Set<string>
   tokenAccounts: Set<string>
+  stakeAccounts: Set<string>
+  escrowAccounts: Set<string>
 }
 
 export function newEstate(wallets: Iterable<string>): Estate {
-  return { wallets: new Set(wallets), tokenAccounts: new Set() }
+  return { wallets: new Set(wallets), tokenAccounts: new Set(), stakeAccounts: new Set(), escrowAccounts: new Set() }
+}
+
+/** Every non-wallet account in the estate. */
+export function ownedAccounts(estate: Estate): string[] {
+  return [...estate.tokenAccounts, ...estate.stakeAccounts, ...estate.escrowAccounts]
 }

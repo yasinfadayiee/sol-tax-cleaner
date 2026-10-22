@@ -256,7 +256,7 @@ export default function App() {
           </details>
           <details>
             <summary>What isn’t included?</summary>
-            <p>Automatic staking rewards paid each epoch without a transaction, NFT-specific handling and price data. The report lists anything that needs a manual look.</p>
+            <p>NFT-specific handling and price data (your tax tool adds prices). Native staking rewards are included, one row per stake account per epoch. The report lists anything that needs a manual look.</p>
           </details>
           <details>
             <summary>Why pay in SOL?</summary>

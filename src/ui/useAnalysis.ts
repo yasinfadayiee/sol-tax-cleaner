@@ -1,9 +1,10 @@
 import { useCallback, useRef, useState } from 'react'
 import { SAMPLE_TOKENS, SAMPLE_WALLET, sampleResult } from '../demo/sample'
-import { collectDecimals, processHistory, type Result } from '../engine'
+import { collectDecimals, processHistory, withExtraRows, type Result } from '../engine'
 import { makeCache } from '../rpc/cache'
 import { makeClient, type RpcClient } from '../rpc/client'
 import { fetchHistory, type Progress } from '../rpc/history'
+import { fetchStakingRewards } from '../rpc/staking'
 import { resolveTokens, type TokenInfo } from '../rpc/tokens'
 
 export interface Analysis extends Result {
@@ -12,6 +13,8 @@ export interface Analysis extends Result {
   missing: string[]
   rpc: RpcClient
   finishedAt: Date
+  /** Some staking rewards could not be read from the RPC. */
+  stakingIncomplete?: boolean
   /** True for the built-in sample wallet: no payment, free download. */
   sample?: boolean
 }
@@ -41,12 +44,36 @@ export function useAnalysis() {
           if (!ctrl.signal.aborted) setState({ status: 'running', progress })
         },
       })
-      const result = processHistory(history.txs, wallets, history.estate)
+      const base = processHistory(history.txs, wallets, history.estate)
+      // Rewards come from extra RPC calls; if they fail, keep the transaction rows and say what's missing.
+      const rewards = await fetchStakingRewards(rpc, history.txs, base.estate, {
+        signal: ctrl.signal,
+        onProgress: ({ epochsDone, epochsTotal }) => {
+          if (!ctrl.signal.aborted) {
+            setState({
+              status: 'running',
+              progress: { phase: 'staking', addressesDone: 0, addressesTotal: 0, signatures: 0, txDone: epochsDone, txTotal: epochsTotal },
+            })
+          }
+        },
+      }).catch((e: unknown) => {
+        if (ctrl.signal.aborted) throw e
+        return { rows: [], failedEpochs: [], failed: true }
+      })
+      const result = withExtraRows(base, rewards.rows)
       const tokens = await resolveTokens(rpc, collectDecimals(history.txs))
       if (ctrl.signal.aborted) return
       setState({
         status: 'done',
-        analysis: { ...result, wallets, tokens, missing: history.missing, rpc, finishedAt: new Date() },
+        analysis: {
+          ...result,
+          wallets,
+          tokens,
+          missing: history.missing,
+          rpc,
+          finishedAt: new Date(),
+          stakingIncomplete: 'failed' in rewards || rewards.failedEpochs.length > 0,
+        },
       })
     } catch (e) {
       if (ctrl.signal.aborted) {

@@ -11,6 +11,7 @@ export interface ReportInput {
   missing: string[]
   generatedAt: Date
   format?: FormatId
+  stakingIncomplete?: boolean
 }
 
 /** Tickers a tax tool may match to the wrong coin: unknown, or shared by several of the user's tokens. */
@@ -88,8 +89,14 @@ export function buildReport(r: ReportInput): string {
   }
 
   lines.push('## Known limitations', '')
-  lines.push(`- Staking rewards paid automatically each epoch (no transaction) are not included. ${tool} may add them from its own Solana staking sync.`)
+  const rewards = r.rows.filter((row) => row.tag === 'staking').length
+  lines.push(
+    rewards
+      ? `- Native staking rewards are included (${rewards} rows tagged as staking income, one per stake account per epoch). Rewards from liquid staking tokens (such as JitoSOL) are in the token's price, not paid out, so they have no rows.`
+      : '- No native stake accounts were found. Rewards from liquid staking tokens (such as JitoSOL) are in the token\'s price, not paid out, so they have no rows.',
+  )
   lines.push(`- Prices are not included; ${tool} fills them in. Tokens without a market price may need a manual price in ${tool}.`)
+  if (r.stakingIncomplete) lines.push('- Some staking rewards could not be read from the RPC node and are missing. Run the analysis again with another RPC endpoint to include them.')
   if (r.missing.length) lines.push(`- ${r.missing.length} transaction(s) could not be fetched from the RPC node and are missing. Try again with another RPC endpoint.`)
   if (s.skippedNoMeta) lines.push(`- ${s.skippedNoMeta} transaction(s) had no status data and were skipped.`)
   lines.push('')

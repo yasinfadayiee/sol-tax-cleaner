@@ -136,11 +136,13 @@ function ProgressView({ p }: { p: Progress }) {
       ? 'Finding your token accounts…'
       : p.phase === 'signatures'
         ? `Listing transactions: ${p.signatures.toLocaleString()} found (${p.addressesDone}/${p.addressesTotal} accounts scanned)`
-        : `Reading transactions: ${p.txDone.toLocaleString()} of ${p.txTotal.toLocaleString()}`
+        : p.phase === 'staking'
+          ? `Checking staking rewards: epoch ${p.txDone.toLocaleString()} of ${p.txTotal.toLocaleString()}`
+          : `Reading transactions: ${p.txDone.toLocaleString()} of ${p.txTotal.toLocaleString()}`
   return (
     <div className="progress" role="status" aria-live="polite">
       <div className="bar" aria-hidden="true">
-        <span style={{ width: `${p.phase === 'transactions' ? pct : 5}%` }} />
+        <span style={{ width: `${p.phase === 'transactions' || p.phase === 'staking' ? pct : 5}%` }} />
       </div>
       <p className="small">{label}</p>
       <p className="muted small">Keep this tab open. Re-running later is instant: transactions are cached in your browser.</p>
