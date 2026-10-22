@@ -49,7 +49,8 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
    Koinly, maybe staking rewards and a CoinTracker format.
 
 ## Environment notes for Claude
-- The cloud sandbox cannot reach Solana RPC (proxy 403); real-data testing runs in GitHub Actions.
+- Until 2026-10-22 the sandbox could not reach Solana RPC (proxy 403), so real-data testing runs in GitHub Actions.
+  Yasin then set a cloud environment with wider network access; new threads should check whether RPC works directly.
   Read CI logs with the GitHub MCP `get_job_logs` (gh log download is blocked); `gh run list/watch` works.
 - Pages settings API is blocked through the proxy.
 - Commit trailer lines are required (see session instructions).
