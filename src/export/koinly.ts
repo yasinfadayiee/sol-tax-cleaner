@@ -36,15 +36,15 @@ export function csvCell(v: string): string {
 
 export type TokenTable = Map<string, TokenInfo>
 
-function symbolOf(tokens: TokenTable, mint: string): string {
+export function symbolOf(tokens: TokenTable, mint: string): string {
   return tokens.get(mint)?.symbol ?? (mint === SOL ? 'SOL' : `UNKNOWN-${mint.slice(0, 4)}`)
 }
 
-function decimalsOf(tokens: TokenTable, mint: string): number {
+export function decimalsOf(tokens: TokenTable, mint: string): number {
   return tokens.get(mint)?.decimals ?? (mint === SOL ? 9 : 0)
 }
 
-function describe(row: Row, tokens: TokenTable): string {
+export function describe(row: Row, tokens: TokenTable): string {
   const parts: string[] = []
   if (row.note) parts.push(row.note)
   for (const leg of [row.sent, row.received]) {
