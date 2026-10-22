@@ -60,6 +60,11 @@ const GUIDES = [
   { slug: 'koinly-solana-rent-not-merged', title: 'Solana rent not merged into transactions' },
   { slug: 'cointracker-jupiter-limit-order-one-sided', title: 'Jupiter limit orders showing as one-sided' },
   { slug: 'solana-swap-split-into-multiple-transactions', title: 'One swap showing as several rows' },
+  { slug: 'cointracker-solana-transactions-wrong', title: 'Solana transactions wrong in CoinTracker' },
+  { slug: 'coinledger-solana-import', title: 'Import Solana DeFi history into CoinLedger' },
+  { slug: 'pump-fun-trades-tax-software', title: 'pump.fun trades in tax software' },
+  { slug: 'phantom-wallet-transactions-koinly', title: 'Phantom wallet history in Koinly' },
+  { slug: 'wrapped-sol-wsol-tax-software', title: 'Wrapped SOL (WSOL) showing in your tax tool' },
 ]
 
 export default function App() {
