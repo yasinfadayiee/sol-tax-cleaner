@@ -1,4 +1,4 @@
-import { APP_NAME, MAX_WALLETS, PRICE_SOL, UNLOCK_DAYS } from './config'
+import { APP_NAME, MAX_WALLETS, PRICE_SOL, PRICE_USDC, UNLOCK_DAYS } from './config'
 import { Analyzer } from './ui/Analyzer'
 import { Icon, Logo, type IconName } from './ui/Icon'
 import { usdLabel, useSolPrice } from './ui/useSolPrice'
@@ -224,7 +224,7 @@ export default function App() {
               </p>
               <p className="muted">
                 {usdPrice && <strong className="usd">{usdLabel(PRICE_SOL, usdPrice)} today. </strong>}
-                Per year, paid once from your own wallet.
+                Or pay {PRICE_USDC} USDC. Per year, paid once from your own wallet.
               </p>
               <a className="button primary" href="#analyse">
                 Start with a free analysis
@@ -266,8 +266,11 @@ export default function App() {
             <p>NFT-specific handling and price data (your tax tool adds prices). Native staking rewards are included, one row per stake account per epoch. The report lists anything that needs a manual look.</p>
           </details>
           <details>
-            <summary>Why pay in SOL?</summary>
-            <p>Paying from your own wallet is also how the site recognises you, so there are no accounts, emails or licence keys.</p>
+            <summary>Why pay from my wallet, in SOL or USDC?</summary>
+            <p>
+              Paying from your own wallet is also how the site recognises you, so there are no accounts, emails or licence keys.
+              Pay in SOL, or in USDC if you'd rather have a fixed dollar price.
+            </p>
           </details>
         </section>
 

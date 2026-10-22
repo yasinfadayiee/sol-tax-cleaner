@@ -1,14 +1,23 @@
 import QRCode from 'qrcode'
 import { useEffect, useRef, useState } from 'react'
-import { APP_NAME, MAX_WALLETS, MEMO_PREFIX, MERCHANT_ADDRESS, PRICE_SOL, UNLOCK_DAYS } from '../config'
+import { APP_NAME, MAX_WALLETS, MEMO_PREFIX, MERCHANT_ADDRESS, PRICE_SOL, PRICE_USDC, UNLOCK_DAYS } from '../config'
 import { usdLabel, useSolPrice } from './useSolPrice'
-import { findPayment, memoFor, paymentUrl, rememberUnlock, rememberedUnlock, type PaymentTerms } from '../license/license'
+import {
+  findPayment,
+  memoFor,
+  paymentUrl,
+  rememberUnlock,
+  rememberedUnlock,
+  type PayCurrency,
+  type PaymentTerms,
+} from '../license/license'
 import type { RpcClient } from '../rpc/client'
 import { isValidAddress } from '../rpc/history'
 
 const terms: PaymentTerms = {
   merchant: MERCHANT_ADDRESS,
   priceSol: PRICE_SOL,
+  priceUsdc: PRICE_USDC,
   memoPrefix: MEMO_PREFIX,
   label: APP_NAME,
   validDays: UNLOCK_DAYS,
@@ -25,8 +34,10 @@ export function Payment({ wallets, rpc, onUnlocked }: { wallets: string[]; rpc: 
   const [status, setStatus] = useState<Status>(configured ? 'checking' : 'unpaid')
   const [qr, setQr] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
+  const [currency, setCurrency] = useState<PayCurrency>('SOL')
   const polling = useRef(false)
-  const url = configured ? paymentUrl(terms) : ''
+  const url = configured ? paymentUrl(terms, undefined, currency) : ''
+  const price = currency === 'USDC' ? `${PRICE_USDC} USDC` : `${PRICE_SOL} SOL`
 
   const check = async () => {
     try {
@@ -93,8 +104,24 @@ export function Payment({ wallets, rpc, onUnlocked }: { wallets: string[]; rpc: 
     <div className="payment">
       <p>
         Full export for up to {MAX_WALLETS} wallets, valid {UNLOCK_DAYS} days: <strong>{PRICE_SOL} SOL</strong>
-        {usdPrice ? ` (${usdLabel(PRICE_SOL, usdPrice)} at today's price)` : ''}, paid once.
+        {usdPrice ? ` (${usdLabel(PRICE_SOL, usdPrice)} at today's price)` : ''} or <strong>{PRICE_USDC} USDC</strong>, paid
+        once.
       </p>
+      <div className="format-picker" role="radiogroup" aria-label="Pay with">
+        <span className="muted small">Pay with:</span>
+        {(['SOL', 'USDC'] as const).map((c) => (
+          <button
+            key={c}
+            type="button"
+            role="radio"
+            aria-checked={c === currency}
+            className={c === currency ? 'chip on' : 'chip'}
+            onClick={() => setCurrency(c)}
+          >
+            {c}
+          </button>
+        ))}
+      </div>
       {status === 'checking' ? (
         <p className="muted small">Checking for an earlier payment…</p>
       ) : (
@@ -116,7 +143,7 @@ export function Payment({ wallets, rpc, onUnlocked }: { wallets: string[]; rpc: 
               <li>The download unlocks automatically, usually within 30 seconds.</li>
             </ol>
             <p className="muted small">
-              Paying by hand? Send exactly {PRICE_SOL} SOL to{' '}
+              Paying by hand? Send exactly {price} to{' '}
               <button
                 type="button"
                 className="link mono"
