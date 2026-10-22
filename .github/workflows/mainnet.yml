@@ -1,0 +1,41 @@
+name: Mainnet check
+
+# Rebuilds the full history of a few real wallets and checks that the rows reconcile to
+# on-chain balances. Set the RPC_URL secret to a keyed endpoint for faster, more reliable runs.
+on:
+  workflow_dispatch:
+    inputs:
+      wallets:
+        description: Comma-separated wallets (blank picks recent Jupiter users)
+        required: false
+  schedule:
+    - cron: '0 6 * * 1'
+  push:
+    branches: [main]
+    paths: ['src/engine/**', 'src/rpc/**', 'tests/mainnet.test.ts']
+
+permissions:
+  contents: read
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx vitest run tests/mainnet.test.ts
+        env:
+          MAINNET: '1'
+          WALLETS: ${{ inputs.wallets }}
+          RPC_URL: ${{ secrets.RPC_URL }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mainnet-report
+          path: mainnet-report.json
+          if-no-files-found: ignore

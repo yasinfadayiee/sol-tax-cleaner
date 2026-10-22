@@ -4,7 +4,7 @@ import { newEstate, type Estate, type Row, type RowKind, type RpcTransaction } f
 
 export * from './types'
 export { classify } from './classify'
-export { accountKeys, computeDeltas, discoverTokenAccounts } from './deltas'
+export { accountKeys, collectDecimals, computeDeltas, discoverTokenAccounts } from './deltas'
 
 export interface Stats {
   transactions: number

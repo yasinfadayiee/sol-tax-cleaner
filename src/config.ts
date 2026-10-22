@@ -1,0 +1,15 @@
+/** Public settings. No secrets belong here. */
+export const APP_NAME = 'SolTax Cleaner'
+
+/** Owner's Solana wallet that receives payments. VITE_MERCHANT_ADDRESS overrides it at build time. */
+export const MERCHANT_ADDRESS: string = import.meta.env.VITE_MERCHANT_ADDRESS || 'REPLACE_WITH_MERCHANT_WALLET'
+
+/** Price of one unlock (12 months, up to MAX_WALLETS wallets), in SOL. */
+export const PRICE_SOL = '0.2'
+
+/** Memo attached to payments; the unlock check looks for it. */
+export const MEMO_PREFIX = 'STC'
+
+export const MAX_WALLETS = 5
+export const PREVIEW_ROWS = 20
+export const UNLOCK_DAYS = 365

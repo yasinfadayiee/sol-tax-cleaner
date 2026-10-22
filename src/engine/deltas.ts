@@ -1,4 +1,4 @@
-import { NATIVE_MINT, type Estate, type RpcTransaction, type TokenBalance } from './types'
+import { NATIVE_MINT, SOL, SOL_DECIMALS, type Estate, type RpcTransaction, type TokenBalance } from './types'
 
 /** Every account key of the transaction, including address-lookup-table keys. */
 export function accountKeys(tx: RpcTransaction): string[] {
@@ -94,4 +94,15 @@ export function computeDeltas(tx: RpcTransaction, estate: Estate): Deltas {
   }
 
   return { solLamports: sol, tokens, fee, failed: meta.err != null, rentFromOthers }
+}
+
+/** Decimals for every mint seen in the transactions (SOL included). */
+export function collectDecimals(txs: RpcTransaction[]): Map<string, number> {
+  const out = new Map<string, number>([[SOL, SOL_DECIMALS]])
+  for (const tx of txs) {
+    for (const tb of tokenBalances(tx)) {
+      if (tb.mint !== NATIVE_MINT && !out.has(tb.mint)) out.set(tb.mint, tb.uiTokenAmount.decimals)
+    }
+  }
+  return out
 }

@@ -1,0 +1,133 @@
+// Real-data check against Solana mainnet. Skipped unless MAINNET=1 (CI runs it on a schedule;
+// the dev sandbox cannot reach Solana RPC). It picks a few real wallets with modest histories,
+// rebuilds their full history and checks that the exported rows reconcile to today's balances:
+// for every asset, received − sent − fees must equal what the wallet and its token accounts hold now.
+import { writeFileSync } from 'node:fs'
+import { describe, expect, it } from 'vitest'
+import { collectDecimals, processHistory, SOL, type Row, type RpcTransaction } from '../src/engine'
+import { KOINLY_COLUMNS, toKoinlyCsv } from '../src/export/koinly'
+import { DEFAULT_RPC, getSignaturesForAddress, getTransaction, RpcClient } from '../src/rpc/client'
+import { fetchHistory } from '../src/rpc/history'
+import { resolveTokens } from '../src/rpc/tokens'
+
+const RUN = process.env.MAINNET === '1'
+const URL = process.env.RPC_URL || DEFAULT_RPC
+const JUPITER = 'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4'
+const MAX_SIGS = Number(process.env.MAX_SIGS ?? 250)
+const PICK = Number(process.env.PICK ?? 3)
+
+const rpc = new RpcClient({ url: URL, maxConcurrent: URL === DEFAULT_RPC ? 3 : 8, ratePerSec: URL === DEFAULT_RPC ? 3.5 : 20 })
+
+/** Recent Jupiter users whose own address has a small enough history to fetch in full. */
+async function pickWallets(): Promise<string[]> {
+  const fromEnv = process.env.WALLETS?.split(',').map((w) => w.trim()).filter(Boolean)
+  if (fromEnv?.length) return fromEnv
+  const picked: string[] = []
+  const seen = new Set<string>()
+  let before: string | undefined
+  for (let page = 0; page < 5 && picked.length < PICK; page++) {
+    const sigs = await getSignaturesForAddress(rpc, JUPITER, { limit: 40, before })
+    before = sigs.at(-1)?.signature
+    for (const s of sigs) {
+      if (picked.length >= PICK) break
+      if (s.err) continue
+      const tx = await getTransaction<RpcTransaction>(rpc, s.signature)
+      const k = tx?.transaction.message.accountKeys[0]
+      const payer = typeof k === 'string' ? k : k?.pubkey
+      if (!payer || seen.has(payer)) continue
+      seen.add(payer)
+      const history = await getSignaturesForAddress(rpc, payer, { limit: MAX_SIGS + 1 })
+      if (history.length >= 20 && history.length <= MAX_SIGS) picked.push(payer)
+    }
+  }
+  return picked
+}
+
+interface ParsedTokenAccount {
+  lamports: number
+  data: { parsed?: { info?: { mint?: string; tokenAmount?: { amount: string } } } }
+}
+
+/** What the wallet and every token account it ever owned hold right now. */
+async function currentHoldings(wallet: string, tokenAccounts: string[]) {
+  const held = new Map<string, bigint>()
+  const add = (asset: string, v: bigint) => held.set(asset, (held.get(asset) ?? 0n) + v)
+  const bal = await rpc.call<{ value: number }>('getBalance', [wallet, { commitment: 'confirmed' }])
+  add(SOL, BigInt(bal.value))
+  for (let i = 0; i < tokenAccounts.length; i += 100) {
+    const batch = tokenAccounts.slice(i, i + 100)
+    const res = await rpc.call<{ value: Array<ParsedTokenAccount | null> }>('getMultipleAccounts', [
+      batch,
+      { encoding: 'jsonParsed', commitment: 'confirmed' },
+    ])
+    for (const acct of res.value) {
+      if (!acct) continue
+      add(SOL, BigInt(acct.lamports))
+      const info = acct.data.parsed?.info
+      if (info?.mint && info.tokenAmount && info.mint !== 'So11111111111111111111111111111111111111112') {
+        add(info.mint, BigInt(info.tokenAmount.amount))
+      }
+    }
+  }
+  return held
+}
+
+function netFromRows(rows: Row[]) {
+  const net = new Map<string, bigint>()
+  const add = (asset: string, v: bigint) => net.set(asset, (net.get(asset) ?? 0n) + v)
+  for (const r of rows) {
+    if (r.received) add(r.received.mint, r.received.amount)
+    if (r.sent) add(r.sent.mint, -r.sent.amount)
+    if (r.fee) add(SOL, -r.fee)
+  }
+  return net
+}
+
+describe.skipIf(!RUN)('mainnet reconciliation', () => {
+  it('rows reconcile to current balances for real wallets', { timeout: 30 * 60_000 }, async () => {
+    const wallets = await pickWallets()
+    console.log(`RPC ${URL === DEFAULT_RPC ? 'public' : 'custom'}; wallets: ${wallets.join(', ')}`)
+    expect(wallets.length).toBeGreaterThan(0)
+    const summary: unknown[] = []
+
+    for (const wallet of wallets) {
+      const t0 = Date.now()
+      const history = await fetchHistory(rpc, [wallet])
+      const { rows, stats, estate } = processHistory(history.txs, [wallet], history.estate)
+      const held = await currentHoldings(wallet, [...estate.tokenAccounts])
+      const net = netFromRows(rows)
+
+      const mismatches: Array<{ asset: string; rows: string; onChain: string; diff: string }> = []
+      for (const asset of new Set([...net.keys(), ...held.keys()])) {
+        const a = net.get(asset) ?? 0n
+        const b = held.get(asset) ?? 0n
+        if (a !== b) mismatches.push({ asset, rows: `${a}`, onChain: `${b}`, diff: `${a - b}` })
+      }
+
+      const tokens = await resolveTokens(rpc, collectDecimals(history.txs))
+      const sources: Record<string, number> = {}
+      for (const t of tokens.values()) sources[t.source] = (sources[t.source] ?? 0) + 1
+      const csv = toKoinlyCsv(rows, tokens)
+      const lines = csv.trimEnd().split('\r\n')
+      expect(lines[0]).toBe(KOINLY_COLUMNS.join(','))
+
+      const entry = {
+        wallet,
+        seconds: Math.round((Date.now() - t0) / 1000),
+        txs: history.txs.length,
+        missing: history.missing.length,
+        tokenAccounts: estate.tokenAccounts.size,
+        stats,
+        tokenSources: sources,
+        mismatches,
+        sample: lines.slice(0, 12),
+      }
+      summary.push(entry)
+      console.log(JSON.stringify(entry, null, 2))
+      if (history.missing.length === 0) expect.soft(mismatches, `wallet ${wallet}`).toEqual([])
+    }
+
+    console.log(`RPC requests: ${rpc.requests}`)
+    writeFileSync('mainnet-report.json', JSON.stringify(summary, null, 2))
+  })
+})
