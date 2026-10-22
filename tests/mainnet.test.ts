@@ -16,6 +16,12 @@ const JUPITER = 'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4'
 const MAX_SIGS = Number(process.env.MAX_SIGS ?? 250)
 const PICK = Number(process.env.PICK ?? 3)
 
+const txStore = new Map<string, unknown>()
+const cache = {
+  get: async (sig: string) => txStore.get(sig),
+  put: async (sig: string, tx: unknown) => void txStore.set(sig, tx),
+}
+
 const rpc = new RpcClient({ url: URL, maxConcurrent: URL === DEFAULT_RPC ? 3 : 8, ratePerSec: URL === DEFAULT_RPC ? 3.5 : 20 })
 
 /** Recent Jupiter users whose own address has a small enough history to fetch in full. */
@@ -92,9 +98,23 @@ describe.skipIf(!RUN)('mainnet reconciliation', () => {
 
     for (const wallet of wallets) {
       const t0 = Date.now()
-      const history = await fetchHistory(rpc, [wallet])
-      const { rows, stats, estate } = processHistory(history.txs, [wallet], history.estate)
-      const held = await currentHoldings(wallet, [...estate.tokenAccounts])
+      // Picked wallets are active traders: a transaction landing between the history fetch and the
+      // balance snapshot shows up as a false mismatch. Re-run (cheaply, via the cache) until the
+      // wallet's newest signature is unchanged across the snapshot.
+      let history!: Awaited<ReturnType<typeof fetchHistory>>
+      let processed!: ReturnType<typeof processHistory>
+      let held!: Map<string, bigint>
+      let quiet = false
+      for (let attempt = 0; attempt < 4 && !quiet; attempt++) {
+        const before = (await getSignaturesForAddress(rpc, wallet, { limit: 1 }))[0]?.signature
+        history = await fetchHistory(rpc, [wallet], { cache })
+        processed = processHistory(history.txs, [wallet], history.estate)
+        held = await currentHoldings(wallet, [...processed.estate.tokenAccounts])
+        const after = (await getSignaturesForAddress(rpc, wallet, { limit: 1 }))[0]?.signature
+        quiet = before === after
+        if (!quiet) console.log(`${wallet}: new activity during check, retrying`)
+      }
+      const { rows, stats, estate } = processed
       const net = netFromRows(rows)
 
       const mismatches: Array<{ asset: string; rows: string; onChain: string; diff: string }> = []
@@ -128,12 +148,13 @@ describe.skipIf(!RUN)('mainnet reconciliation', () => {
         tokenAccounts: estate.tokenAccounts.size,
         stats,
         tokenSources: sources,
+        quiet,
         mismatches,
         sample: lines.slice(0, 12),
       }
       summary.push(entry)
       console.log(JSON.stringify(entry, null, 2))
-      if (history.missing.length === 0) expect.soft(mismatches, `wallet ${wallet}`).toEqual([])
+      if (history.missing.length === 0 && quiet) expect.soft(mismatches, `wallet ${wallet}`).toEqual([])
     }
 
     console.log(`RPC requests: ${rpc.requests}`)
