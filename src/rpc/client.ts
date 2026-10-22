@@ -151,7 +151,7 @@ export async function getTransaction<T>(rpc: RpcClient, signature: string): Prom
 }
 
 export const TOKEN_PROGRAM = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'
-export const TOKEN_2022_PROGRAM = 'TokenzQdBNbLqP5VEhdkAS6EH5MUbbpMaQ3WvtQ52bD2Bg3'
+export const TOKEN_2022_PROGRAM = 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb'
 
 export async function getTokenAccountsByOwner(rpc: RpcClient, owner: string, programId: string) {
   const res = await rpc.call<{ value: Array<{ pubkey: string }> }>('getTokenAccountsByOwner', [
