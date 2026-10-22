@@ -32,15 +32,18 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
 - Tests: 49 unit tests pass (`npm test`). Browser smoke test with mocked RPC passed (desktop/mobile, light/dark).
 - CI: `.github/workflows/deploy.yml` (lint+test+build, deploy to Pages) and `mainnet.yml`
   (`tests/mainnet.test.ts`: full history of 3 real Jupiter users, rows must reconcile to on-chain balances).
+- GitHub Pages is enabled: the Deploy workflow deployed successfully on 2026-10-22 (run 39779981052).
+- Payments configured: `MERCHANT_ADDRESS` = C6fwRzwGVLBhBnLmiWqKgR25qBz4U3ysNuEKse519G6V (Yasin's public wallet).
+  Price 0.25 SOL (≈ $25–35), 365 days, up to 5 wallets; Yasin let Claude choose (below Koinly's $49 entry plan).
+- Mainnet check: 2 of 3 real wallets reconciled exactly. The third was off by 0.08005 SOL because it traded
+  while the check ran; the test now retries until the wallet is quiet across the balance snapshot.
 - Bugs found by the mainnet check and fixed: transaction version 1 support (auto-upgrades
   `maxSupportedTransactionVersion`); mistyped Token-2022 program ID.
 
 ## In progress / next
-1. Mainnet reconciliation run: check latest "Mainnet check" run in Actions; fix any mismatches it reports.
+1. Mainnet reconciliation run: confirm the latest "Mainnet check" run is green; fix any mismatches it reports.
 2. **Waiting on Yasin:**
-   - Enable Pages: repo Settings → Pages → Source: GitHub Actions (Claude can't change this setting).
-   - His Solana receiving address → `MERCHANT_ADDRESS` in `src/config.ts` (public address only).
-   - Confirm price (placeholder 0.2 SOL ≈ $29, 365 days, up to 5 wallets).
+   - Nothing right now.
 3. After launch: distribution (Reddit r/CryptoTax, r/solana, Koinly community; SEO guides), check real exports in
    Koinly, maybe staking rewards and a CoinTracker format.
 
