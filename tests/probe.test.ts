@@ -76,6 +76,21 @@ describe.skipIf(!RUN)('probe escrow programs', () => {
       }
       out[name] = { recentCount: sigs.length, recent, lifecycle }
     }
+    // Native stakers with a modest history, for the mainnet reconciliation check.
+    const stakers: string[] = []
+    const STAKE = 'Stake11111111111111111111111111111111111111'
+    for (const s of (await getSignaturesForAddress(rpc, STAKE, { limit: 60 })).filter((x) => !x.err)) {
+      if (stakers.length >= 3) break
+      const t = await getTransaction<Tx>(rpc, s.signature)
+      const ix = (t?.transaction.message.instructions ?? []).find(
+        (i) => i.programId === STAKE && typeof i.parsed === 'object' && i.parsed?.type === 'delegate',
+      )
+      const auth = ix && typeof ix.parsed === 'object' ? String(ix.parsed.info.stakeAuthority) : undefined
+      if (!auth || stakers.includes(auth)) continue
+      const n = (await getSignaturesForAddress(rpc, auth, { limit: 251 })).length
+      if (n >= 5 && n <= 250) stakers.push(auth)
+    }
+    out.stakers = stakers
     const json = JSON.stringify(out, null, 1)
     writeFileSync('probe-report.json', json)
     console.log(json)

@@ -1,9 +1,10 @@
 import { useCallback, useRef, useState } from 'react'
 import { SAMPLE_TOKENS, SAMPLE_WALLET, sampleResult } from '../demo/sample'
-import { collectDecimals, processHistory, type Result } from '../engine'
+import { collectDecimals, processHistory, withExtraRows, type Result } from '../engine'
 import { makeCache } from '../rpc/cache'
 import { makeClient, type RpcClient } from '../rpc/client'
 import { fetchHistory, type Progress } from '../rpc/history'
+import { fetchStakingRewards } from '../rpc/staking'
 import { resolveTokens, type TokenInfo } from '../rpc/tokens'
 
 export interface Analysis extends Result {
@@ -41,7 +42,19 @@ export function useAnalysis() {
           if (!ctrl.signal.aborted) setState({ status: 'running', progress })
         },
       })
-      const result = processHistory(history.txs, wallets, history.estate)
+      const base = processHistory(history.txs, wallets, history.estate)
+      const rewards = await fetchStakingRewards(rpc, history.txs, base.estate, {
+        signal: ctrl.signal,
+        onProgress: ({ epochsDone, epochsTotal }) => {
+          if (!ctrl.signal.aborted) {
+            setState({
+              status: 'running',
+              progress: { phase: 'staking', addressesDone: 0, addressesTotal: 0, signatures: 0, txDone: epochsDone, txTotal: epochsTotal },
+            })
+          }
+        },
+      })
+      const result = withExtraRows(base, rewards)
       const tokens = await resolveTokens(rpc, collectDecimals(history.txs))
       if (ctrl.signal.aborted) return
       setState({

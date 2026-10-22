@@ -66,7 +66,8 @@ export function toKoinlyCsv(rows: Row[], tokens: TokenTable): string {
       r.received ? symbolOf(tokens, r.received.mint) : '',
       r.fee ? formatAmount(r.fee, 9) : '',
       r.fee ? 'SOL' : '',
-      r.tag,
+      // Koinly's label for staking income is "reward".
+      r.tag === 'staking' ? 'reward' : r.tag,
       describe(r, tokens),
       r.signature,
     ]

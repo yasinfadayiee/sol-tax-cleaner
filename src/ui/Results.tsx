@@ -74,8 +74,8 @@ export function Results({ analysis, onTokensChange }: { analysis: Analysis; onTo
                 <td>{leg(r.received, tokens)}</td>
                 <td>{r.fee ? `${formatAmount(r.fee, 9)} SOL` : ''}</td>
                 <td>
-                  {analysis.sample ? (
-                    <span className="muted">sample</span>
+                  {analysis.sample || r.tag === 'staking' ? (
+                    <span className="muted">{analysis.sample ? 'sample' : 'reward'}</span>
                   ) : (
                     <a href={`https://solscan.io/tx/${r.signature}`} target="_blank" rel="noreferrer">
                       {r.signature.slice(0, 6)}…
@@ -177,6 +177,7 @@ function Stat({ value, label }: { value: number; label: string }) {
 }
 
 function label(r: Row): string {
+  if (r.tag === 'staking') return 'Staking reward'
   if (r.kind === 'complex') return 'Check'
   if (r.kind === 'fee') return r.note?.startsWith('Failed') ? 'Failed (fee)' : 'Fee'
   return r.kind[0].toUpperCase() + r.kind.slice(1)

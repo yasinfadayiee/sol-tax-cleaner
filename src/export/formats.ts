@@ -52,7 +52,7 @@ export function toCoinTrackerCsv(rows: Row[], tokens: TokenTable): string {
       currency(r.sent, tokens),
       fee(r),
       feeCurrency(r),
-      '',
+      r.tag === 'staking' ? 'staking' : '',
     ]),
   )
 }
@@ -84,7 +84,7 @@ export function toCoinLedgerCsv(rows: Row[], tokens: TokenTable): string {
       amount(r.received, tokens),
       feeCurrency(r),
       fee(r),
-      r.sent && r.received ? '' : r.received ? 'Deposit' : 'Withdrawal',
+      r.tag === 'staking' ? 'Staking' : r.sent && r.received ? '' : r.received ? 'Deposit' : 'Withdrawal',
       describe(r, tokens),
       r.signature,
     ]),

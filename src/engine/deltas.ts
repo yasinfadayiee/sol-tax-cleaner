@@ -1,4 +1,6 @@
-import { NATIVE_MINT, SOL, SOL_DECIMALS, type Estate, type RpcTransaction, type TokenBalance } from './types'
+import { NATIVE_MINT, SOL, SOL_DECIMALS, type Estate, type ParsedInstruction, type RpcTransaction, type TokenBalance } from './types'
+
+export const STAKE_PROGRAM = 'Stake11111111111111111111111111111111111111'
 
 /** Every account key of the transaction, including address-lookup-table keys. */
 export function accountKeys(tx: RpcTransaction): string[] {
@@ -34,6 +36,46 @@ export function discoverTokenAccounts(tx: RpcTransaction, estate: Estate): strin
   return found
 }
 
+/** Top-level and inner instructions, as decoded by the RPC. */
+export function instructions(tx: RpcTransaction): ParsedInstruction[] {
+  return [...(tx.transaction.message.instructions ?? []), ...(tx.meta?.innerInstructions ?? []).flatMap((ii) => ii.instructions)]
+}
+
+const STAKE_AUTHORITY_FIELDS = ['staker', 'withdrawer', 'stakeAuthority', 'withdrawAuthority', 'newAuthority']
+const STAKE_ACCOUNT_FIELDS = ['stakeAccount', 'newSplitAccount', 'destination', 'source']
+
+/**
+ * Adds to the estate every native stake account a user wallet funds or controls in this transaction, so staking
+ * and unstaking net out like moves between the user's own accounts. Returns the newly discovered addresses.
+ */
+export function discoverStakeAccounts(tx: RpcTransaction, estate: Estate): string[] {
+  const found: string[] = []
+  const add = (a: unknown) => {
+    if (typeof a === 'string' && !estate.stakeAccounts.has(a) && !estate.wallets.has(a)) {
+      estate.stakeAccounts.add(a)
+      found.push(a)
+    }
+  }
+  for (const ix of instructions(tx)) {
+    if (typeof ix.parsed !== 'object' || !ix.parsed) continue
+    const info = ix.parsed.info
+    if (ix.program === 'system' && /^createAccount/.test(ix.parsed.type) && info.owner === STAKE_PROGRAM) {
+      if (estate.wallets.has(String(info.source))) add(info.newAccount)
+      continue
+    }
+    if (ix.programId !== STAKE_PROGRAM) continue
+    const authorized = (info.authorized ?? {}) as Record<string, unknown>
+    const authorities = [...STAKE_AUTHORITY_FIELDS.map((f) => info[f]), authorized.staker, authorized.withdrawer]
+    if (!authorities.some((a) => typeof a === 'string' && estate.wallets.has(a))) continue
+    // A withdraw's destination is usually the wallet itself; only stake-program accounts join the estate.
+    for (const f of STAKE_ACCOUNT_FIELDS) {
+      if (f === 'destination' && ix.parsed.type === 'withdraw') continue
+      add(info[f])
+    }
+  }
+  return found
+}
+
 export interface Deltas {
   /** Net lamports change across the whole estate, excluding the network fee. */
   solLamports: bigint
@@ -57,7 +99,7 @@ export function computeDeltas(tx: RpcTransaction, estate: Estate): Deltas {
 
   const inEstate = new Set<number>()
   keys.forEach((k, i) => {
-    if (estate.wallets.has(k) || estate.tokenAccounts.has(k)) inEstate.add(i)
+    if (estate.wallets.has(k) || estate.tokenAccounts.has(k) || estate.stakeAccounts.has(k)) inEstate.add(i)
   })
   for (const tb of tokenBalances(tx)) {
     if (tb.owner && estate.wallets.has(tb.owner)) inEstate.add(tb.accountIndex)

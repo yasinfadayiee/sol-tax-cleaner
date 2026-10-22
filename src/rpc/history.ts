@@ -11,7 +11,7 @@ import {
 } from './client'
 
 export interface Progress {
-  phase: 'accounts' | 'signatures' | 'transactions' | 'done'
+  phase: 'accounts' | 'signatures' | 'transactions' | 'staking' | 'done'
   addressesDone: number
   addressesTotal: number
   signatures: number

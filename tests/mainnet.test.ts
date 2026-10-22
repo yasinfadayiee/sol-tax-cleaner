@@ -4,10 +4,11 @@
 // for every asset, received − sent − fees must equal what the wallet and its token accounts hold now.
 import { writeFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { collectDecimals, processHistory, SOL, type Row, type RpcTransaction } from '../src/engine'
+import { collectDecimals, processHistory, SOL, withExtraRows, type Row, type RpcTransaction } from '../src/engine'
 import { KOINLY_COLUMNS, toKoinlyCsv } from '../src/export/koinly'
 import { DEFAULT_RPC, getSignaturesForAddress, getTransaction, RpcClient } from '../src/rpc/client'
 import { fetchHistory } from '../src/rpc/history'
+import { fetchStakingRewards } from '../src/rpc/staking'
 import { resolveTokens } from '../src/rpc/tokens'
 
 const RUN = process.env.MAINNET === '1'
@@ -108,8 +109,9 @@ describe.skipIf(!RUN)('mainnet reconciliation', () => {
       for (let attempt = 0; attempt < 4 && !quiet; attempt++) {
         const before = (await getSignaturesForAddress(rpc, wallet, { limit: 1 }))[0]?.signature
         history = await fetchHistory(rpc, [wallet], { cache })
-        processed = processHistory(history.txs, [wallet], history.estate)
-        held = await currentHoldings(wallet, [...processed.estate.tokenAccounts])
+        const base = processHistory(history.txs, [wallet], history.estate)
+        processed = withExtraRows(base, await fetchStakingRewards(rpc, history.txs, base.estate))
+        held = await currentHoldings(wallet, [...processed.estate.tokenAccounts, ...processed.estate.stakeAccounts])
         const after = (await getSignaturesForAddress(rpc, wallet, { limit: 1 }))[0]?.signature
         quiet = before === after
         if (!quiet) console.log(`${wallet}: new activity during check, retrying`)
@@ -146,6 +148,7 @@ describe.skipIf(!RUN)('mainnet reconciliation', () => {
         txs: history.txs.length,
         missing: history.missing.length,
         tokenAccounts: estate.tokenAccounts.size,
+        stakeAccounts: estate.stakeAccounts.size,
         stats,
         tokenSources: sources,
         quiet,
