@@ -1,6 +1,7 @@
 import QRCode from 'qrcode'
 import { useEffect, useRef, useState } from 'react'
 import { APP_NAME, MAX_WALLETS, MEMO_PREFIX, MERCHANT_ADDRESS, PRICE_SOL, UNLOCK_DAYS } from '../config'
+import { usdLabel, useSolPrice } from './useSolPrice'
 import { findPayment, memoFor, paymentUrl, rememberUnlock, rememberedUnlock, type PaymentTerms } from '../license/license'
 import type { RpcClient } from '../rpc/client'
 import { isValidAddress } from '../rpc/history'
@@ -19,6 +20,7 @@ const POLL_FOR_MS = 3 * 60 * 1000
 type Status = 'checking' | 'unpaid' | 'waiting' | 'not-found' | 'error'
 
 export function Payment({ wallets, rpc, onUnlocked }: { wallets: string[]; rpc: RpcClient; onUnlocked: () => void }) {
+  const usdPrice = useSolPrice()
   const configured = isValidAddress(MERCHANT_ADDRESS)
   const [status, setStatus] = useState<Status>(configured ? 'checking' : 'unpaid')
   const [qr, setQr] = useState<string | null>(null)
@@ -90,7 +92,8 @@ export function Payment({ wallets, rpc, onUnlocked }: { wallets: string[]; rpc: 
   return (
     <div className="payment">
       <p>
-        Full export for up to {MAX_WALLETS} wallets, valid {UNLOCK_DAYS} days: <strong>{PRICE_SOL} SOL</strong>, paid once.
+        Full export for up to {MAX_WALLETS} wallets, valid {UNLOCK_DAYS} days: <strong>{PRICE_SOL} SOL</strong>
+        {usdPrice ? ` (${usdLabel(PRICE_SOL, usdPrice)} at today's price)` : ''}, paid once.
       </p>
       {status === 'checking' ? (
         <p className="muted small">Checking for an earlier payment…</p>

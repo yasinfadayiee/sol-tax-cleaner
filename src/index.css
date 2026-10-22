@@ -991,3 +991,7 @@ button.chip.on {
   color: var(--accent);
   font-weight: 600;
 }
+
+.price-card .usd {
+  color: var(--text);
+}

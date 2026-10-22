@@ -1,6 +1,7 @@
 import { APP_NAME, MAX_WALLETS, PRICE_SOL, UNLOCK_DAYS } from './config'
 import { Analyzer } from './ui/Analyzer'
 import { Icon, Logo, type IconName } from './ui/Icon'
+import { usdLabel, useSolPrice } from './ui/useSolPrice'
 
 const base = import.meta.env.BASE_URL
 const YEAR = new Date().getFullYear()
@@ -68,6 +69,7 @@ const GUIDES = [
 ]
 
 export default function App() {
+  const usdPrice = useSolPrice()
   return (
     <>
       <header className="site-header">
@@ -218,7 +220,10 @@ export default function App() {
               <p className="amount">
                 {PRICE_SOL} <span>SOL</span>
               </p>
-              <p className="muted">per year, paid once from your own wallet</p>
+              <p className="muted">
+                {usdPrice && <strong className="usd">{usdLabel(PRICE_SOL, usdPrice)} today. </strong>}
+                Per year, paid once from your own wallet.
+              </p>
               <a className="button primary" href="#analyse">
                 Start with a free analysis
               </a>
