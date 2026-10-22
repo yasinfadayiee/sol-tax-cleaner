@@ -1,6 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import { SAMPLE_TOKENS, sampleResult } from '../src/demo/sample'
-import { COINLEDGER_COLUMNS, COINTRACKER_COLUMNS, FORMATS, formatUsDate, toCoinLedgerCsv, toCoinTrackerCsv } from '../src/export/formats'
+import {
+  AWAKEN_COLUMNS,
+  COINLEDGER_COLUMNS,
+  COINTRACKER_COLUMNS,
+  FORMATS,
+  formatUsDate,
+  maxDecimals,
+  toAwakenCsv,
+  toCoinLedgerCsv,
+  toCoinTrackerCsv,
+} from '../src/export/formats'
 import { buildReport } from '../src/export/report'
 
 const { rows, stats } = sampleResult()
@@ -43,6 +53,27 @@ describe('CoinLedger CSV', () => {
 
   it('puts sent before received', () => {
     expect(csv[2].startsWith('01/09/2025 09:15:40,Solana,SOL,1,USDC,186.42,SOL,0.000012,,')).toBe(true)
+  })
+})
+
+describe('Awaken CSV', () => {
+  const csv = lines(toAwakenCsv(rows, SAMPLE_TOKENS))
+
+  it('uses the template header', () => {
+    expect(csv[0]).toBe(AWAKEN_COLUMNS.join(','))
+    expect(csv).toHaveLength(rows.length + 1)
+  })
+
+  it('writes received before sent, with the hash', () => {
+    expect(csv[2].startsWith('01/09/2025 09:15:40,186.42,USDC,,1,SOL,,0.000012,SOL,sample02')).toBe(true)
+  })
+
+  it('never writes more than eight decimals', () => {
+    expect(maxDecimals('0.123456789')).toBe('0.12345678')
+    expect(maxDecimals('1.500000001')).toBe('1.5')
+    expect(maxDecimals('0.000000001')).toBe('0')
+    expect(maxDecimals('42')).toBe('42')
+    expect(maxDecimals('')).toBe('')
   })
 })
 

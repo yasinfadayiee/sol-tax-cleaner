@@ -45,7 +45,7 @@ const STEPS: Array<{ icon: IconName; title: string; text: string }> = [
   {
     icon: 'download',
     title: 'Export',
-    text: 'Download a CSV for Koinly, CoinTracker or CoinLedger, plus a short report of anything worth a second look.',
+    text: 'Download a CSV for Koinly, CoinTracker, CoinLedger or Awaken, plus a short report of anything worth a second look.',
   },
 ]
 
@@ -66,6 +66,8 @@ const GUIDES = [
   { slug: 'pump-fun-trades-tax-software', title: 'pump.fun trades in tax software' },
   { slug: 'phantom-wallet-transactions-koinly', title: 'Phantom wallet history in Koinly' },
   { slug: 'wrapped-sol-wsol-tax-software', title: 'Wrapped SOL (WSOL) showing in your tax tool' },
+  { slug: 'solana-staking-rewards-tax-software', title: 'Solana staking rewards missing' },
+  { slug: 'awaken-solana-csv-import', title: 'Import cleaned Solana history into Awaken' },
 ]
 
 export default function App() {
@@ -92,7 +94,7 @@ export default function App() {
       <div className="hero-band">
         <section className="hero wrap">
           <div className="hero-copy">
-            <p className="eyebrow">For Solana traders using Koinly, CoinTracker or CoinLedger</p>
+            <p className="eyebrow">For Solana traders using Koinly, CoinTracker, CoinLedger or Awaken</p>
             <h1>
               Messy Solana history in. <span className="grad">One clean CSV out.</span>
             </h1>
@@ -253,7 +255,7 @@ export default function App() {
           </details>
           <details>
             <summary>Which tax tools are supported?</summary>
-            <p>Koinly, CoinTracker and CoinLedger, each in its own import format. Pick the tool before you download; you can switch at any time.</p>
+            <p>Koinly, CoinTracker, CoinLedger and Awaken, each in its own import format. Pick the tool before you download; you can switch at any time.</p>
           </details>
           <details>
             <summary>How do I import it without duplicates?</summary>

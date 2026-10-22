@@ -2,7 +2,7 @@
 import type { Row } from '../engine/types'
 import { csvCell, decimalsOf, describe, formatAmount, symbolOf, toKoinlyCsv, type TokenTable } from './koinly'
 
-export type FormatId = 'koinly' | 'cointracker' | 'coinledger'
+export type FormatId = 'koinly' | 'cointracker' | 'coinledger' | 'awaken'
 
 export interface ExportFormat {
   id: FormatId
@@ -91,6 +91,49 @@ export function toCoinLedgerCsv(rows: Row[], tokens: TokenTable): string {
   )
 }
 
+/** Awaken accepts at most eight decimal places; extra digits are cut off. */
+export function maxDecimals(value: string, places = 8): string {
+  const [whole, frac = ''] = value.split('.')
+  const kept = frac.slice(0, places).replace(/0+$/, '')
+  return kept ? `${whole}.${kept}` : whole
+}
+
+/** Awaken Tax simple CSV template. Quantities are never negative; the fee is kept out of the sent quantity. */
+export const AWAKEN_COLUMNS = [
+  'Date',
+  'Received Quantity',
+  'Received Currency',
+  'Received Fiat Amount',
+  'Sent Quantity',
+  'Sent Currency',
+  'Sent Fiat Amount',
+  'Fee Amount',
+  'Fee Currency',
+  'Transaction Hash',
+  'Notes',
+  'Tag',
+] as const
+
+export function toAwakenCsv(rows: Row[], tokens: TokenTable): string {
+  return writeCsv(
+    AWAKEN_COLUMNS,
+    rows.map((r) => [
+      formatUsDate(r.blockTime),
+      maxDecimals(amount(r.received, tokens)),
+      currency(r.received, tokens),
+      '',
+      maxDecimals(amount(r.sent, tokens)),
+      currency(r.sent, tokens),
+      '',
+      maxDecimals(fee(r)),
+      feeCurrency(r),
+      r.tag === 'staking' ? '' : r.signature,
+      describe(r, tokens),
+      '',
+    ]),
+  )
+}
+
 export const FORMATS: Record<FormatId, ExportFormat> = {
   koinly: {
     id: 'koinly',
@@ -123,6 +166,17 @@ export const FORMATS: Record<FormatId, ExportFormat> = {
       'In CoinLedger, remove any Solana wallets synced automatically for these addresses, so nothing is counted twice.',
       'Choose "Add Account", then the manual import / universal template option.',
       'Upload `coinledger.csv`. Transfers between your own addresses are already netted out.',
+    ],
+  },
+  awaken: {
+    id: 'awaken',
+    name: 'Awaken',
+    filename: 'awaken.csv',
+    toCsv: toAwakenCsv,
+    importSteps: [
+      'In Awaken, remove any Solana wallets synced automatically for these addresses, so nothing is counted twice.',
+      'Add an account and choose the CSV upload option for a custom / other source.',
+      'Upload `awaken.csv` as ONE account: transfers between your own addresses are already netted out. Staking rewards say so in Notes; label them as staking income in Awaken if it does not do so itself.',
     ],
   },
 }
