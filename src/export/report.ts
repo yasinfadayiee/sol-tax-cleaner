@@ -1,5 +1,6 @@
 import type { Stats } from '../engine'
 import type { Row } from '../engine/types'
+import { FORMATS, type FormatId } from './formats'
 import { formatDate, type TokenTable } from './koinly'
 
 export interface ReportInput {
@@ -9,9 +10,10 @@ export interface ReportInput {
   tokens: TokenTable
   missing: string[]
   generatedAt: Date
+  format?: FormatId
 }
 
-/** Tickers Koinly may match to the wrong coin: unknown, or shared by several of the user's tokens. */
+/** Tickers a tax tool may match to the wrong coin: unknown, or shared by several of the user's tokens. */
 export function ambiguousTokens(tokens: TokenTable): Array<{ mint: string; symbol: string; why: string }> {
   const bySymbol = new Map<string, string[]>()
   for (const [mint, t] of tokens) bySymbol.set(t.symbol, [...(bySymbol.get(t.symbol) ?? []), mint])
@@ -26,6 +28,8 @@ export function ambiguousTokens(tokens: TokenTable): Array<{ mint: string; symbo
 
 export function buildReport(r: ReportInput): string {
   const s = r.stats
+  const format = FORMATS[r.format ?? 'koinly']
+  const tool = format.name
   const review = r.rows.filter((row) => row.needsReview)
   const reviewSigs = [...new Set(review.map((row) => row.signature))]
   const lines: string[] = [
@@ -41,24 +45,22 @@ export function buildReport(r: ReportInput): string {
     '| | Count |',
     '| --- | --- |',
     `| Transactions analysed | ${s.transactions} |`,
-    `| Rows in koinly.csv | ${s.rows} |`,
+    `| Rows in ${format.filename} | ${s.rows} |`,
     `| Swaps (one row each) | ${s.byKind.swap} |`,
     `| Deposits | ${s.byKind.deposit} |`,
     `| Withdrawals | ${s.byKind.withdrawal} |`,
     `| Fee-only rows (incl. ${s.failed} failed transactions) | ${s.byKind.fee} |`,
     `| Transactions to review | ${s.needsReview} |`,
     '',
-    '## How to import into Koinly',
+    `## How to import into ${tool}`,
     '',
-    '1. In Koinly, remove (or exclude) any Solana wallets Koinly synced automatically for these addresses, so nothing is counted twice.',
-    '2. Add a new wallet in Koinly, choose the custom / "Other" wallet option and pick "Import from file".',
-    '3. Upload `koinly.csv`. Import it as ONE wallet: transfers between your own addresses are already netted out.',
-    '4. Check the transactions listed below.',
+    ...format.importSteps.map((step, i) => `${i + 1}. ${step}`),
+    `${format.importSteps.length + 1}. Check the transactions listed below.`,
     '',
   ]
 
   if (reviewSigs.length) {
-    lines.push('## Transactions to check', '', 'These move more than two assets at once (for example adding or removing liquidity). Each asset is a separate row with the same TxHash. In Koinly, group or tag them as you see fit.', '')
+    lines.push('## Transactions to check', '', `These move more than two assets at once (for example adding or removing liquidity). Each asset is a separate row with the same TxHash. In ${tool}, group or tag them as you see fit.`, '')
     for (const sig of reviewSigs) {
       const first = review.find((row) => row.signature === sig)!
       lines.push(`- ${formatDate(first.blockTime)} — https://solscan.io/tx/${sig}`)
@@ -69,9 +71,9 @@ export function buildReport(r: ReportInput): string {
   const ambiguous = ambiguousTokens(r.tokens)
   if (ambiguous.length) {
     lines.push(
-      '## Tokens to double-check in Koinly',
+      `## Tokens to double-check in ${tool}`,
       '',
-      'Koinly matches tokens by ticker. For these, open the token in Koinly and use "Change currency" if it picked the wrong coin. The mint address is also in each row\'s Description.',
+      `${tool} matches tokens by ticker. For these, check which coin ${tool} picked and change it if it is wrong. The mint address is listed here${format.id === 'cointracker' ? '' : " and in each row's Description"}.`,
       '',
       '| Ticker | Mint | Why |',
       '| --- | --- | --- |',
@@ -86,8 +88,8 @@ export function buildReport(r: ReportInput): string {
   }
 
   lines.push('## Known limitations', '')
-  lines.push('- Staking rewards paid automatically each epoch (no transaction) are not included. Koinly can add them from its own Solana staking sync.')
-  lines.push('- Prices are not included; Koinly fills them in. Tokens without a market price may need a manual price in Koinly.')
+  lines.push(`- Staking rewards paid automatically each epoch (no transaction) are not included. ${tool} may add them from its own Solana staking sync.`)
+  lines.push(`- Prices are not included; ${tool} fills them in. Tokens without a market price may need a manual price in ${tool}.`)
   if (r.missing.length) lines.push(`- ${r.missing.length} transaction(s) could not be fetched from the RPC node and are missing. Try again with another RPC endpoint.`)
   if (s.skippedNoMeta) lines.push(`- ${s.skippedNoMeta} transaction(s) had no status data and were skipped.`)
   lines.push('')

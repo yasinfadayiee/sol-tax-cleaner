@@ -1,7 +1,8 @@
 import { useCallback, useMemo, useState } from 'react'
 import { PREVIEW_ROWS } from '../config'
 import { SOL, type Row } from '../engine/types'
-import { formatAmount, formatDate, toKoinlyCsv } from '../export/koinly'
+import { FORMAT_IDS, FORMATS, type FormatId } from '../export/formats'
+import { formatAmount, formatDate } from '../export/koinly'
 import { ambiguousTokens, buildReport } from '../export/report'
 import { loadOverrides, saveOverrides, type TokenInfo } from '../rpc/tokens'
 import { download } from './download'
@@ -14,9 +15,20 @@ export function Results({ analysis, onTokensChange }: { analysis: Analysis; onTo
   const unlock = useCallback(() => setUnlocked(true), [])
   const review = useMemo(() => [...new Set(rows.filter((r) => r.needsReview).map((r) => r.signature))], [rows])
 
-  const csv = () => toKoinlyCsv(rows, tokens)
+  const [formatId, setFormatId] = useState<FormatId>(savedFormat)
+  const format = FORMATS[formatId]
+  const chooseFormat = (id: FormatId) => {
+    setFormatId(id)
+    try {
+      localStorage.setItem(FORMAT_KEY, id)
+    } catch {
+      // Storage can be unavailable (private mode); the choice just isn't remembered.
+    }
+  }
+
+  const csv = () => format.toCsv(rows, tokens)
   const report = () =>
-    buildReport({ wallets: analysis.wallets, stats, rows, tokens, missing: analysis.missing, generatedAt: analysis.finishedAt })
+    buildReport({ wallets: analysis.wallets, stats, rows, tokens, missing: analysis.missing, generatedAt: analysis.finishedAt, format: formatId })
 
   return (
     <div className="results">
@@ -95,12 +107,27 @@ export function Results({ analysis, onTokensChange }: { analysis: Analysis; onTo
       )}
 
       <div className="download card inset">
-        <h4>Download for Koinly</h4>
+        <h4>Download</h4>
+        <div className="format-picker" role="radiogroup" aria-label="Tax tool">
+          <span className="muted small">Format for:</span>
+          {FORMAT_IDS.map((id) => (
+            <button
+              key={id}
+              type="button"
+              role="radio"
+              aria-checked={id === formatId}
+              className={id === formatId ? 'chip on' : 'chip'}
+              onClick={() => chooseFormat(id)}
+            >
+              {FORMATS[id].name}
+            </button>
+          ))}
+        </div>
         {analysis.sample ? (
           <>
-            <p>The sample CSV is free. Import it into a test wallet in Koinly to see how clean rows look before you analyse your own.</p>
+            <p>The sample CSV is free. Import it into a test wallet in {format.name} to see how clean rows look before you analyse your own.</p>
             <div className="actions">
-              <button className="primary" onClick={() => download('sample-koinly.csv', csv(), 'text/csv')}>
+              <button className="primary" onClick={() => download(`sample-${format.filename}`, csv(), 'text/csv')}>
                 Download sample CSV
               </button>
               <button className="secondary" onClick={() => download('sample-report.md', report(), 'text/markdown')}>
@@ -110,10 +137,10 @@ export function Results({ analysis, onTokensChange }: { analysis: Analysis; onTo
           </>
         ) : unlocked ? (
           <>
-            <p>Unlocked. Thank you! Import the CSV as one wallet in Koinly; the report explains each step.</p>
+            <p>Unlocked. Thank you! Import the CSV as one wallet in {format.name}; the report explains each step.</p>
             <div className="actions">
-              <button className="primary" onClick={() => download('koinly.csv', csv(), 'text/csv')}>
-                Download koinly.csv
+              <button className="primary" onClick={() => download(format.filename, csv(), 'text/csv')}>
+                Download {format.filename}
               </button>
               <button className="secondary" onClick={() => download('report.md', report(), 'text/markdown')}>
                 Download report
@@ -126,6 +153,18 @@ export function Results({ analysis, onTokensChange }: { analysis: Analysis; onTo
       </div>
     </div>
   )
+}
+
+const FORMAT_KEY = 'stc-format'
+
+function savedFormat(): FormatId {
+  try {
+    const v = localStorage.getItem(FORMAT_KEY)
+    if (v && v in FORMATS) return v as FormatId
+  } catch {
+    // Fall through to the default.
+  }
+  return 'koinly'
 }
 
 function Stat({ value, label }: { value: number; label: string }) {
@@ -170,7 +209,7 @@ function TokenNames({ tokens, onChange }: { tokens: Map<string, TokenInfo>; onCh
       <summary>
         Token names ({entries.length}){flagged.length ? ` — ${flagged.length} to double-check` : ''}
       </summary>
-      <p className="muted small">Koinly matches tokens by ticker. Fix any ticker here before downloading; the mint address is also written into each row.</p>
+      <p className="muted small">Tax tools match tokens by ticker. Fix any ticker here before downloading; the mint address is also written into each row.</p>
       <div className="table-wrap">
         <table>
           <thead>

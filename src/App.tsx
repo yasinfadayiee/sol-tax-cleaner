@@ -44,7 +44,7 @@ const STEPS: Array<{ icon: IconName; title: string; text: string }> = [
   {
     icon: 'download',
     title: 'Export',
-    text: 'Download a Koinly Universal CSV plus a short report of anything worth a second look.',
+    text: 'Download a CSV for Koinly, CoinTracker or CoinLedger, plus a short report of anything worth a second look.',
   },
 ]
 
@@ -85,13 +85,13 @@ export default function App() {
       <div className="hero-band">
         <section className="hero wrap">
           <div className="hero-copy">
-            <p className="eyebrow">For Solana traders who use Koinly</p>
+            <p className="eyebrow">For Solana traders using Koinly, CoinTracker or CoinLedger</p>
             <h1>
               Messy Solana history in. <span className="grad">One clean CSV out.</span>
             </h1>
             <p className="lead">
               Swaps split into four rows, DCA fills that never show up, rent counted as income. Paste your wallet address
-              and get a Koinly file where every transaction is rebuilt correctly.
+              and get a tax-tool CSV where every transaction is rebuilt correctly.
             </p>
             <div className="hero-actions">
               <a className="button primary" href="#analyse">
@@ -235,7 +235,7 @@ export default function App() {
           <h2 id="faq-title">Questions</h2>
           <details>
             <summary>Do you calculate my tax?</summary>
-            <p>No. We only clean and reformat your transaction history. Koinly (or your accountant) does the tax calculation. This is not tax advice.</p>
+            <p>No. We only clean and reformat your transaction history. Your tax tool (or your accountant) does the tax calculation. This is not tax advice.</p>
           </details>
           <details>
             <summary>Is my data sent anywhere?</summary>
@@ -243,11 +243,11 @@ export default function App() {
           </details>
           <details>
             <summary>Which tax tools are supported?</summary>
-            <p>Koinly’s Universal CSV format today. Other tools that accept a generic CSV can usually import it too.</p>
+            <p>Koinly, CoinTracker and CoinLedger, each in its own import format. Pick the tool before you download; you can switch at any time.</p>
           </details>
           <details>
             <summary>How do I import it without duplicates?</summary>
-            <p>Remove or exclude the Solana wallets Koinly synced automatically for these addresses, then import our CSV as one custom wallet. Transfers between your own addresses are already netted out.</p>
+            <p>Remove or exclude the Solana wallets your tax tool synced automatically for these addresses, then import our CSV as one custom wallet. Transfers between your own addresses are already netted out.</p>
           </details>
           <details>
             <summary>What isn’t included?</summary>

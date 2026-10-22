@@ -20,6 +20,8 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
 - Don't rely on Wise for revenue (bars Iran residents). Exclude US customers in the Terms.
   No borrowed identities; avoid OFAC-sanctioned Iranian exchanges (Nobitex, Wallex, Bitpin, Ramzinex).
 - Claude builds everything itself (owner said Codex is weaker); owner just approves.
+- Work autonomously through the roadmap without waiting for Yasin between steps; only message him for results
+  or blockers (Yasin, 2026-10-22).
 - Claude may merge its own PRs into `main` and ship without asking (Yasin, 2026-10-22).
 - To save Claude usage, owner opens a new chat for each part of the project. Keep this file current.
 
@@ -43,6 +45,9 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
 - Sample wallet demo (`src/demo/sample.ts`): made-up txs run through the real engine; hero + analyser buttons
   (`#sample`), free sample CSV/report download, no payment. Tested in `tests/demo.test.ts`.
 - DCA guide corrected: fills export as deposits and the DCA setup as a withdrawal (the engine doesn't pair them).
+- Export formats (`src/export/formats.ts`): Koinly, CoinTracker (exact 8-column template, MM/DD/YYYY UTC) and
+  CoinLedger (universal template, Type blank for trades). Picker in the download box, remembered per browser; the
+  report's import steps follow the chosen tool. Tested in `tests/formats.test.ts`.
 - Launch kit with ready-to-post texts (Reddit, Koinly board, X): `docs/launch-posts.md`. Yasin posts them himself.
 - Bugs found by the mainnet check and fixed: transaction version 1 support (auto-upgrades
   `maxSupportedTransactionVersion`); mistyped Token-2022 program ID.
@@ -52,8 +57,7 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
 2. **Waiting on Yasin:**
    - Optional: Google Search Console verification tag (see `docs/launch-posts.md`).
 3. Next product ideas (from the analysis, in order): pair DCA/limit-order escrow with fills so they export as
-   swaps (treat the user's Jupiter DCA/limit escrow accounts as part of the estate), CoinTracker/CoinLedger/
-   Awaken exports, staking rewards, USDC payment, USD price next to SOL, privacy-friendly analytics.
+   swaps (treat the user's Jupiter DCA/limit escrow accounts as part of the estate), Awaken export, staking rewards, USDC payment, USD price next to SOL, privacy-friendly analytics.
 4. After launch: distribution (Reddit r/CryptoTax, r/solana, Koinly community; SEO guides), check real exports in
    Koinly, maybe staking rewards and a CoinTracker format.
 
