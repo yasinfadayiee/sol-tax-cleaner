@@ -13,10 +13,10 @@ Each DCA fill is executed by a Jupiter "keeper", not by you. The bought tokens l
 ## How SolTax Cleaner fixes it
 
 - It finds every token account your wallet owns or has ever owned, including closed ones.
-- It reads the history of each of those accounts too, so fills that only touch a token account are found.
-- Moving funds into the DCA order is exported as a withdrawal, and each fill as a deposit of the token you bought, each with its own transaction hash. In Koinly you can merge them into trades, so both the sale and the purchases are recorded.
+- It treats the DCA order account and its vaults as yours, and reads their history too, so fills a keeper makes are found even when your wallet never appears in them.
+- Moving funds into the DCA order is not a sale (the money is still yours), so it only costs the network fee. Each fill is exported as one trade: the amount spent for the amount bought, with its own transaction hash.
 
 ## What to do
 
-1. [Analyse your wallet free](../#analyse) and check the preview: each DCA fill appears as a deposit of the token you bought.
+1. [Analyse your wallet free](../#analyse) and check the preview: each DCA fill appears as its own swap.
 2. Download the CSV and import it into Koinly as one custom wallet, after removing Koinly's auto-synced Solana wallet for the same address.

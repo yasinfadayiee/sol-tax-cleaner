@@ -1,4 +1,4 @@
-import { discoverTokenAccounts } from '../engine/deltas'
+import { discoverEscrowAccounts, discoverTokenAccounts } from '../engine/deltas'
 import { newEstate, type Estate, type RpcTransaction } from '../engine/types'
 import type { TxCache } from './cache'
 import {
@@ -112,7 +112,8 @@ export async function fetchHistory(rpc: RpcClient, wallets: string[], opts: Hist
       await opts.cache?.put(signature, tx)
     }
     txs.set(signature, tx)
-    for (const acct of discoverTokenAccounts(tx, estate)) queue.push(acct)
+    // Escrow accounts of DCA / limit orders are filled by keepers in transactions the wallet never signs.
+    for (const acct of [...discoverTokenAccounts(tx, estate), ...discoverEscrowAccounts(tx, estate)]) queue.push(acct)
   }
 
   while (queue.length || pending.length) {

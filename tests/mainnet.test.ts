@@ -4,7 +4,7 @@
 // for every asset, received − sent − fees must equal what the wallet and its token accounts hold now.
 import { writeFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { collectDecimals, processHistory, SOL, withExtraRows, type Row, type RpcTransaction } from '../src/engine'
+import { collectDecimals, ownedAccounts, processHistory, SOL, withExtraRows, type Row, type RpcTransaction } from '../src/engine'
 import { KOINLY_COLUMNS, toKoinlyCsv } from '../src/export/koinly'
 import { DEFAULT_RPC, getSignaturesForAddress, getTransaction, RpcClient } from '../src/rpc/client'
 import { fetchHistory } from '../src/rpc/history'
@@ -113,7 +113,7 @@ describe.skipIf(!RUN)('mainnet reconciliation', () => {
         const rewards = await fetchStakingRewards(rpc, history.txs, base.estate)
         if (rewards.failedEpochs.length) console.log(`${wallet}: reward epochs failed: ${rewards.failedEpochs.join(',')}`)
         processed = withExtraRows(base, rewards.rows)
-        held = await currentHoldings(wallet, [...processed.estate.tokenAccounts, ...processed.estate.stakeAccounts])
+        held = await currentHoldings(wallet, ownedAccounts(processed.estate))
         const after = (await getSignaturesForAddress(rpc, wallet, { limit: 1 }))[0]?.signature
         quiet = before === after
         if (!quiet) console.log(`${wallet}: new activity during check, retrying`)
@@ -151,6 +151,7 @@ describe.skipIf(!RUN)('mainnet reconciliation', () => {
         missing: history.missing.length,
         tokenAccounts: estate.tokenAccounts.size,
         stakeAccounts: estate.stakeAccounts.size,
+        escrowAccounts: estate.escrowAccounts.size,
         stats,
         tokenSources: sources,
         quiet,

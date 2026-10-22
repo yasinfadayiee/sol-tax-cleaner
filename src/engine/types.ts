@@ -81,13 +81,22 @@ export interface Row {
   note?: string
 }
 
-/** The user's accounts: wallet addresses, token accounts they own and native stake accounts they control. */
+/**
+ * The user's accounts: wallet addresses, token accounts they own, native stake accounts they control, and escrow
+ * accounts their Jupiter DCA / limit orders created (the order account and the token accounts it owns).
+ */
 export interface Estate {
   wallets: Set<string>
   tokenAccounts: Set<string>
   stakeAccounts: Set<string>
+  escrowAccounts: Set<string>
 }
 
 export function newEstate(wallets: Iterable<string>): Estate {
-  return { wallets: new Set(wallets), tokenAccounts: new Set(), stakeAccounts: new Set() }
+  return { wallets: new Set(wallets), tokenAccounts: new Set(), stakeAccounts: new Set(), escrowAccounts: new Set() }
+}
+
+/** Every non-wallet account in the estate. */
+export function ownedAccounts(estate: Estate): string[] {
+  return [...estate.tokenAccounts, ...estate.stakeAccounts, ...estate.escrowAccounts]
 }

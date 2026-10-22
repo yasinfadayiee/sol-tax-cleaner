@@ -12,6 +12,9 @@ const JUP = 'JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN'
 const MEME = 'CATz9vQmN4rB7xKp2LdW8sYhT3eFgJ5uVcA6nR1oPump'
 const RENT = 2_039_280
 const SOL1 = 1_000_000_000
+const ORDER_RENT = 2_540_000
+const DCA_PROGRAM = 'DCA265Vj8a9CEuX1eb1LWRnDT7uK6q1xMipnNyatn23M'
+const LIMIT_PROGRAM = 'j1o2qRpjcyUwEvwtcfhEQefh773ZgjxcVRry7LDqg5X'
 
 export const SAMPLE_TOKENS = new Map<string, TokenInfo>([
   [SOL, { symbol: 'SOL', name: 'Solana', decimals: 9, source: 'builtin' }],
@@ -86,10 +89,16 @@ function sampleTxs(): RpcTransaction[] {
       ],
       12_000,
     ),
-    // Set up a Jupiter DCA order: 60 USDC moves into the DCA vault.
+    // Set up a Jupiter DCA order: 60 USDC moves into a vault owned by the new DCA order account.
     tx(
       '2025-01-11T20:41:13Z',
-      [move(-5000), { key: 'UsdcAta', pre: RENT, post: RENT }, { key: 'DcaVault', pre: 0, post: RENT }, { key: 'DcaPayer', pre: 0, post: 0 }],
+      [
+        move(-RENT - ORDER_RENT - 5000),
+        { key: 'UsdcAta', pre: RENT, post: RENT },
+        { key: 'DcaVault', pre: 0, post: RENT },
+        { key: 'DcaPda', pre: 0, post: ORDER_RENT },
+        { key: DCA_PROGRAM, pre: 1, post: 1 },
+      ],
       [{ account: 'UsdcAta', mint: USDC, owner: W, amount: '186420000', decimals: 6 }],
       [
         { account: 'UsdcAta', mint: USDC, owner: W, amount: '126420000', decimals: 6 },
@@ -100,7 +109,13 @@ function sampleTxs(): RpcTransaction[] {
     ...[0, 1, 2].map((i) =>
       tx(
         `2025-01-${12 + i * 7}T03:00:0${i}Z`,
-        [{ key: 'DcaKeeper', pre: 50 * SOL1, post: 50 * SOL1 - 5000 }, { key: 'DcaVault', pre: RENT, post: RENT }, { key: 'JupAta', pre: RENT, post: RENT }],
+        [
+          { key: 'DcaKeeper', pre: 50 * SOL1, post: 50 * SOL1 - 5000 },
+          { key: 'DcaVault', pre: RENT, post: RENT },
+          { key: 'JupAta', pre: RENT, post: RENT },
+          { key: 'DcaPda', pre: ORDER_RENT, post: ORDER_RENT },
+          { key: DCA_PROGRAM, pre: 1, post: 1 },
+        ],
         [
           { account: 'DcaVault', mint: USDC, owner: 'DcaPda', amount: `${60_000_000 - i * 20_000_000}`, decimals: 6 },
           { account: 'JupAta', mint: JUP, owner: W, amount: `${i * 24_100_000}`, decimals: 6 },
@@ -139,10 +154,16 @@ function sampleTxs(): RpcTransaction[] {
       ],
       9000,
     ),
-    // Place a limit order: the BONK moves into the order escrow.
+    // Place a limit order: the BONK moves into an escrow owned by the new order account.
     tx(
       '2025-03-15T08:12:31Z',
-      [move(-5000), { key: 'BonkAta', pre: RENT, post: RENT }, { key: 'OrderEscrow', pre: 0, post: RENT }],
+      [
+        move(-RENT - ORDER_RENT - 5000),
+        { key: 'BonkAta', pre: RENT, post: RENT },
+        { key: 'OrderEscrow', pre: 0, post: RENT },
+        { key: 'LimitPda', pre: 0, post: ORDER_RENT },
+        { key: LIMIT_PROGRAM, pre: 1, post: 1 },
+      ],
       [{ account: 'BonkAta', mint: BONK, owner: W, amount: '312500000000', decimals: 5 }],
       [
         { account: 'BonkAta', mint: BONK, owner: W, amount: '0', decimals: 5 },
@@ -152,7 +173,14 @@ function sampleTxs(): RpcTransaction[] {
     // Limit order fill: BONK sold for USDC by a keeper, landing in the USDC account.
     tx(
       '2025-03-20T22:03:47Z',
-      [{ key: 'LimitKeeper', pre: 20 * SOL1, post: 20 * SOL1 - 5000 }, { key: 'BonkAta', pre: RENT, post: RENT }, { key: 'UsdcAta', pre: RENT, post: RENT }, { key: 'OrderEscrow', pre: RENT, post: RENT }],
+      [
+        { key: 'LimitKeeper', pre: 20 * SOL1, post: 20 * SOL1 - 5000 },
+        { key: 'BonkAta', pre: RENT, post: RENT },
+        { key: 'UsdcAta', pre: RENT, post: RENT },
+        { key: 'OrderEscrow', pre: RENT, post: RENT },
+        { key: 'LimitPda', pre: ORDER_RENT, post: ORDER_RENT },
+        { key: LIMIT_PROGRAM, pre: 1, post: 1 },
+      ],
       [
         { account: 'OrderEscrow', mint: BONK, owner: 'LimitPda', amount: '312500000000', decimals: 5 },
         { account: 'UsdcAta', mint: USDC, owner: W, amount: '126420000', decimals: 6 },

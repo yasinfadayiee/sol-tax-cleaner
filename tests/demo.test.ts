@@ -12,10 +12,10 @@ describe('sample wallet demo', () => {
   })
 
   it('shows swaps, DCA and limit fills, deposits and withdrawals', () => {
-    expect(stats.byKind.swap).toBe(4)
-    expect(stats.byKind.deposit).toBe(5)
-    expect(stats.byKind.withdrawal).toBe(3)
-    expect(stats.byKind.fee).toBe(1)
+    expect(stats.byKind.swap).toBe(8)
+    expect(stats.byKind.deposit).toBe(1)
+    expect(stats.byKind.withdrawal).toBe(1)
+    expect(stats.byKind.fee).toBe(3)
   })
 
   it('never counts rent as income or a cost', () => {

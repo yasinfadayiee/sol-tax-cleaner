@@ -2,6 +2,13 @@ import { NATIVE_MINT, SOL, SOL_DECIMALS, type Estate, type ParsedInstruction, ty
 
 export const STAKE_PROGRAM = 'Stake11111111111111111111111111111111111111'
 
+/** Jupiter programs that hold a user's funds in per-order escrow accounts until keepers fill the order. */
+export const ESCROW_PROGRAMS = new Set([
+  'DCA265Vj8a9CEuX1eb1LWRnDT7uK6q1xMipnNyatn23M', // DCA
+  'jupoNjAxXgZ4rjzxzPMP4oxduvQsQtZzyknqvzYNrNu', // limit order v1
+  'j1o2qRpjcyUwEvwtcfhEQefh773ZgjxcVRry7LDqg5X', // limit order v2
+])
+
 /** Every account key of the transaction, including address-lookup-table keys. */
 export function accountKeys(tx: RpcTransaction): string[] {
   const raw = tx.transaction.message.accountKeys
@@ -76,6 +83,41 @@ export function discoverStakeAccounts(tx: RpcTransaction, estate: Estate): strin
   return found
 }
 
+/**
+ * When a user wallet pays for a transaction that calls a Jupiter DCA / limit-order program, the order account and
+ * the token accounts it owns that are created in that transaction hold the user's funds. Adding them to the estate
+ * makes placing or cancelling an order a move inside the user's own pot, and each fill a swap.
+ * Returns the newly discovered addresses.
+ */
+export function discoverEscrowAccounts(tx: RpcTransaction, estate: Estate): string[] {
+  const meta = tx.meta
+  if (!meta || meta.err) return []
+  const keys = accountKeys(tx)
+  const userOrder = estate.wallets.has(keys[0] ?? '') && keys.some((k) => ESCROW_PROGRAMS.has(k))
+  const created = (i: number) => (meta.preBalances[i] ?? 0) === 0 && (meta.postBalances[i] ?? 0) > 0
+  const found: string[] = []
+  const add = (a: string) => {
+    if (!estate.escrowAccounts.has(a) && !estate.wallets.has(a) && !estate.tokenAccounts.has(a)) {
+      estate.escrowAccounts.add(a)
+      found.push(a)
+    }
+  }
+  for (const tb of meta.postTokenBalances ?? []) {
+    if (!tb.owner || estate.wallets.has(tb.owner)) continue
+    // A token account opened later for an order we already know (e.g. a DCA output vault).
+    if (estate.escrowAccounts.has(tb.owner)) {
+      add(keys[tb.accountIndex])
+      continue
+    }
+    if (!userOrder || !created(tb.accountIndex)) continue
+    const ownerIndex = keys.indexOf(tb.owner)
+    if (ownerIndex < 0 || !created(ownerIndex)) continue
+    add(keys[tb.accountIndex])
+    add(tb.owner)
+  }
+  return found
+}
+
 export interface Deltas {
   /** Net lamports change across the whole estate, excluding the network fee. */
   solLamports: bigint
@@ -99,10 +141,10 @@ export function computeDeltas(tx: RpcTransaction, estate: Estate): Deltas {
 
   const inEstate = new Set<number>()
   keys.forEach((k, i) => {
-    if (estate.wallets.has(k) || estate.tokenAccounts.has(k) || estate.stakeAccounts.has(k)) inEstate.add(i)
+    if (estate.wallets.has(k) || estate.tokenAccounts.has(k) || estate.stakeAccounts.has(k) || estate.escrowAccounts.has(k)) inEstate.add(i)
   })
   for (const tb of tokenBalances(tx)) {
-    if (tb.owner && estate.wallets.has(tb.owner)) inEstate.add(tb.accountIndex)
+    if (tb.owner && (estate.wallets.has(tb.owner) || estate.escrowAccounts.has(tb.owner))) inEstate.add(tb.accountIndex)
   }
 
   let sol = 0n

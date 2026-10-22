@@ -1,10 +1,20 @@
 import { classify } from './classify'
-import { computeDeltas, discoverStakeAccounts, discoverTokenAccounts } from './deltas'
+import { computeDeltas, discoverEscrowAccounts, discoverStakeAccounts, discoverTokenAccounts } from './deltas'
 import { newEstate, type Estate, type Row, type RowKind, type RpcTransaction } from './types'
 
 export * from './types'
 export { classify } from './classify'
-export { accountKeys, collectDecimals, computeDeltas, discoverStakeAccounts, discoverTokenAccounts, instructions, STAKE_PROGRAM } from './deltas'
+export {
+  accountKeys,
+  collectDecimals,
+  computeDeltas,
+  discoverEscrowAccounts,
+  discoverStakeAccounts,
+  discoverTokenAccounts,
+  ESCROW_PROGRAMS,
+  instructions,
+  STAKE_PROGRAM,
+} from './deltas'
 
 export interface Stats {
   transactions: number
@@ -27,6 +37,7 @@ export function processHistory(txs: RpcTransaction[], wallets: Iterable<string>,
   for (const tx of txs) {
     discoverTokenAccounts(tx, estate)
     discoverStakeAccounts(tx, estate)
+    discoverEscrowAccounts(tx, estate)
   }
 
   const sorted = [...txs].sort((a, b) => (a.blockTime ?? 0) - (b.blockTime ?? 0) || a.slot - b.slot)

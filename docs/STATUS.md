@@ -44,7 +44,13 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
   Analysis of next steps (Persian): https://claude.ai/artifact/SgNWp4qj7eZ4BffkYKqnX1
 - Sample wallet demo (`src/demo/sample.ts`): made-up txs run through the real engine; hero + analyser buttons
   (`#sample`), free sample CSV/report download, no payment. Tested in `tests/demo.test.ts`.
-- DCA guide corrected: fills export as deposits and the DCA setup as a withdrawal (the engine doesn't pair them).
+- Jupiter DCA / limit orders (v1, v2): order accounts and their token vaults created in a user-paid tx that calls the
+  Jupiter programs join the estate (`discoverEscrowAccounts`), and token accounts owned by them count too. Placing or
+  cancelling an order is fee-only; each keeper fill is a swap. Tested in `tests/escrow.test.ts` (shaped after a real
+  limit v2 order found by the probe, `tests/probe.test.ts` + `.github/workflows/probe.yml`, run manually).
+- Native staking: stake accounts the user controls join the estate; rewards per epoch come from
+  `getInflationReward` and export as staking income (Koinly tag `reward`). If reading rewards fails, the analysis
+  continues and the results/report warn. Tested in `tests/staking.test.ts`; not yet checked on a real staker.
 - Export formats (`src/export/formats.ts`): Koinly, CoinTracker (exact 8-column template, MM/DD/YYYY UTC) and
   CoinLedger (universal template, Type blank for trades). Picker in the download box, remembered per browser; the
   report's import steps follow the chosen tool. Tested in `tests/formats.test.ts`.
@@ -57,10 +63,10 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
 1. Watch the scheduled "Mainnet check"; fix any mismatches it reports.
 2. **Waiting on Yasin:**
    - Optional: Google Search Console verification tag (see `docs/launch-posts.md`).
-3. Next product ideas (from the analysis, in order): pair DCA/limit-order escrow with fills so they export as
-   swaps (treat the user's Jupiter DCA/limit escrow accounts as part of the estate), Awaken export, staking rewards, USDC payment, USD price next to SOL, privacy-friendly analytics.
+3. Next product ideas, in order: Awaken export, USD price next to SOL, USDC payment, privacy-friendly analytics
+   (needs Yasin's signup), a real staker wallet in the mainnet check.
 4. After launch: distribution (Reddit r/CryptoTax, r/solana, Koinly community; SEO guides), check real exports in
-   Koinly, maybe staking rewards and a CoinTracker format.
+   Koinly.
 
 ## Environment notes for Claude
 - Until 2026-10-22 the sandbox could not reach Solana RPC (proxy 403), so real-data testing runs in GitHub Actions.
