@@ -97,11 +97,11 @@ export default function App() {
               <a className="button primary" href="#analyse">
                 Analyse my wallet free <Icon name="arrow" size={18} />
               </a>
-              <a className="button secondary" href="#before-after">
-                See an example
+              <a className="button secondary" href="#sample">
+                Try a sample wallet
               </a>
             </div>
-            <p className="hero-note muted small">Free preview. Pay only if you want the full download.</p>
+            <p className="hero-note muted small">No address handy? The sample wallet shows real output in one click.</p>
           </div>
 
           <div className="hero-visual" aria-hidden="true">

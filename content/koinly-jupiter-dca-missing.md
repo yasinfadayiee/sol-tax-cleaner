@@ -14,9 +14,9 @@ Each DCA fill is executed by a Jupiter "keeper", not by you. The bought tokens l
 
 - It finds every token account your wallet owns or has ever owned, including closed ones.
 - It reads the history of each of those accounts too, so fills that only touch a token account are found.
-- Each fill is exported as a normal swap row in Koinly's CSV format.
+- Moving funds into the DCA order is exported as a withdrawal, and each fill as a deposit of the token you bought, each with its own transaction hash. In Koinly you can merge them into trades, so both the sale and the purchases are recorded.
 
 ## What to do
 
-1. [Analyse your wallet free](../#analyse) and check the preview: DCA fills appear as swaps.
+1. [Analyse your wallet free](../#analyse) and check the preview: each DCA fill appears as a deposit of the token you bought.
 2. Download the CSV and import it into Koinly as one custom wallet, after removing Koinly's auto-synced Solana wallet for the same address.

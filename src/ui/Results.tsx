@@ -20,7 +20,13 @@ export function Results({ analysis, onTokensChange }: { analysis: Analysis; onTo
 
   return (
     <div className="results">
-      <h3>Your history, cleaned</h3>
+      {analysis.sample && (
+        <p className="sample-note">
+          <strong>Sample wallet.</strong> These are made-up transactions shaped like real Jupiter, pump.fun, DCA and limit-order
+          activity, run through the same engine as your real history. Paste your own address above to analyse it.
+        </p>
+      )}
+      <h3>{analysis.sample ? 'Sample history, cleaned' : 'Your history, cleaned'}</h3>
       <div className="stats">
         <Stat value={stats.transactions} label="transactions read" />
         <Stat value={stats.byKind.swap} label="swaps, one row each" />
@@ -56,9 +62,13 @@ export function Results({ analysis, onTokensChange }: { analysis: Analysis; onTo
                 <td>{leg(r.received, tokens)}</td>
                 <td>{r.fee ? `${formatAmount(r.fee, 9)} SOL` : ''}</td>
                 <td>
-                  <a href={`https://solscan.io/tx/${r.signature}`} target="_blank" rel="noreferrer">
-                    {r.signature.slice(0, 6)}…
-                  </a>
+                  {analysis.sample ? (
+                    <span className="muted">sample</span>
+                  ) : (
+                    <a href={`https://solscan.io/tx/${r.signature}`} target="_blank" rel="noreferrer">
+                      {r.signature.slice(0, 6)}…
+                    </a>
+                  )}
                 </td>
               </tr>
             ))}
@@ -86,7 +96,19 @@ export function Results({ analysis, onTokensChange }: { analysis: Analysis; onTo
 
       <div className="download card inset">
         <h4>Download for Koinly</h4>
-        {unlocked ? (
+        {analysis.sample ? (
+          <>
+            <p>The sample CSV is free. Import it into a test wallet in Koinly to see how clean rows look before you analyse your own.</p>
+            <div className="actions">
+              <button className="primary" onClick={() => download('sample-koinly.csv', csv(), 'text/csv')}>
+                Download sample CSV
+              </button>
+              <button className="secondary" onClick={() => download('sample-report.md', report(), 'text/markdown')}>
+                Download sample report
+              </button>
+            </div>
+          </>
+        ) : unlocked ? (
           <>
             <p>Unlocked. Thank you! Import the CSV as one wallet in Koinly; the report explains each step.</p>
             <div className="actions">

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { MAX_WALLETS } from '../config'
 import { DEFAULT_RPC, saveRpcUrl, savedRpcUrl } from '../rpc/client'
 import { isValidAddress, type Progress } from '../rpc/history'
@@ -6,7 +6,8 @@ import { Results } from './Results'
 import { useAnalysis } from './useAnalysis'
 
 export function Analyzer() {
-  const { state, start, cancel, updateTokens } = useAnalysis()
+  const { state, start, startSample, cancel, updateTokens } = useAnalysis()
+  const section = useRef<HTMLElement>(null)
   const [wallets, setWallets] = useState<string[]>([''])
   const [rpcUrl, setRpcUrl] = useState(savedRpcUrl() ?? '')
   const [touched, setTouched] = useState(false)
@@ -16,6 +17,19 @@ export function Analyzer() {
   const duplicate = new Set(cleaned).size !== cleaned.length
   const canRun = cleaned.length > 0 && invalid.length === 0 && !duplicate && state.status !== 'running'
 
+  // The hero's "Try a sample wallet" button links to #sample.
+  useEffect(() => {
+    const onHash = () => {
+      if (location.hash !== '#sample') return
+      startSample()
+      history.replaceState(null, '', '#analyse')
+      section.current?.scrollIntoView({ behavior: 'smooth' })
+    }
+    onHash()
+    addEventListener('hashchange', onHash)
+    return () => removeEventListener('hashchange', onHash)
+  }, [startSample])
+
   const run = () => {
     setTouched(true)
     if (!canRun) return
@@ -24,7 +38,7 @@ export function Analyzer() {
   }
 
   return (
-    <section className="analyzer card" id="analyse" aria-labelledby="analyse-title">
+    <section className="analyzer card" id="analyse" aria-labelledby="analyse-title" ref={section}>
       <h2 id="analyse-title">Analyse your wallets free</h2>
       <p className="muted">
         Paste your public Solana address. Nothing is uploaded: your browser reads the blockchain directly and
@@ -93,7 +107,12 @@ export function Analyzer() {
             </button>
           ) : (
             <button type="submit" className="primary" disabled={touched && !canRun}>
-              {state.status === 'done' ? 'Analyse again' : 'Analyse free'}
+              {state.status === 'done' && !state.analysis.sample ? 'Analyse again' : 'Analyse free'}
+            </button>
+          )}
+          {state.status !== 'running' && (
+            <button type="button" className="secondary" onClick={startSample}>
+              Try a sample wallet
             </button>
           )}
         </div>
