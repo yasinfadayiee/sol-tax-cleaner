@@ -37,7 +37,7 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
   (`tests/mainnet.test.ts`: full history of 3 real Jupiter users, rows must reconcile to on-chain balances).
 - GitHub Pages is enabled: the Deploy workflow deployed successfully on 2026-10-22 (run 39779981052).
 - Payments configured: `MERCHANT_ADDRESS` = C6fwRzwGVLBhBnLmiWqKgR25qBz4U3ysNuEKse519G6V (Yasin's public wallet).
-  Price 0.25 SOL (≈ $25–35), 365 days, up to 5 wallets; Yasin let Claude choose (below Koinly's $49 entry plan).
+  Price 0.25 SOL or 39 USDC (#12), 365 days, up to 5 wallets; Yasin let Claude choose (below Koinly's $49 entry plan).
 - Mainnet check is green: all 3 real wallets reconcile exactly to on-chain balances (run 39780634996).
 - Design overhaul (2026-10-22): logo, gradient hero with a 3D 'rows merge into one' visual, trust strip, feature
   cards, pricing card, FAQ cards, guide cards, self-hosted Inter, og.png + apple-touch-icon (`scripts/brand/`).
@@ -66,7 +66,7 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
 1. Watch the scheduled "Mainnet check"; fix any mismatches it reports.
 2. **Waiting on Yasin:**
    - Optional: Google Search Console verification tag (see `docs/launch-posts.md`).
-3. Next product ideas, in order: USDC payment, privacy-friendly analytics
+3. Next product ideas, in order: privacy-friendly analytics
    (needs Yasin's signup), a real staker wallet in the mainnet check.
 4. After launch: distribution (Reddit r/CryptoTax, r/solana, Koinly community; SEO guides), check real exports in
    Koinly.
