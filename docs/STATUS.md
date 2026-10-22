@@ -20,6 +20,7 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
 - Don't rely on Wise for revenue (bars Iran residents). Exclude US customers in the Terms.
   No borrowed identities; avoid OFAC-sanctioned Iranian exchanges (Nobitex, Wallex, Bitpin, Ramzinex).
 - Claude builds everything itself (owner said Codex is weaker); owner just approves.
+- Claude may merge its own PRs into `main` and ship without asking (Yasin, 2026-10-22).
 - To save Claude usage, owner opens a new chat for each part of the project. Keep this file current.
 
 ## Done
@@ -35,15 +36,15 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
 - GitHub Pages is enabled: the Deploy workflow deployed successfully on 2026-10-22 (run 39779981052).
 - Payments configured: `MERCHANT_ADDRESS` = C6fwRzwGVLBhBnLmiWqKgR25qBz4U3ysNuEKse519G6V (Yasin's public wallet).
   Price 0.25 SOL (≈ $25–35), 365 days, up to 5 wallets; Yasin let Claude choose (below Koinly's $49 entry plan).
-- Mainnet check: 2 of 3 real wallets reconciled exactly. The third was off by 0.08005 SOL because it traded
-  while the check ran; the test now retries until the wallet is quiet across the balance snapshot.
+- Mainnet check is green: all 3 real wallets reconcile exactly to on-chain balances (run 39780634996).
+- Launch kit with ready-to-post texts (Reddit, Koinly board, X): `docs/launch-posts.md`. Yasin posts them himself.
 - Bugs found by the mainnet check and fixed: transaction version 1 support (auto-upgrades
   `maxSupportedTransactionVersion`); mistyped Token-2022 program ID.
 
 ## In progress / next
-1. Mainnet reconciliation run: confirm the latest "Mainnet check" run is green; fix any mismatches it reports.
+1. Watch the scheduled "Mainnet check"; fix any mismatches it reports.
 2. **Waiting on Yasin:**
-   - Nothing right now.
+   - Optional: Google Search Console verification tag (see `docs/launch-posts.md`).
 3. After launch: distribution (Reddit r/CryptoTax, r/solana, Koinly community; SEO guides), check real exports in
    Koinly, maybe staking rewards and a CoinTracker format.
 
