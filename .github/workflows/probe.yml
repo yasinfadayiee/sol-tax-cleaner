@@ -1,0 +1,33 @@
+name: Probe
+
+# Dev-only data probe (tests/probe.test.ts). Runs when the probe changes on a claude/* branch, or by hand.
+on:
+  workflow_dispatch:
+  push:
+    branches: ['claude/**']
+    paths: ['tests/probe.test.ts', '.github/workflows/probe.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npx vitest run tests/probe.test.ts
+        env:
+          PROBE: '1'
+          RPC_URL: ${{ secrets.RPC_URL }}
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: probe-report
+          path: probe-report.json
+          if-no-files-found: ignore
