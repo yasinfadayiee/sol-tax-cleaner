@@ -1,6 +1,6 @@
 # AGENTS.md — SolTax Cleaner (working name)
 
-Read `docs/SPEC.md` before any task. It is the source of truth for product behaviour.
+Start with `docs/STATUS.md` (current state and next steps). Read `docs/SPEC.md` before changing product behaviour. It is the source of truth for product behaviour.
 
 ## What this project is
 A static, browser-only web app. A Solana user enters their wallet address(es); the app pulls their full
