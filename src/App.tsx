@@ -68,6 +68,9 @@ const GUIDES = [
   { slug: 'wrapped-sol-wsol-tax-software', title: 'Wrapped SOL (WSOL) showing in your tax tool' },
   { slug: 'solana-staking-rewards-tax-software', title: 'Solana staking rewards missing' },
   { slug: 'awaken-solana-csv-import', title: 'Import cleaned Solana history into Awaken' },
+  { slug: 'solscan-csv-export-tax-software', title: 'Why a Solscan CSV export imports badly' },
+  { slug: 'raydium-orca-meteora-swaps-tax-software', title: 'Raydium, Orca and Meteora swaps' },
+  { slug: 'solana-spam-tokens-airdrops-tax-software', title: 'Spam tokens and airdrops in your tax tool' },
 ]
 
 export default function App() {
@@ -288,6 +291,9 @@ export default function App() {
               </li>
             ))}
           </ul>
+          <p>
+            <a href={`${base}guides/`}>See all guides</a>
+          </p>
         </section>
       </main>
 
