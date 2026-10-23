@@ -1,7 +1,7 @@
 import type { Deltas } from './deltas'
 import { SOL, type Leg, type Row } from './types'
 
-/** SOL outflows up to this size next to a token-for-token swap are treated as fees (platform fees, tips). */
+/** SOL flows up to this size next to a token-for-token swap: outflows are fees (platform fees, tips), inflows a separate deposit. */
 export const SOL_FEE_FOLD_LAMPORTS = 10_000_000n // 0.01 SOL
 
 export interface TxRef {
@@ -52,6 +52,24 @@ export function classify(ref: TxRef, d: Deltas): Row[] {
 
   const feeField = fee > 0n ? { fee } : {}
   const note = notes.length ? notes.join('; ') : undefined
+
+  // Token-for-token swap that also leaves a little SOL with the user (gasless/relayed swaps where someone else
+  // pays rent or refunds SOL): one swap row plus a SOL deposit, so it doesn't need a manual look.
+  if (out.length === 1 && inn.length === 2 && out[0].mint !== SOL) {
+    const solLeg = inn.find((l) => l.mint === SOL)
+    const tokenLeg = inn.find((l) => l.mint !== SOL)
+    if (solLeg && tokenLeg && solLeg.amount <= SOL_FEE_FOLD_LAMPORTS) {
+      return [
+        { ...base, kind: 'swap', sent: out[0], received: tokenLeg, ...feeField, note },
+        {
+          ...base,
+          kind: 'deposit',
+          received: solLeg,
+          note: 'Small SOL received alongside the swap (often rent or a refund paid by a gasless-swap relayer)',
+        },
+      ]
+    }
+  }
 
   if (out.length === 1 && inn.length === 1) {
     return [{ ...base, kind: 'swap', sent: out[0], received: inn[0], ...feeField, note }]

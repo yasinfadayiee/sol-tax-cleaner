@@ -177,6 +177,31 @@ describe('estate accounting', () => {
     ])
   })
 
+  it('a gasless swap that also sends the user a little SOL is a swap plus a small deposit, not a review item', () => {
+    // Shaped after a real relayed (gasless) swap: a relayer pays the fee and creates the user's USDC account,
+    // and the user's wallet ends up with a little SOL too.
+    const t = tx({
+      accounts: [
+        { key: 'Relayer', pre: 50_000_000, post: 50_000_000 - 15_000 - 2 * 1_488_440 },
+        { key: W, pre: 10_000_000, post: 10_000_000 + 1_488_440 },
+        { key: 'QiAta', pre: RENT, post: RENT },
+        { key: 'UsdcAta', pre: 0, post: 1_488_440 },
+      ],
+      pre: [{ account: 'QiAta', mint: 'Qi111111', owner: W, amount: '6179206838', decimals: 6 }],
+      post: [
+        { account: 'QiAta', mint: 'Qi111111', owner: W, amount: '0', decimals: 6 },
+        { account: 'UsdcAta', mint: USDC, owner: W, amount: '1986804' },
+      ],
+    })
+    const rows = run(t)
+    expect(rows.map((r) => r.kind)).toEqual(['swap', 'deposit'])
+    expect(rows[0]).toEqual(
+      expect.objectContaining({ sent: { mint: 'Qi111111', amount: 6_179_206_838n }, received: { mint: USDC, amount: 1_986_804n } }),
+    )
+    expect(rows[1]).toEqual(expect.objectContaining({ received: { mint: SOL, amount: 2_976_880n }, needsReview: false }))
+    expect(rows[1].note).toMatch(/alongside the swap/)
+  })
+
   it('a spam airdrop that opens a token account for the user is labelled as such', () => {
     const t = tx({
       accounts: [

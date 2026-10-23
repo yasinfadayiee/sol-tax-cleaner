@@ -76,8 +76,10 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
   `maxSupportedTransactionVersion`); mistyped Token-2022 program ID.
 
 ## In progress / next
-0. **Blocker for real users:** Yasin to get a free Helius key (domain-restricted to yasinfadayiee.github.io);
-   then set repo variable `RPC_URL` and redeploy.
+0. Done 2026-10-23: Yasin's free Helius key (domain-restricted to yasinfadayiee.github.io) is in the repo variable
+   `RPC_URL`; the live site analyses a real wallet end to end. The key is never committed. Free plan = 10 req/s
+   shared by all visitors, so the site client paces at 8/s; watch Helius usage as traffic grows.
+   Gasless/relayed swaps that also leave <= 0.01 SOL now export as swap + SOL deposit (was 'needs review').
 1. Watch the scheduled "Mainnet check"; fix any mismatches it reports.
 2. **Waiting on Yasin:**
    - Done 2026-10-23: Google Search Console verified (HTML tag in index.html) and sitemap.xml submitted.

@@ -197,8 +197,12 @@ export function defaultRpcUrl(): string {
   return savedRpcUrl() ?? (SITE_RPC_URL || DEFAULT_RPC)
 }
 
-/** Public endpoint: gentle pacing. Custom (usually keyed) endpoint: faster. */
+/**
+ * Public endpoint: gentle pacing. The site's endpoint is a free plan shared by every visitor (Helius free allows
+ * 10 requests/s), so stay under it. A visitor's own keyed endpoint: faster.
+ */
 export function makeClient(url = defaultRpcUrl()): RpcClient {
-  const isPublic = url === DEFAULT_RPC
-  return new RpcClient({ url, maxConcurrent: isPublic ? 3 : 8, ratePerSec: isPublic ? 3.5 : 20 })
+  if (url === DEFAULT_RPC) return new RpcClient({ url, maxConcurrent: 3, ratePerSec: 3.5 })
+  if (url === SITE_RPC_URL) return new RpcClient({ url, maxConcurrent: 4, ratePerSec: 8 })
+  return new RpcClient({ url, maxConcurrent: 8, ratePerSec: 20 })
 }
