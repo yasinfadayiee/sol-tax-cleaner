@@ -82,6 +82,21 @@ describe('report', () => {
   })
 })
 
+describe('reportToHtml', () => {
+  it('renders the report as a standalone page', async () => {
+    const { reportToHtml } = await import('../src/export/reportHtml')
+    const html = reportToHtml(
+      ['# Title', '', 'Wallets:', '- `W<1>`', '', '| A | B |', '| --- | --- |', '| 1 | 2 |', '', '1. Step one', '2. Step two', '', '- 2025 — https://solscan.io/tx/abc'].join('\n'),
+    )
+    expect(html).toMatch(/^<!doctype html>/)
+    expect(html).toContain('<h1>Title</h1>')
+    expect(html).toContain('<ul>\n<li><code>W&lt;1&gt;</code></li>\n</ul>')
+    expect(html).toContain('<thead><tr><th>A</th><th>B</th></tr></thead>\n<tbody><tr><td>1</td><td>2</td></tr></tbody>')
+    expect(html).toContain('<ol>\n<li>Step one</li>\n<li>Step two</li>\n</ol>')
+    expect(html).toContain('<a href="https://solscan.io/tx/abc">solscan.io/tx/abc</a>')
+  })
+})
+
 describe('groupDigits', () => {
   it('groups the integer part only', async () => {
     const { groupDigits } = await import('../src/ui/format')

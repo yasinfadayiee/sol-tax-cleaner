@@ -5,6 +5,7 @@ import { FORMAT_IDS, FORMATS, type FormatId } from '../export/formats'
 import { formatAmount, formatDate } from '../export/koinly'
 import { groupDigits } from './format'
 import { ambiguousTokens, buildReport } from '../export/report'
+import { reportToHtml } from '../export/reportHtml'
 import { loadOverrides, saveOverrides, type TokenInfo } from '../rpc/tokens'
 import { download } from './download'
 import type { Analysis } from './useAnalysis'
@@ -103,7 +104,7 @@ export function Results({ analysis, onTokensChange }: { analysis: Analysis; onTo
               <button className="primary" onClick={() => download(`sample-${format.filename}`, csv(), 'text/csv')}>
                 Download sample CSV
               </button>
-              <button className="secondary" onClick={() => download('sample-report.md', report(), 'text/markdown')}>
+              <button className="secondary" onClick={() => download('sample-report.html', reportToHtml(report()), 'text/html')}>
                 Download sample report
               </button>
             </div>
@@ -115,7 +116,7 @@ export function Results({ analysis, onTokensChange }: { analysis: Analysis; onTo
               <button className="primary" onClick={() => download(format.filename, csv(), 'text/csv')}>
                 Download {format.filename}
               </button>
-              <button className="secondary" onClick={() => download('report.md', report(), 'text/markdown')}>
+              <button className="secondary" onClick={() => download('report.html', reportToHtml(report()), 'text/html')}>
                 Download report
               </button>
             </div>
