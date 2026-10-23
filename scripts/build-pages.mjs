@@ -1,6 +1,7 @@
 // Renders content/*.md into static pages under dist/<slug>/index.html, a /guides/ index, sitemap.xml and robots.txt.
 // Runs after `vite build`. Static HTML so guides and legal pages work without JavaScript and index well.
 import { mkdirSync, readdirSync, readFileSync, writeFileSync, existsSync } from 'node:fs'
+import { execFileSync } from 'node:child_process'
 import { join } from 'node:path'
 
 const SITE_URL = (process.env.SITE_URL ?? 'https://yasinfadayiee.github.io/sol-tax-cleaner/').replace(/\/?$/, '/')
@@ -10,6 +11,19 @@ const contentDir = join(root, 'content')
 const dist = join(root, 'dist')
 // Legal pages; every other content file is a guide.
 const LEGAL = new Set(['terms', 'privacy'])
+
+// First and last commit dates of a content file (YYYY-MM-DD); today when git history isn't available.
+function gitDates(file) {
+  const today = new Date().toISOString().slice(0, 10)
+  try {
+    const dates = execFileSync('git', ['log', '--follow', '--format=%cs', '--', file], { cwd: root, encoding: 'utf8' }).trim().split('\n').filter(Boolean)
+    return { published: dates.at(-1) ?? today, modified: dates[0] ?? today }
+  } catch {
+    return { published: today, modified: today }
+  }
+}
+
+const longDate = (d) => new Date(`${d}T00:00:00Z`).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })
 
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
 
@@ -133,7 +147,7 @@ const pages = readdirSync(contentDir)
     const slug = file.replace(/\.md$/, '')
     const { meta, body } = parse(join(contentDir, file))
     const heading = /^# (.*)$/m.exec(body)?.[1] ?? meta.title
-    return { slug, meta, body, heading, url: `${SITE_URL}${slug}/` }
+    return { slug, meta, body, heading, url: `${SITE_URL}${slug}/`, dates: gitDates(join(contentDir, file)) }
   })
 const guides = pages.filter((p) => !LEGAL.has(p.slug))
 const guidesUrl = `${SITE_URL}guides/`
@@ -141,8 +155,13 @@ const guidesUrl = `${SITE_URL}guides/`
 for (const p of pages) {
   const isGuide = !LEGAL.has(p.slug)
   let body = markdown(p.body)
-  if (isGuide)
+  if (isGuide) {
+    body = `<nav class="crumbs" aria-label="Breadcrumb"><a href="../">Home</a><span aria-hidden="true">›</span><a href="../guides/">Guides</a></nav>\n${body.replace(
+      '</h1>',
+      `</h1>\n<p class="meta">Updated <time datetime="${p.dates.modified}">${longDate(p.dates.modified)}</time> · Not tax advice</p>`,
+    )}`
     body += `\n<aside class="cta-card"><p><strong>Fix this in your own history.</strong> Paste your public address and preview the cleaned rows free. Everything runs in your browser.</p><p><a class="button" href="../#analyse">Analyse your wallet free</a> <a href="../#sample">or try a sample wallet</a></p></aside>\n<h2>Related guides</h2>\n${guideList(related(p, guides))}\n<p><a href="../guides/">All guides</a></p>`
+  }
   const jsonLd = isGuide && {
     '@context': 'https://schema.org',
     '@graph': [
@@ -152,6 +171,8 @@ for (const p of pages) {
         description: p.meta.description,
         url: p.url,
         image: `${SITE_URL}og.png`,
+        datePublished: p.dates.published,
+        dateModified: p.dates.modified,
         publisher: { '@type': 'Organization', name: APP_NAME, url: SITE_URL },
       },
       breadcrumb([[APP_NAME, SITE_URL], ['Guides', guidesUrl], [p.heading, p.url]]),
@@ -199,10 +220,11 @@ writeFileSync(
     .replace('<link rel="canonical"', '<meta name="robots" content="noindex" />\n<link rel="canonical"'),
 )
 
-const urls = [SITE_URL, guidesUrl, ...pages.map((p) => p.url)]
+const newest = pages.map((p) => p.dates.modified).sort().at(-1)
+const urls = [[SITE_URL], [guidesUrl, newest], ...pages.map((p) => [p.url, p.dates.modified])]
 writeFileSync(
   join(dist, 'sitemap.xml'),
-  `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `  <url><loc>${u}</loc></url>`).join('\n')}\n</urlset>\n`,
+  `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(([u, d]) => `  <url><loc>${u}</loc>${d ? `<lastmod>${d}</lastmod>` : ''}</url>`).join('\n')}\n</urlset>\n`,
 )
 writeFileSync(join(dist, 'robots.txt'), `User-agent: *\nAllow: /\nSitemap: ${SITE_URL}sitemap.xml\n`)
 console.log(`Rendered ${pages.length} pages and the guides index`)

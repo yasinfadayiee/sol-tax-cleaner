@@ -32,7 +32,7 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
 - Export (`src/export`): Koinly CSV + Markdown report. License (`src/license`): Solana Pay URL + memo `STC-YYYY`.
 - UI (`src/ui`, `src/App.tsx`): landing page, analyser, results preview, token editor, payment with QR.
 - SEO/legal pages: `content/*.md` → `scripts/build-pages.mjs` (also sitemap/robots).
-- Tests: 49 unit tests pass (`npm test`). Browser smoke test with mocked RPC passed (desktop/mobile, light/dark).
+- Tests: 81 unit tests pass (`npm test`). Browser smoke test with mocked RPC passed (desktop/mobile, light/dark).
 - CI: `.github/workflows/deploy.yml` (lint+test+build, deploy to Pages) and `mainnet.yml`
   (`tests/mainnet.test.ts`: full history of 3 real Jupiter users, rows must reconcile to on-chain balances).
 - GitHub Pages is enabled: the Deploy workflow deployed successfully on 2026-10-22 (run 39779981052).
@@ -71,6 +71,12 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
   Now: on refusal the analyser shows an "add a free RPC URL" step + guide `content/free-solana-rpc-url.md`.
   `SITE_RPC_URL` (build var `VITE_RPC_URL` from repo variable `RPC_URL`) embeds a site key; visitor URL wins.
   Browser tests from this sandbox go through a proxy that also 403s; check RPC from curl with an Origin header.
+- Results + landing polish (2026-10-23, #21 #22 #23): preview has type filter chips with counts and pages through
+  every row ("Show 100 more"), coloured type badges, rows become cards on phones; the report downloads as a
+  printable standalone `report.html` (`src/export/reportHtml.ts` converts the Markdown report); new landing section
+  "What it handles" (`#coverage`, `COVERAGE` in `src/App.tsx`) linking each item to its guide.
+  Guides show a visible breadcrumb and "Updated <date>" (from git history of the content file; Deploy checks out
+  with fetch-depth 0), with datePublished/dateModified in JSON-LD and lastmod in sitemap.xml.
 - Launch kit with ready-to-post texts (Reddit, Koinly board, X): `docs/launch-posts.md`. Yasin posts them himself.
 - Bugs found by the mainnet check and fixed: transaction version 1 support (auto-upgrades
   `maxSupportedTransactionVersion`); mistyped Token-2022 program ID.
@@ -85,11 +91,16 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
    - Done 2026-10-23: Google Search Console verified (HTML tag in index.html) and sitemap.xml submitted.
    - Posting the Reddit / Koinly board texts in `docs/launch-posts.md`.
 3. Next product ideas, in order: privacy-friendly analytics
-   (needs Yasin's signup), a real staker wallet in the mainnet check.
+   (needs Yasin's signup), a real staker wallet in the mainnet check (candidates found 2026-10-23 from recent Stake
+   program txs: FtSeRqHLd8PrDTMoaic4c9iQKBYb83s6YJewBxXo5wz1, 5z1vv82XM9mNqrQhttKnEf7ajGBN9s9NPGs4ajcxbA3J; run the
+   Mainnet check manually with them as `wallets`).
 4. After launch: distribution (Reddit r/CryptoTax, r/solana, Koinly community; SEO guides), check real exports in
    Koinly.
 
 ## Environment notes for Claude
+- 2026-10-23: the sandbox reaches `api.mainnet-beta.solana.com` directly with curl/node (no Origin header), but it
+  is slow; long real-data runs still go through the Mainnet check workflow. Don't `pkill -f` a pattern that also
+  appears in your own command line (it kills the shell).
 - Until 2026-10-22 the sandbox could not reach Solana RPC (proxy 403), so real-data testing runs in GitHub Actions.
   Yasin then set a cloud environment with wider network access; new threads should check whether RPC works directly.
   Read CI logs with the GitHub MCP `get_job_logs` (gh log download is blocked); `gh run list/watch` works.
