@@ -1059,3 +1059,20 @@ button.chip.on {
 .price-card .usd {
   color: var(--text);
 }
+
+.rpc-help {
+  margin-top: 20px;
+  padding: 18px 20px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface));
+}
+
+.rpc-help p {
+  margin: 0 0 10px;
+}
+
+.rpc-help ol {
+  margin: 0 0 12px;
+  padding-left: 20px;
+}

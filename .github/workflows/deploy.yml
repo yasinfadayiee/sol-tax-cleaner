@@ -28,6 +28,9 @@ jobs:
       - run: npm run lint
       - run: npm test
       - run: npm run build
+        env:
+          # Keyed RPC URL for visitors without their own (repo Settings > Variables > RPC_URL); restrict the key to the site's domain.
+          VITE_RPC_URL: ${{ vars.RPC_URL }}
       - uses: actions/upload-pages-artifact@v3
         if: github.ref == 'refs/heads/main'
         with:
