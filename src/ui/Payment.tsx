@@ -1,4 +1,3 @@
-import QRCode from 'qrcode'
 import { useEffect, useRef, useState } from 'react'
 import { APP_NAME, MAX_WALLETS, MEMO_PREFIX, MERCHANT_ADDRESS, PRICE_SOL, PRICE_USDC, UNLOCK_DAYS } from '../config'
 import { usdLabel, useSolPrice } from './useSolPrice'
@@ -84,7 +83,10 @@ export function Payment({ wallets, rpc, onUnlocked }: { wallets: string[]; rpc: 
 
   useEffect(() => {
     if (!url) return
-    QRCode.toDataURL(url, { margin: 1, width: 220 }).then(setQr, () => setQr(null))
+    // Loaded on demand: only people who reach the payment step need the QR encoder.
+    import('qrcode')
+      .then((m) => m.default.toDataURL(url, { margin: 1, width: 220 }))
+      .then(setQr, () => setQr(null))
   }, [url])
 
   const waitForPayment = async () => {
