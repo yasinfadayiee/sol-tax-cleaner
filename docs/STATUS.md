@@ -68,7 +68,7 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
 ## In progress / next
 1. Watch the scheduled "Mainnet check"; fix any mismatches it reports.
 2. **Waiting on Yasin:**
-   - Google Search Console: verification tag added to index.html (2026-10-23); Yasin clicks Verify, then submits `sitemap.xml`.
+   - Done 2026-10-23: Google Search Console verified (HTML tag in index.html) and sitemap.xml submitted.
    - Posting the Reddit / Koinly board texts in `docs/launch-posts.md`.
 3. Next product ideas, in order: privacy-friendly analytics
    (needs Yasin's signup), a real staker wallet in the mainnet check.
