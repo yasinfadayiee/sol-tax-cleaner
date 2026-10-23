@@ -4,10 +4,11 @@
 // for every asset, received − sent − fees must equal what the wallet and its token accounts hold now.
 import { writeFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { collectDecimals, ownedAccounts, processHistory, SOL, withExtraRows, type Row, type RpcTransaction } from '../src/engine'
+import { collectDecimals, ownedAccounts, processHistory, reconcile, withExtraRows, type RpcTransaction } from '../src/engine'
 import { KOINLY_COLUMNS, toKoinlyCsv } from '../src/export/koinly'
 import { DEFAULT_RPC, getSignaturesForAddress, getTransaction, RpcClient } from '../src/rpc/client'
 import { fetchHistory } from '../src/rpc/history'
+import { currentHoldings } from '../src/rpc/holdings'
 import { fetchStakingRewards } from '../src/rpc/staking'
 import { resolveTokens } from '../src/rpc/tokens'
 
@@ -16,6 +17,8 @@ const URL = process.env.RPC_URL || DEFAULT_RPC
 const JUPITER = 'JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4'
 const MAX_SIGS = Number(process.env.MAX_SIGS ?? 250)
 const PICK = Number(process.env.PICK ?? 3)
+// A real native staker whose validator also pays MEV into the stake account; always checked on scheduled runs.
+const STAKER = 'FtSeRqHLd8PrDTMoaic4c9iQKBYb83s6YJewBxXo5wz1'
 
 const txStore = new Map<string, unknown>()
 const cache = {
@@ -47,47 +50,7 @@ async function pickWallets(): Promise<string[]> {
       if (history.length >= 20 && history.length <= MAX_SIGS) picked.push(payer)
     }
   }
-  return picked
-}
-
-interface ParsedTokenAccount {
-  lamports: number
-  data: { parsed?: { info?: { mint?: string; tokenAmount?: { amount: string } } } }
-}
-
-/** What the wallet and every token account it ever owned hold right now. */
-async function currentHoldings(wallet: string, tokenAccounts: string[]) {
-  const held = new Map<string, bigint>()
-  const add = (asset: string, v: bigint) => held.set(asset, (held.get(asset) ?? 0n) + v)
-  const bal = await rpc.call<{ value: number }>('getBalance', [wallet, { commitment: 'confirmed' }])
-  add(SOL, BigInt(bal.value))
-  for (let i = 0; i < tokenAccounts.length; i += 100) {
-    const batch = tokenAccounts.slice(i, i + 100)
-    const res = await rpc.call<{ value: Array<ParsedTokenAccount | null> }>('getMultipleAccounts', [
-      batch,
-      { encoding: 'jsonParsed', commitment: 'confirmed' },
-    ])
-    for (const acct of res.value) {
-      if (!acct) continue
-      add(SOL, BigInt(acct.lamports))
-      const info = acct.data.parsed?.info
-      if (info?.mint && info.tokenAmount && info.mint !== 'So11111111111111111111111111111111111111112') {
-        add(info.mint, BigInt(info.tokenAmount.amount))
-      }
-    }
-  }
-  return held
-}
-
-function netFromRows(rows: Row[]) {
-  const net = new Map<string, bigint>()
-  const add = (asset: string, v: bigint) => net.set(asset, (net.get(asset) ?? 0n) + v)
-  for (const r of rows) {
-    if (r.received) add(r.received.mint, r.received.amount)
-    if (r.sent) add(r.sent.mint, -r.sent.amount)
-    if (r.fee) add(SOL, -r.fee)
-  }
-  return net
+  return [...picked, STAKER]
 }
 
 describe.skipIf(!RUN)('mainnet reconciliation', () => {
@@ -113,20 +76,18 @@ describe.skipIf(!RUN)('mainnet reconciliation', () => {
         const rewards = await fetchStakingRewards(rpc, history.txs, base.estate)
         if (rewards.failedEpochs.length) console.log(`${wallet}: reward epochs failed: ${rewards.failedEpochs.join(',')}`)
         processed = withExtraRows(base, rewards.rows)
-        held = await currentHoldings(wallet, ownedAccounts(processed.estate))
+        held = await currentHoldings(rpc, [wallet], ownedAccounts(processed.estate))
         const after = (await getSignaturesForAddress(rpc, wallet, { limit: 1 }))[0]?.signature
         quiet = before === after
         if (!quiet) console.log(`${wallet}: new activity during check, retrying`)
       }
       const { rows, stats, estate } = processed
-      const net = netFromRows(rows)
-
-      const mismatches: Array<{ asset: string; rows: string; onChain: string; diff: string }> = []
-      for (const asset of new Set([...net.keys(), ...held.keys()])) {
-        const a = net.get(asset) ?? 0n
-        const b = held.get(asset) ?? 0n
-        if (a !== b) mismatches.push({ asset, rows: `${a}`, onChain: `${b}`, diff: `${a - b}` })
-      }
+      const mismatches = reconcile(rows, held).mismatches.map((m) => ({
+        asset: m.asset,
+        rows: `${m.rows}`,
+        onChain: `${m.onChain}`,
+        diff: `${m.rows - m.onChain}`,
+      }))
 
       const tokens = await resolveTokens(rpc, collectDecimals(history.txs))
       const sources: Record<string, number> = {}
