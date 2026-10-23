@@ -1,6 +1,7 @@
 ---
 title: Solscan CSV export for taxes — why it doesn't import cleanly
 description: A Solscan CSV export lists raw transfers, not trades, so Koinly or CoinTracker turn one Solana swap into several rows. Here is why, and a cleaner export.
+category: tools
 ---
 # Solscan CSV export for taxes: why it doesn't import cleanly
 

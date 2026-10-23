@@ -44,10 +44,13 @@ describe('CoinLedger CSV', () => {
     expect(csv[0]).toBe(COINLEDGER_COLUMNS.join(','))
   })
 
-  it('leaves Type blank for trades and sets Deposit / Withdrawal otherwise', () => {
+  it('leaves Type blank for trades and sets Deposit / Withdrawal / Staking otherwise', () => {
     const types = csv.slice(1).map((l) => l.split(',')[8])
+    const rewards = rows.filter((r) => r.tag === 'staking').length
+    expect(rewards).toBeGreaterThan(0)
     expect(types.filter((t) => t === '')).toHaveLength(stats.byKind.swap)
-    expect(types.filter((t) => t === 'Deposit')).toHaveLength(stats.byKind.deposit)
+    expect(types.filter((t) => t === 'Staking')).toHaveLength(rewards)
+    expect(types.filter((t) => t === 'Deposit')).toHaveLength(stats.byKind.deposit - rewards)
     expect(types.filter((t) => t === 'Withdrawal')).toHaveLength(stats.byKind.withdrawal + stats.byKind.fee)
   })
 
@@ -83,6 +86,16 @@ describe('report', () => {
     expect(md).toContain('## How to import into CoinTracker')
     expect(md).toContain('cointracker.csv')
     expect(md).not.toContain('Koinly')
+  })
+
+  it('states the period covered, counts staking rewards apart and totals each asset', () => {
+    const md = buildReport({ wallets: ['w'], stats, rows, tokens: SAMPLE_TOKENS, missing: [], generatedAt: new Date(0) })
+    expect(md).toContain('Period covered: 2025-01-08 to 2025-04-08')
+    expect(md).toContain('| Deposits | 1 |')
+    expect(md).toContain('| Staking rewards (income) | 2 |')
+    expect(md).toContain('## Assets in this export')
+    // CATZ: bought 3,512,000 and sold all of it.
+    expect(md).toContain('| CATZ | 3512000 | 3512000 |  | 2 |')
   })
 
   it('every format has a distinct file name', () => {

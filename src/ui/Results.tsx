@@ -28,6 +28,7 @@ export function Results({ analysis, onTokensChange }: { analysis: Analysis; onTo
     }
   }
 
+  const rewards = rows.filter((r) => r.tag === 'staking').length
   const csv = () => format.toCsv(rows, tokens)
   const report = () =>
     buildReport({ wallets: analysis.wallets, stats, rows, tokens, missing: analysis.missing, generatedAt: analysis.finishedAt, format: formatId, stakingIncomplete: analysis.stakingIncomplete, balanceCheck: analysis.balanceCheck })
@@ -36,7 +37,7 @@ export function Results({ analysis, onTokensChange }: { analysis: Analysis; onTo
     <div className="results">
       {analysis.sample && (
         <p className="sample-note">
-          <strong>Sample wallet.</strong> These are made-up transactions shaped like real Jupiter, pump.fun, DCA and limit-order
+          <strong>Sample wallet.</strong> These are made-up transactions shaped like real Jupiter, pump.fun, DCA, limit-order and staking
           activity, run through the same engine as your real history. Paste your own address above to analyse it.
         </p>
       )}
@@ -44,7 +45,8 @@ export function Results({ analysis, onTokensChange }: { analysis: Analysis; onTo
       <div className="stats">
         <Stat value={stats.transactions} label="transactions read" />
         <Stat value={stats.byKind.swap} label="swaps, one row each" />
-        <Stat value={stats.byKind.deposit + stats.byKind.withdrawal} label="deposits and withdrawals" />
+        <Stat value={stats.byKind.deposit + stats.byKind.withdrawal - rewards} label="deposits and withdrawals" />
+        {rewards > 0 && <Stat value={rewards} label="staking rewards" />}
         <Stat value={stats.byKind.fee} label="fee-only rows" />
         <Stat value={stats.needsReview} label="to check by hand" />
       </div>

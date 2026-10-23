@@ -1,7 +1,8 @@
-// A made-up wallet whose transactions are shaped like real Jupiter, pump.fun and DCA activity. The demo runs these
+// A made-up wallet whose transactions are shaped like real Jupiter, pump.fun, DCA and staking activity. The demo runs these
 // through the real engine, so what visitors see is exactly what the export does, without touching the network.
-import { processHistory, type Result } from '../engine'
-import { SOL, type RpcTransaction, type TokenBalance } from '../engine/types'
+import { processHistory, withExtraRows, type Result } from '../engine'
+import { STAKE_PROGRAM } from '../engine/deltas'
+import { SOL, type ParsedInstruction, type RpcTransaction, type Row, type TokenBalance } from '../engine/types'
 import type { TokenInfo } from '../rpc/tokens'
 
 export const SAMPLE_WALLET = 'SampLeWaLLet8xQ3vKz5RtYp2mNcHdJ7fGbEaU4sTw9'
@@ -15,6 +16,8 @@ const SOL1 = 1_000_000_000
 const ORDER_RENT = 2_540_000
 const DCA_PROGRAM = 'DCA265Vj8a9CEuX1eb1LWRnDT7uK6q1xMipnNyatn23M'
 const LIMIT_PROGRAM = 'j1o2qRpjcyUwEvwtcfhEQefh773ZgjxcVRry7LDqg5X'
+const STAKE_ACCOUNT = 'SampLeStake4hQ2vNz8RtYp5mKcHdJ3fGbEaU7sTw1'
+const STAKE_RENT = 2_282_880
 
 export const SAMPLE_TOKENS = new Map<string, TokenInfo>([
   [SOL, { symbol: 'SOL', name: 'Solana', decimals: 9, source: 'builtin' }],
@@ -38,7 +41,15 @@ interface Tok {
 }
 
 let n = 0
-function tx(day: string, accounts: Acct[], pre: Tok[] = [], post: Tok[] = [], fee = 5000, err: unknown = null): RpcTransaction {
+function tx(
+  day: string,
+  accounts: Acct[],
+  pre: Tok[] = [],
+  post: Tok[] = [],
+  fee = 5000,
+  err: unknown = null,
+  instructions?: ParsedInstruction[],
+): RpcTransaction {
   const keys = accounts.map((a) => a.key)
   const bal = (toks: Tok[]): TokenBalance[] =>
     toks.map((t) => ({
@@ -62,7 +73,7 @@ function tx(day: string, accounts: Acct[], pre: Tok[] = [], post: Tok[] = [], fe
     },
     transaction: {
       signatures: [`sample${String(n).padStart(2, '0')}${'x'.repeat(78)}`],
-      message: { accountKeys: keys.map((pubkey, i) => ({ pubkey, signer: i === 0, writable: true, source: 'transaction' })) },
+      message: { accountKeys: keys.map((pubkey, i) => ({ pubkey, signer: i === 0, writable: true, source: 'transaction' })), instructions },
     },
   }
 }
@@ -190,11 +201,42 @@ function sampleTxs(): RpcTransaction[] {
         { account: 'UsdcAta', mint: USDC, owner: W, amount: '213970000', decimals: 6 },
       ],
     ),
+    // Stake 2 SOL with a validator: a new stake account the wallet controls, so only the fee is a cost.
+    tx(
+      '2025-03-24T16:05:12Z',
+      [move(-2 * SOL1 - STAKE_RENT - 5000), { key: STAKE_ACCOUNT, pre: 0, post: 2 * SOL1 + STAKE_RENT }],
+      [],
+      [],
+      5000,
+      null,
+      [
+        {
+          program: 'system',
+          programId: '11111111111111111111111111111111',
+          parsed: { type: 'createAccount', info: { source: W, newAccount: STAKE_ACCOUNT, owner: STAKE_PROGRAM, lamports: 2 * SOL1 + STAKE_RENT } },
+        },
+      ],
+    ),
     // Send 1 SOL back to the exchange.
     tx('2025-04-02T10:30:00Z', [move(-SOL1 - 5000), { key: 'ExchangeDeposit', pre: 2 * SOL1, post: 3 * SOL1 }]),
   ]
 }
 
+// Epoch rewards arrive without a transaction; the live analyser reads them with getInflationReward.
+const sampleRewards = (): Row[] =>
+  [
+    ['2025-04-06T11:20:00Z', 755, 1_384_210],
+    ['2025-04-08T23:41:00Z', 756, 1_391_870],
+  ].map(([day, epoch, lamports]) => ({
+    signature: `staking-reward-${STAKE_ACCOUNT}-epoch-${epoch}`,
+    blockTime: Math.floor(Date.parse(day as string) / 1000),
+    kind: 'deposit',
+    received: { mint: SOL, amount: BigInt(lamports) },
+    tag: 'staking',
+    needsReview: false,
+    note: `Staking reward, epoch ${epoch}, stake account ${STAKE_ACCOUNT}`,
+  }))
+
 export function sampleResult(): Result {
-  return processHistory(sampleTxs(), [W])
+  return withExtraRows(processHistory(sampleTxs(), [W]), sampleRewards())
 }

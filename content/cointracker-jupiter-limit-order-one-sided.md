@@ -1,6 +1,7 @@
 ---
 title: Jupiter limit orders show as one-sided receives — fix for tax tools
 description: Jupiter limit orders on Solana can import into CoinTracker or Koinly as a receive with no matching sale. Here is how to export them as proper swaps.
+category: trades
 ---
 # Jupiter limit orders imported as one-sided receives
 

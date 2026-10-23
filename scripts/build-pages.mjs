@@ -11,6 +11,12 @@ const contentDir = join(root, 'content')
 const dist = join(root, 'dist')
 // Legal pages; every other content file is a guide.
 const LEGAL = new Set(['terms', 'privacy'])
+// Sections of the guides index, in order; each guide names one in its `category` front matter.
+const CATEGORIES = {
+  tools: 'Tax tools and exports',
+  trades: 'Swaps, DCA and DeFi trades',
+  accounts: 'Rent, staking and tokens',
+}
 
 // First and last commit dates of a content file (YYYY-MM-DD); today when git history isn't available.
 function gitDates(file) {
@@ -108,12 +114,17 @@ function page({ title, description, url, body, jsonLd, cta = true }) {
 <link rel="stylesheet" href="../pages.css" />
 ${jsonLd ? `<script type="application/ld+json">${JSON.stringify(jsonLd).replace(/</g, '\\u003c')}</script>\n` : ''}</head>
 <body>
-<header class="site-header"><div class="wrap"><a class="brand" href="../"><img src="../favicon.svg" width="28" height="28" alt="" />${APP_NAME}</a><nav><a href="../guides/">Guides</a><a class="nav-cta" href="../#analyse">Analyse free</a></nav></div></header>
+<header class="site-header"><div class="wrap"><a class="brand" href="../"><img src="../favicon.svg" width="28" height="28" alt="" />${APP_NAME}</a><nav aria-label="Main"><a class="wide" href="../#how">How it works</a><a class="wide" href="../#pricing">Pricing</a><a href="../guides/">Guides</a><a class="nav-cta" href="../#analyse">Analyse free</a></nav></div></header>
 <main class="wrap prose">
 ${body}
 ${cta ? '<p class="cta"><a class="button" href="../#analyse">Analyse your wallet free</a></p>' : ''}
 </main>
-<footer class="site-footer"><div class="wrap"><p>${APP_NAME}. Not tax advice. <a href="../guides/">Guides</a> · <a href="../terms/">Terms</a> · <a href="../privacy/">Privacy</a></p></div></footer>
+<footer class="site-footer"><div class="wrap footer-grid">
+<div><a class="brand" href="../"><img src="../favicon.svg" width="22" height="22" alt="" />${APP_NAME}</a><p>Clean Solana history for crypto tax tools. Runs in your browser. We don't calculate tax; this is not tax advice.</p></div>
+<nav aria-label="Product"><h3>Product</h3><a href="../#analyse">Analyse a wallet</a><a href="../#sample">Try the sample wallet</a><a href="../#pricing">Pricing</a><a href="../#faq">FAQ</a></nav>
+<nav aria-label="Guides"><h3>Guides</h3>${footerGuides}<a href="../guides/">All guides</a></nav>
+<nav aria-label="Legal"><h3>Legal</h3><a href="../terms/">Terms</a><a href="../privacy/">Privacy</a></nav>
+</div><div class="wrap footer-bottom"><p>© ${YEAR} ${APP_NAME}. Not affiliated with Koinly, CoinTracker, CoinLedger or Awaken.</p></div></footer>
 </body>
 </html>
 `
@@ -150,7 +161,21 @@ const pages = readdirSync(contentDir)
     return { slug, meta, body, heading, url: `${SITE_URL}${slug}/`, dates: gitDates(join(contentDir, file)) }
   })
 const guides = pages.filter((p) => !LEGAL.has(p.slug))
+for (const g of guides) if (!CATEGORIES[g.meta.category]) throw new Error(`${g.slug}.md: category must be one of ${Object.keys(CATEGORIES).join(', ')}`)
 const guidesUrl = `${SITE_URL}guides/`
+const YEAR = new Date().getUTCFullYear()
+// The same four guides the landing page footer lists.
+const footerGuides = ['koinly-jupiter-dca-missing', 'koinly-solana-rent-not-merged', 'cointracker-jupiter-limit-order-one-sided', 'solana-swap-split-into-multiple-transactions']
+  .map((slug) => guides.find((g) => g.slug === slug))
+  .map((g) => `<a href="../${g.slug}/">${inline(g.heading)}</a>`)
+  .join('')
+
+// pages.css uses the Inter font the app bundles; point it at the hashed file Vite emitted.
+const inter = readdirSync(join(dist, 'assets')).find((f) => /^inter-latin-wght-normal-.*\.woff2$/.test(f))
+if (inter) {
+  const css = join(dist, 'pages.css')
+  writeFileSync(css, `@font-face{font-family:'Inter Variable';font-style:normal;font-display:swap;font-weight:100 900;src:url(assets/${inter}) format('woff2')}\n${readFileSync(css, 'utf8')}`)
+}
 
 for (const p of pages) {
   const isGuide = !LEGAL.has(p.slug)
@@ -189,7 +214,11 @@ writeFileSync(
     title: `Solana tax import guides — ${APP_NAME}`,
     description: 'Fixes for the most common problems when importing Solana wallets into Koinly, CoinTracker, CoinLedger and Awaken: rent, split swaps, DCA, staking and more.',
     url: guidesUrl,
-    body: `<h1>Solana tax import guides</h1>\n<p>Short fixes for the problems people hit when they import a Solana wallet into crypto tax software.</p>\n${guideList(guides)}`,
+    body: `<nav class="crumbs" aria-label="Breadcrumb"><a href="../">Home</a></nav>\n<h1>Solana tax import guides</h1>\n<p class="lede">Short fixes for the problems people hit when they import a Solana wallet into crypto tax software. Each one explains why it happens and what to do about it.</p>\n${Object.entries(
+      CATEGORIES,
+    )
+      .map(([key, name]) => `<h2>${name}</h2>\n${guideList(guides.filter((g) => g.meta.category === key))}`)
+      .join('\n')}`,
     jsonLd: {
       '@context': 'https://schema.org',
       '@graph': [
