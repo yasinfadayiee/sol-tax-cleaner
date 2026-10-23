@@ -3,7 +3,7 @@
 This file is the hand-off between chat sessions. Read it (plus `AGENTS.md` and `docs/SPEC.md` only if the task
 needs them) instead of re-reading the whole codebase. **Update it at the end of every session.**
 
-Last updated: 2026-10-22
+Last updated: 2026-10-23
 
 ## The product
 SolTax Cleaner: a static, browser-only site. A Solana user pastes wallet address(es); the browser reads their full
@@ -58,6 +58,9 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
   session and hidden if it can't load (#9).
 - Mainnet check green after staking + escrow support (run 39797075653).
 - 13 guide pages in `content/` (Awaken and staking rewards added in #10) (added CoinTracker, CoinLedger, pump.fun, Phantom, WSOL on 2026-10-22).
+- SEO (2026-10-23): `/guides/` index page, "Related guides" block on every guide (closest by slug words), TechArticle +
+  BreadcrumbList JSON-LD, Guides link in the guide header. 3 more guides: Solscan CSV export, Raydium/Orca/Meteora
+  swaps (LP adds flagged for review), spam tokens and airdrops. 14 guides total.
 - Launch kit with ready-to-post texts (Reddit, Koinly board, X): `docs/launch-posts.md`. Yasin posts them himself.
 - Bugs found by the mainnet check and fixed: transaction version 1 support (auto-upgrades
   `maxSupportedTransactionVersion`); mistyped Token-2022 program ID.
@@ -65,7 +68,8 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
 ## In progress / next
 1. Watch the scheduled "Mainnet check"; fix any mismatches it reports.
 2. **Waiting on Yasin:**
-   - Optional: Google Search Console verification tag (see `docs/launch-posts.md`).
+   - Google Search Console verification tag (see `docs/launch-posts.md`); then submit `sitemap.xml` there.
+   - Posting the Reddit / Koinly board texts in `docs/launch-posts.md`.
 3. Next product ideas, in order: privacy-friendly analytics
    (needs Yasin's signup), a real staker wallet in the mainnet check.
 4. After launch: distribution (Reddit r/CryptoTax, r/solana, Koinly community; SEO guides), check real exports in
