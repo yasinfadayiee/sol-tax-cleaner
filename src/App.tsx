@@ -52,6 +52,19 @@ const STEPS: Array<{ icon: IconName; title: string; text: string }> = [
   },
 ]
 
+const COVERAGE: Array<{ title: string; text: string; guide?: string; review?: boolean }> = [
+  { title: 'Jupiter swaps', text: 'Every route, one row with what left and what arrived.', guide: 'solana-swap-split-into-multiple-transactions' },
+  { title: 'Jupiter DCA and limit orders', text: 'Each keeper fill becomes its own swap, even when it only touched the order account.', guide: 'koinly-jupiter-dca-missing' },
+  { title: 'pump.fun trades', text: 'Bonding-curve buys and sells as plain swaps.', guide: 'pump-fun-trades-tax-software' },
+  { title: 'Raydium, Orca, Meteora', text: 'Pool swaps as one row each.', guide: 'raydium-orca-meteora-swaps-tax-software' },
+  { title: 'Native staking rewards', text: 'One income row per stake account per epoch.', guide: 'solana-staking-rewards-tax-software' },
+  { title: 'Rent and wrapped SOL', text: 'Token-account rent and WSOL wrapping cancel out instead of looking like trades.', guide: 'wrapped-sol-wsol-tax-software' },
+  { title: 'Your own wallets', text: `Transfers between up to ${MAX_WALLETS} of your addresses are netted out.` },
+  { title: 'Failed transactions', text: 'Kept as a fee-only row, because the fee was still paid.' },
+  { title: 'Spam tokens and airdrops', text: 'Plain deposits, with a note when a stranger paid the rent.', guide: 'solana-spam-tokens-airdrops-tax-software' },
+  { title: 'Liquidity adds and removals', text: 'Moves of three or more assets are exported per asset and listed for you to check.', review: true },
+]
+
 const INCLUDED = [
   `Full CSV export for up to ${MAX_WALLETS} wallets`,
   `Unlimited re-exports for ${UNLOCK_DAYS} days`,
@@ -227,6 +240,24 @@ export default function App() {
               </li>
             ))}
           </ol>
+        </section>
+
+        <section id="coverage" aria-labelledby="coverage-title">
+          <p className="eyebrow">What it handles</p>
+          <h2 id="coverage-title">Built for how Solana actually works</h2>
+          <ul className="coverage">
+            {COVERAGE.map((c) => (
+              <li key={c.title} className={c.review ? 'review' : undefined}>
+                <span className="coverage-icon" aria-hidden="true">
+                  <Icon name={c.review ? 'search' : 'check'} size={16} />
+                </span>
+                <div>
+                  <h3>{c.guide ? <a href={`${base}${c.guide}/`}>{c.title}</a> : c.title}</h3>
+                  <p className="muted">{c.text}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
         </section>
 
         <section id="pricing" aria-labelledby="pricing-title">
