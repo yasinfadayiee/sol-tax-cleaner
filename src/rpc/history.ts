@@ -1,4 +1,4 @@
-import { discoverEscrowAccounts, discoverTokenAccounts } from '../engine/deltas'
+import { discoverEscrowAccounts, discoverStakeAccounts, discoverTokenAccounts } from '../engine/deltas'
 import { newEstate, type Estate, type RpcTransaction } from '../engine/types'
 import type { TxCache } from './cache'
 import {
@@ -43,8 +43,8 @@ export function isValidAddress(a: string): boolean {
 }
 
 /**
- * Collects every transaction that touched the user's wallets or any token account they own
- * (now or in the past). Wallet signatures alone miss transfers and DCA/limit-order fills
+ * Collects every transaction that touched the user's wallets, any token account they own
+ * (now or in the past), their stake accounts and their DCA / limit-order accounts. Wallet signatures alone miss transfers and DCA/limit-order fills
  * that touch only a token account, so token accounts are discovered and scanned too, until
  * no new ones turn up.
  */
@@ -112,8 +112,9 @@ export async function fetchHistory(rpc: RpcClient, wallets: string[], opts: Hist
       await opts.cache?.put(signature, tx)
     }
     txs.set(signature, tx)
-    // Escrow accounts of DCA / limit orders are filled by keepers in transactions the wallet never signs.
-    for (const acct of [...discoverTokenAccounts(tx, estate), ...discoverEscrowAccounts(tx, estate)]) queue.push(acct)
+    // Escrow accounts of DCA / limit orders are filled by keepers, and stake accounts receive MEV tips and validator
+    // payouts, in transactions the wallet never signs.
+    for (const acct of [...discoverTokenAccounts(tx, estate), ...discoverStakeAccounts(tx, estate), ...discoverEscrowAccounts(tx, estate)]) queue.push(acct)
   }
 
   while (queue.length || pending.length) {

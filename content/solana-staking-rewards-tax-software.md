@@ -15,6 +15,7 @@ Two other things often go wrong:
 
 - It finds the stake accounts your wallet controls and treats them as part of your own funds, so staking and withdrawing are fee-only.
 - It reads the reward for every epoch from the network and adds one row per epoch, dated when the reward was paid, as staking income.
+- Many validators also pay MEV tips or share rewards by sending SOL straight into your stake account. Those payouts are real transactions, but your wallet isn't in them. SolTax Cleaner reads your stake accounts' own history, so each payout is exported as staking income too.
 - If the network can't return some epochs, the results and the report say so, so you know the list is incomplete.
 
 ## Steps

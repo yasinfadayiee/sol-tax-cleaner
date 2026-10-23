@@ -128,6 +128,8 @@ export interface Deltas {
   failed: boolean
   /** True when SOL arrived only as rent for token accounts that someone else opened for the user. */
   rentFromOthers: boolean
+  /** True when someone else paid SOL straight into the user's stake accounts (MEV tips, validator reward sharing). */
+  stakePayout: boolean
 }
 
 /**
@@ -166,7 +168,14 @@ export function computeDeltas(tx: RpcTransaction, estate: Estate): Deltas {
   for (const [mint, v] of tokens) if (v === 0n) tokens.delete(mint)
 
   let rentFromOthers = false
+  let stakePayout = false
   if (!feePaid && sol > 0n) {
+    let toStake = 0n
+    for (const i of inEstate) {
+      if (estate.stakeAccounts.has(keys[i] ?? '')) toStake += BigInt(meta.postBalances[i] ?? 0) - BigInt(meta.preBalances[i] ?? 0)
+    }
+    stakePayout = toStake === sol && tokens.size === 0
+
     let createdRent = 0n
     for (const i of inEstate) {
       if (estate.wallets.has(keys[i] ?? '')) continue
@@ -177,7 +186,7 @@ export function computeDeltas(tx: RpcTransaction, estate: Estate): Deltas {
     rentFromOthers = createdRent === sol
   }
 
-  return { solLamports: sol, tokens, fee, failed: meta.err != null, rentFromOthers }
+  return { solLamports: sol, tokens, fee, failed: meta.err != null, rentFromOthers, stakePayout }
 }
 
 /** Decimals for every mint seen in the transactions (SOL included). */

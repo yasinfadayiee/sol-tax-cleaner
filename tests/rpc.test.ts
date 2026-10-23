@@ -189,6 +189,35 @@ describe('fetchHistory', () => {
     expect(seen.at(-1)).toBe('done')
   })
 
+  it('scans stake accounts too, so payouts into them are found', async () => {
+    const STAKE = 'StakeAcct1111111111111111111111111111111111'
+    const STAKE_PROGRAM = 'Stake11111111111111111111111111111111111111'
+    const create = tx({
+      sig: 'stake',
+      blockTime: 100,
+      accounts: [
+        { key: WALLET, pre: 10e9, post: 5e9 - 5000 },
+        { key: STAKE, pre: 0, post: 5e9 },
+      ],
+    })
+    create.transaction.message.instructions = [
+      { program: 'stake', programId: STAKE_PROGRAM, parsed: { type: 'initialize', info: { stakeAccount: STAKE, authorized: { staker: WALLET, withdrawer: WALLET } } } },
+    ]
+    // A validator payout credits the stake account; the wallet is not in this transaction.
+    const payout = tx({
+      sig: 'payout',
+      blockTime: 200,
+      accounts: [
+        { key: 'Sender111111111111111111111111111111111111', pre: 1e9, post: 1e9 - 1000 - 5000 },
+        { key: STAKE, pre: 5e9, post: 5e9 + 1000 },
+      ],
+    })
+    const { rpc } = fakeNode([create, payout], [])
+    const h = await fetchHistory(rpc, [WALLET])
+    expect([...h.estate.stakeAccounts]).toEqual([STAKE])
+    expect(h.txs.map((t) => t.transaction.signatures[0]).sort()).toEqual(['payout', 'stake'])
+  })
+
   it('serves repeat runs from the cache', async () => {
     const t = tx({ sig: 'only', accounts: [{ key: WALLET, pre: 10, post: 5 }], fee: 5 })
     const { rpc, counts } = fakeNode([t], [])
