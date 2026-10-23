@@ -9,13 +9,17 @@ export function Analyzer() {
   const { state, start, startSample, cancel, updateTokens } = useAnalysis()
   const section = useRef<HTMLElement>(null)
   const [wallets, setWallets] = useState<string[]>([''])
-  const [rpcUrl, setRpcUrl] = useState(savedRpcUrl() ?? '')
+  const [rpcUrl, setRpcUrl] = useState('')
   const [touched, setTouched] = useState(false)
 
   const cleaned = wallets.map((w) => w.trim()).filter(Boolean)
   const invalid = cleaned.filter((w) => !isValidAddress(w))
   const duplicate = new Set(cleaned).size !== cleaned.length
   const canRun = cleaned.length > 0 && invalid.length === 0 && !duplicate && state.status !== 'running'
+
+  // Read after mount so the prerendered page and the first client render match.
+  // oxlint-disable-next-line react/set-state-in-effect -- must run after hydration
+  useEffect(() => setRpcUrl(savedRpcUrl() ?? ''), [])
 
   // The hero's "Try a sample wallet" button links to #sample.
   useEffect(() => {

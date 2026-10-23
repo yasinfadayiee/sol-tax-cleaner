@@ -1,4 +1,5 @@
 import { APP_NAME, MAX_WALLETS, PRICE_SOL, PRICE_USDC, UNLOCK_DAYS } from './config'
+import { FAQ } from './faq'
 import { Analyzer } from './ui/Analyzer'
 import { Icon, Logo, type IconName } from './ui/Icon'
 import { usdLabel, useSolPrice } from './ui/useSolPrice'
@@ -248,33 +249,12 @@ export default function App() {
         <section id="faq" aria-labelledby="faq-title">
           <p className="eyebrow">FAQ</p>
           <h2 id="faq-title">Questions</h2>
-          <details>
-            <summary>Do you calculate my tax?</summary>
-            <p>No. We only clean and reformat your transaction history. Your tax tool (or your accountant) does the tax calculation. This is not tax advice.</p>
-          </details>
-          <details>
-            <summary>Is my data sent anywhere?</summary>
-            <p>No. Everything runs in your browser. The only network requests go to the Solana RPC endpoint (to read public blockchain data) and nowhere else.</p>
-          </details>
-          <details>
-            <summary>Which tax tools are supported?</summary>
-            <p>Koinly, CoinTracker, CoinLedger and Awaken, each in its own import format. Pick the tool before you download; you can switch at any time.</p>
-          </details>
-          <details>
-            <summary>How do I import it without duplicates?</summary>
-            <p>Remove or exclude the Solana wallets your tax tool synced automatically for these addresses, then import our CSV as one custom wallet. Transfers between your own addresses are already netted out.</p>
-          </details>
-          <details>
-            <summary>What isn’t included?</summary>
-            <p>NFT-specific handling and price data (your tax tool adds prices). Native staking rewards are included, one row per stake account per epoch. The report lists anything that needs a manual look.</p>
-          </details>
-          <details>
-            <summary>Why pay from my wallet, in SOL or USDC?</summary>
-            <p>
-              Paying from your own wallet is also how the site recognises you, so there are no accounts, emails or licence keys.
-              Pay in SOL, or in USDC if you'd rather have a fixed dollar price.
-            </p>
-          </details>
+          {FAQ.map((f) => (
+            <details key={f.q}>
+              <summary>{f.q}</summary>
+              <p>{f.a}</p>
+            </details>
+          ))}
         </section>
 
         <section aria-labelledby="guides-title">
