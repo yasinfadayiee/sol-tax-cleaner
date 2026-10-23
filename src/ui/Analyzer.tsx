@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { MAX_WALLETS } from '../config'
 import { DEFAULT_RPC, saveRpcUrl, savedRpcUrl } from '../rpc/client'
+import { SITE_RPC_URL } from '../config'
 import { isValidAddress, type Progress } from '../rpc/history'
 import { Results } from './Results'
 import { useAnalysis } from './useAnalysis'
@@ -11,6 +12,10 @@ export function Analyzer() {
   const [wallets, setWallets] = useState<string[]>([''])
   const [rpcUrl, setRpcUrl] = useState('')
   const [touched, setTouched] = useState(false)
+  const [showRpc, setShowRpc] = useState(false)
+  const rpcInput = useRef<HTMLInputElement>(null)
+  const blocked = state.status === 'error' && state.rpcBlocked
+  const base = import.meta.env.BASE_URL
 
   const cleaned = wallets.map((w) => w.trim()).filter(Boolean)
   const invalid = cleaned.filter((w) => !isValidAddress(w))
@@ -83,17 +88,17 @@ export function Analyzer() {
           </button>
         )}
 
-        <details className="advanced">
-          <summary>Advanced: use your own RPC endpoint (much faster)</summary>
+        <details className="advanced" open={showRpc || blocked} onToggle={(e) => setShowRpc(e.currentTarget.open)}>
+          <summary>Use your own RPC URL (free, much faster)</summary>
           <p className="muted small">
-            The free public endpoint allows only a few requests per second, so large histories can take a while. A free
-            key from an RPC provider (for example Helius or QuickNode) makes analysis many times faster. The URL is stored
-            only in this browser.
+            A free key from an RPC provider (for example Helius, QuickNode or Alchemy) makes analysis many times faster.
+            The URL is stored only in this browser. <a href={`${base}free-solana-rpc-url/`}>How to get one in two minutes</a>.
           </p>
           <input
+            ref={rpcInput}
             className="mono"
             value={rpcUrl}
-            placeholder={DEFAULT_RPC}
+            placeholder={SITE_RPC_URL ? 'https://mainnet.helius-rpc.com/?api-key=…' : DEFAULT_RPC}
             spellCheck={false}
             autoComplete="off"
             onChange={(e) => setRpcUrl(e.target.value)}
@@ -123,10 +128,35 @@ export function Analyzer() {
       </form>
 
       {state.status === 'running' && <ProgressView p={state.progress} />}
-      {state.status === 'error' && (
+      {state.status === 'error' && !state.rpcBlocked && (
         <p className="error" role="alert">
           {state.message}
         </p>
+      )}
+      {state.status === 'error' && state.rpcBlocked && (
+        <div className="rpc-help" role="alert">
+          <p>
+            <strong>One more step: add a free RPC URL.</strong> The Solana RPC endpoint refused this request. The free
+            public one only serves a few requests to web pages, so most people need their own (free) URL.
+          </p>
+          <ol>
+            <li>
+              Create a free account at an RPC provider such as{' '}
+              <a href="https://www.helius.dev/" target="_blank" rel="noreferrer">
+                Helius
+              </a>{' '}
+              and copy your <strong>mainnet</strong> RPC URL.
+            </li>
+            <li>Paste it in the box above and press Analyse again.</li>
+          </ol>
+          <p className="muted small">
+            The URL stays in this browser. <a href={`${base}free-solana-rpc-url/`}>Step-by-step guide</a>. Details:{' '}
+            {state.message}
+          </p>
+          <button type="button" className="secondary" onClick={() => rpcInput.current?.focus()}>
+            Paste my RPC URL
+          </button>
+        </div>
       )}
       {state.status === 'done' && <Results analysis={state.analysis} onTokensChange={updateTokens} />}
     </section>
@@ -135,6 +165,7 @@ export function Analyzer() {
 
 function ProgressView({ p }: { p: Progress }) {
   const pct = p.txTotal ? Math.round((p.txDone / p.txTotal) * 100) : 0
+  const eta = useEta(p)
   const label =
     p.phase === 'accounts'
       ? 'Finding your token accounts…'
@@ -148,8 +179,32 @@ function ProgressView({ p }: { p: Progress }) {
       <div className="bar" aria-hidden="true">
         <span style={{ width: `${p.phase === 'transactions' || p.phase === 'staking' ? pct : 5}%` }} />
       </div>
-      <p className="small">{label}</p>
+      <p className="small">
+        {label}
+        {eta && <span className="muted"> · {eta}</span>}
+      </p>
       <p className="muted small">Keep this tab open. Re-running later is instant: transactions are cached in your browser.</p>
     </div>
   )
+}
+
+/** "about 3 min left" while reading transactions, from the rate so far in this phase. */
+function useEta(p: Progress): string {
+  const start = useRef<{ at: number; done: number } | null>(null)
+  const [eta, setEta] = useState('')
+  const active = p.phase === 'transactions' && p.txTotal > 0
+  useEffect(() => {
+    if (!active) {
+      start.current = null
+      return
+    }
+    const now = Date.now()
+    start.current ??= { at: now, done: p.txDone }
+    const elapsed = now - start.current.at
+    const done = p.txDone - start.current.done
+    if (elapsed < 5000 || done < 20) return
+    const min = Math.round((((p.txTotal - p.txDone) / done) * elapsed) / 60_000)
+    setEta(min < 1 ? 'less than a minute left' : `about ${min} min left`)
+  }, [active, p.txDone, p.txTotal])
+  return active ? eta : ''
 }

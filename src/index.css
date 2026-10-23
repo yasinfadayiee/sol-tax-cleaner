@@ -871,16 +871,76 @@ td input {
   margin-top: 64px;
 }
 
-.site-footer .wrap {
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.6fr repeat(3, 1fr);
+  gap: 32px;
+}
+
+.footer-grid > div p {
+  max-width: 300px;
+  margin: 12px 0 0;
+  line-height: 1.5;
+}
+
+.footer-grid nav {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.footer-grid h3 {
+  margin: 0 0 4px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text);
+}
+
+.footer-grid nav a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.footer-grid nav a:hover {
+  color: var(--accent);
+}
+
+.footer-bottom {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
 }
 
 .site-footer p {
   margin: 0;
+}
+
+.works-with {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 20px;
+}
+
+.works-with .tool {
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+@media (max-width: 760px) {
+  .footer-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+  .footer-grid > div {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (max-width: 860px) {
@@ -906,7 +966,7 @@ td input {
   .pay-grid {
     grid-template-columns: 1fr;
   }
-  nav a:not(.nav-cta) {
+  .site-header nav a:not(.nav-cta) {
     display: none;
   }
   .trust {
@@ -991,11 +1051,28 @@ button.chip {
 
 button.chip.on {
   border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 14%, var(--surface));
+  background: color-mix(in srgb, var(--accent) 9%, var(--surface));
   color: var(--accent);
   font-weight: 600;
 }
 
 .price-card .usd {
   color: var(--text);
+}
+
+.rpc-help {
+  margin-top: 20px;
+  padding: 18px 20px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface));
+}
+
+.rpc-help p {
+  margin: 0 0 10px;
+}
+
+.rpc-help ol {
+  margin: 0 0 12px;
+  padding-left: 20px;
 }

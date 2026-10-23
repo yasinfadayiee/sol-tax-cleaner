@@ -1,3 +1,5 @@
+import { SITE_RPC_URL } from '../config'
+
 export const DEFAULT_RPC = 'https://api.mainnet-beta.solana.com'
 
 export class RpcError extends Error {
@@ -190,8 +192,13 @@ export function saveRpcUrl(url: string | null) {
   }
 }
 
+/** The visitor's own endpoint, else the site's, else the public one. */
+export function defaultRpcUrl(): string {
+  return savedRpcUrl() ?? (SITE_RPC_URL || DEFAULT_RPC)
+}
+
 /** Public endpoint: gentle pacing. Custom (usually keyed) endpoint: faster. */
-export function makeClient(url = savedRpcUrl() ?? DEFAULT_RPC): RpcClient {
+export function makeClient(url = defaultRpcUrl()): RpcClient {
   const isPublic = url === DEFAULT_RPC
   return new RpcClient({ url, maxConcurrent: isPublic ? 3 : 8, ratePerSec: isPublic ? 3.5 : 20 })
 }

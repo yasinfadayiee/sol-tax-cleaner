@@ -23,7 +23,8 @@ export type AnalysisState =
   | { status: 'idle' }
   | { status: 'running'; progress: Progress }
   | { status: 'done'; analysis: Analysis }
-  | { status: 'error'; message: string }
+  /** rpcBlocked: the endpoint refused us outright, so the visitor needs their own RPC URL to continue. */
+  | { status: 'error'; message: string; rpcBlocked?: boolean }
 
 export function useAnalysis() {
   const [state, setState] = useState<AnalysisState>({ status: 'idle' })
@@ -81,7 +82,7 @@ export function useAnalysis() {
         return
       }
       const message = e instanceof Error ? e.message : String(e)
-      setState({ status: 'error', message: friendlyError(message) })
+      setState({ status: 'error', message: friendlyError(message), rpcBlocked: isBlocked(message) })
     }
   }, [])
 
@@ -113,8 +114,16 @@ export function useAnalysis() {
   return { state, start, startSample, cancel, updateTokens }
 }
 
+/** The public Solana endpoint answers browser requests with 403 "Access forbidden"; CORS failures look like this too. */
+export function isBlocked(message: string): boolean {
+  return /HTTP 403|Access forbidden|Request blocked|Failed to fetch|NetworkError|Load failed/i.test(message)
+}
+
 function friendlyError(message: string): string {
-  if (/HTTP 429|HTTP 403|Failed to fetch|NetworkError/i.test(message)) {
+  if (isBlocked(message)) {
+    return `The RPC endpoint refused the request (${message}).`
+  }
+  if (/HTTP 429/i.test(message)) {
     return `The RPC endpoint refused or limited the requests (${message}). Wait a minute and try again, or paste a free RPC URL from a provider such as Helius under "Advanced".`
   }
   return message

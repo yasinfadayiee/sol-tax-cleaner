@@ -74,7 +74,7 @@ function parse(file) {
   return { meta, body: m[2] }
 }
 
-function page({ title, description, url, body, jsonLd }) {
+function page({ title, description, url, body, jsonLd, cta = true }) {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -97,9 +97,9 @@ ${jsonLd ? `<script type="application/ld+json">${JSON.stringify(jsonLd).replace(
 <header class="site-header"><div class="wrap"><a class="brand" href="../"><img src="../favicon.svg" width="28" height="28" alt="" />${APP_NAME}</a><nav><a href="../guides/">Guides</a><a class="nav-cta" href="../#analyse">Analyse free</a></nav></div></header>
 <main class="wrap prose">
 ${body}
-<p class="cta"><a class="button" href="../#analyse">Analyse your wallet free</a></p>
+${cta ? '<p class="cta"><a class="button" href="../#analyse">Analyse your wallet free</a></p>' : ''}
 </main>
-<footer class="site-footer"><div class="wrap"><p>${APP_NAME}. Not tax advice. <a href="../terms/">Terms</a> · <a href="../privacy/">Privacy</a></p></div></footer>
+<footer class="site-footer"><div class="wrap"><p>${APP_NAME}. Not tax advice. <a href="../guides/">Guides</a> · <a href="../terms/">Terms</a> · <a href="../privacy/">Privacy</a></p></div></footer>
 </body>
 </html>
 `
@@ -141,7 +141,8 @@ const guidesUrl = `${SITE_URL}guides/`
 for (const p of pages) {
   const isGuide = !LEGAL.has(p.slug)
   let body = markdown(p.body)
-  if (isGuide) body += `\n<h2>Related guides</h2>\n${guideList(related(p, guides))}\n<p><a href="../guides/">All guides</a></p>`
+  if (isGuide)
+    body += `\n<aside class="cta-card"><p><strong>Fix this in your own history.</strong> Paste your public address and preview the cleaned rows free. Everything runs in your browser.</p><p><a class="button" href="../#analyse">Analyse your wallet free</a> <a href="../#sample">or try a sample wallet</a></p></aside>\n<h2>Related guides</h2>\n${guideList(related(p, guides))}\n<p><a href="../guides/">All guides</a></p>`
   const jsonLd = isGuide && {
     '@context': 'https://schema.org',
     '@graph': [
@@ -157,7 +158,7 @@ for (const p of pages) {
     ],
   }
   mkdirSync(join(dist, p.slug), { recursive: true })
-  writeFileSync(join(dist, p.slug, 'index.html'), page({ title: p.meta.title, description: p.meta.description, url: p.url, body, jsonLd }))
+  writeFileSync(join(dist, p.slug, 'index.html'), page({ title: p.meta.title, description: p.meta.description, url: p.url, body, jsonLd, cta: !isGuide }))
 }
 
 mkdirSync(join(dist, 'guides'), { recursive: true })

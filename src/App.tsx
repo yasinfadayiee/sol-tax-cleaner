@@ -14,6 +14,8 @@ const TRUST: Array<{ icon: IconName; text: string }> = [
   { icon: 'scale', text: 'Rows reconcile to on-chain balances' },
 ]
 
+const TOOLS = ['Koinly', 'CoinTracker', 'CoinLedger', 'Awaken']
+
 const PROBLEMS: Array<{ icon: IconName; title: string; text: string }> = [
   {
     icon: 'split',
@@ -88,6 +90,7 @@ export default function App() {
             <a href="#how">How it works</a>
             <a href="#pricing">Pricing</a>
             <a href="#faq">FAQ</a>
+            <a href={`${base}guides/`}>Guides</a>
             <a className="nav-cta" href="#analyse">
               Analyse free
             </a>
@@ -98,7 +101,7 @@ export default function App() {
       <div className="hero-band">
         <section className="hero wrap">
           <div className="hero-copy">
-            <p className="eyebrow">For Solana traders using Koinly, CoinTracker, CoinLedger or Awaken</p>
+            <p className="eyebrow">For Solana traders and DeFi users</p>
             <h1>
               Messy Solana history in. <span className="grad">One clean CSV out.</span>
             </h1>
@@ -115,6 +118,14 @@ export default function App() {
               </a>
             </div>
             <p className="hero-note muted small">No address handy? The sample wallet shows real output in one click.</p>
+            <p className="works-with">
+              <span className="muted small">Exports for</span>
+              {TOOLS.map((t) => (
+                <span className="tool" key={t}>
+                  {t}
+                </span>
+              ))}
+            </p>
           </div>
 
           <div className="hero-visual" aria-hidden="true">
@@ -278,14 +289,41 @@ export default function App() {
       </main>
 
       <footer className="site-footer">
-        <div className="wrap">
-          <a className="brand" href={base}>
-            <Logo size={22} />
-            <span>{APP_NAME}</span>
-          </a>
-          <p>
-            © {YEAR} {APP_NAME}. Not tax advice. <a href={`${base}terms/`}>Terms</a> ·{' '}
+        <div className="wrap footer-grid">
+          <div>
+            <a className="brand" href={base}>
+              <Logo size={22} />
+              <span>{APP_NAME}</span>
+            </a>
+            <p className="muted small">
+              Clean Solana history for crypto tax tools. Runs in your browser. We don't calculate tax; this is not tax advice.
+            </p>
+          </div>
+          <nav aria-label="Product">
+            <h3>Product</h3>
+            <a href="#analyse">Analyse a wallet</a>
+            <a href="#sample">Try the sample wallet</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#faq">FAQ</a>
+          </nav>
+          <nav aria-label="Popular guides">
+            <h3>Guides</h3>
+            {GUIDES.slice(0, 4).map((g) => (
+              <a key={g.slug} href={`${base}${g.slug}/`}>
+                {g.title}
+              </a>
+            ))}
+            <a href={`${base}guides/`}>All guides</a>
+          </nav>
+          <nav aria-label="Legal">
+            <h3>Legal</h3>
+            <a href={`${base}terms/`}>Terms</a>
             <a href={`${base}privacy/`}>Privacy</a>
+          </nav>
+        </div>
+        <div className="wrap footer-bottom">
+          <p>
+            © {YEAR} {APP_NAME}. Not affiliated with Koinly, CoinTracker, CoinLedger or Awaken.
           </p>
         </div>
       </footer>
