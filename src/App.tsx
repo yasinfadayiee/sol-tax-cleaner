@@ -1,4 +1,4 @@
-import { APP_NAME, MAX_WALLETS, PRICE_SOL, PRICE_USDC, UNLOCK_DAYS } from './config'
+import { APP_NAME, MAX_WALLETS, PRICE_SOL, PRICE_USDC, SUPPORT_URL, UNLOCK_DAYS } from './config'
 import { FAQ } from './faq'
 import { Analyzer } from './ui/Analyzer'
 import { Icon, Logo, type IconName } from './ui/Icon'
@@ -352,10 +352,13 @@ export default function App() {
             ))}
             <a href={`${base}guides/`}>All guides</a>
           </nav>
-          <nav aria-label="Legal">
-            <h3>Legal</h3>
+          <nav aria-label="Help and legal">
+            <h3>Help &amp; legal</h3>
             <a href={`${base}terms/`}>Terms</a>
             <a href={`${base}privacy/`}>Privacy</a>
+            <a href={SUPPORT_URL} target="_blank" rel="noopener">
+              Report a problem
+            </a>
           </nav>
         </div>
         <div className="wrap footer-bottom">

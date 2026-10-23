@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { APP_NAME, MAX_WALLETS, MEMO_PREFIX, MERCHANT_ADDRESS, PRICE_SOL, PRICE_USDC, UNLOCK_DAYS } from '../config'
+import { APP_NAME, MAX_WALLETS, MEMO_PREFIX, MERCHANT_ADDRESS, PRICE_SOL, PRICE_USDC, SUPPORT_URL, UNLOCK_DAYS } from '../config'
 import { usdLabel, useSolPrice } from './useSolPrice'
 import {
   findPayment,
@@ -181,7 +181,11 @@ export function Payment({ wallets, rpc, onUnlocked }: { wallets: string[]; rpc: 
             {status === 'not-found' && (
               <p className="warn">
                 No payment found yet. Make sure it came from an analysed wallet, included the memo, and is confirmed, then
-                check again.
+                check again. Still stuck?{' '}
+                <a href={SUPPORT_URL} target="_blank" rel="noopener">
+                  Report it
+                </a>{' '}
+                with the transaction link and we'll sort it out.
               </p>
             )}
             {status === 'error' && <p className="warn">Couldn’t reach the RPC endpoint to check. Try again in a moment.</p>}
