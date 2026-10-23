@@ -1,6 +1,7 @@
 ---
 title: Import cleaned Solana history into Awaken Tax with a CSV
 description: How to turn Jupiter swaps, pump.fun trades, DCA fills and token-account rent into a clean Awaken Tax CSV, one row per trade.
+category: tools
 ---
 # Import cleaned Solana history into Awaken Tax
 

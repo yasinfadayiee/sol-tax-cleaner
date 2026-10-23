@@ -100,9 +100,9 @@ export default function App() {
             <span>{APP_NAME}</span>
           </a>
           <nav aria-label="Main">
-            <a href="#how">How it works</a>
-            <a href="#pricing">Pricing</a>
-            <a href="#faq">FAQ</a>
+            <a className="wide" href="#how">How it works</a>
+            <a className="wide" href="#pricing">Pricing</a>
+            <a className="wide" href="#faq">FAQ</a>
             <a href={`${base}guides/`}>Guides</a>
             <a className="nav-cta" href="#analyse">
               Analyse free

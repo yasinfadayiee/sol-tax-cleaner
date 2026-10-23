@@ -1,6 +1,7 @@
 ---
 title: Phantom wallet history in Koinly — export clean Solana transactions
 description: Phantom doesn't export a tax-ready CSV. Turn your Phantom wallet's full Solana history into a clean Koinly, CoinTracker or CoinLedger file from its public address.
+category: tools
 ---
 # Phantom wallet history in Koinly
 

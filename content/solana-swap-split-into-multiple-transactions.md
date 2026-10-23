@@ -1,6 +1,7 @@
 ---
 title: One Solana swap showing as several transactions in Koinly — fix
 description: A single Jupiter or Raydium swap can import as three or four rows with the same hash, creating fake gains. Export each swap as one clean row instead.
+category: trades
 ---
 # One Solana swap showing as several rows
 

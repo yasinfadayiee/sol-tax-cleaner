@@ -1,6 +1,7 @@
 ---
 title: Solana transactions wrong in CoinTracker — clean CSV fix
 description: Split swaps, rent rows and one-sided limit-order fills make Solana history look wrong in CoinTracker. Rebuild it into a clean CoinTracker CSV in your browser.
+category: tools
 ---
 # Solana transactions wrong in CoinTracker
 

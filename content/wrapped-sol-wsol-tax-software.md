@@ -1,6 +1,7 @@
 ---
 title: Wrapped SOL (WSOL) showing in Koinly or CoinTracker — why and fix
 description: Swaps on Solana briefly wrap SOL into WSOL. Tax tools can show WSOL as a separate coin with odd balances. Here's why, and how to export swaps without it.
+category: accounts
 ---
 # Wrapped SOL (WSOL) in tax software
 

@@ -1,6 +1,7 @@
 ---
 title: Get a free Solana RPC URL for SolTax Cleaner (2 minutes)
 description: The public Solana RPC refuses most requests from web pages. Here is how to get a free RPC URL from Helius, QuickNode or Alchemy and use it to read your full wallet history.
+category: tools
 ---
 # Get a free Solana RPC URL
 

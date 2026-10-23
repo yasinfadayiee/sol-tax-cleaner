@@ -1,6 +1,7 @@
 ---
 title: Jupiter DCA trades missing in Koinly — why and how to fix it
 description: Jupiter DCA (recurring) fills on Solana often never show up in Koinly. Here is why it happens and how to get every fill into your tax report.
+category: trades
 ---
 # Jupiter DCA trades missing in Koinly
 

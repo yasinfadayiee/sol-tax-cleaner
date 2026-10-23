@@ -44,10 +44,13 @@ describe('CoinLedger CSV', () => {
     expect(csv[0]).toBe(COINLEDGER_COLUMNS.join(','))
   })
 
-  it('leaves Type blank for trades and sets Deposit / Withdrawal otherwise', () => {
+  it('leaves Type blank for trades and sets Deposit / Withdrawal / Staking otherwise', () => {
     const types = csv.slice(1).map((l) => l.split(',')[8])
+    const rewards = rows.filter((r) => r.tag === 'staking').length
+    expect(rewards).toBeGreaterThan(0)
     expect(types.filter((t) => t === '')).toHaveLength(stats.byKind.swap)
-    expect(types.filter((t) => t === 'Deposit')).toHaveLength(stats.byKind.deposit)
+    expect(types.filter((t) => t === 'Staking')).toHaveLength(rewards)
+    expect(types.filter((t) => t === 'Deposit')).toHaveLength(stats.byKind.deposit - rewards)
     expect(types.filter((t) => t === 'Withdrawal')).toHaveLength(stats.byKind.withdrawal + stats.byKind.fee)
   })
 
