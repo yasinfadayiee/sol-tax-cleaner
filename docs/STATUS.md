@@ -60,7 +60,7 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
 - 13 guide pages in `content/` (Awaken and staking rewards added in #10) (added CoinTracker, CoinLedger, pump.fun, Phantom, WSOL on 2026-10-22).
 - SEO (2026-10-23): `/guides/` index page, "Related guides" block on every guide (closest by slug words), TechArticle +
   BreadcrumbList JSON-LD, Guides link in the guide header. 3 more guides: Solscan CSV export, Raydium/Orca/Meteora
-  swaps (LP adds flagged for review), spam tokens and airdrops. 16 guides total.
+  swaps (LP adds flagged for review), spam tokens and airdrops. 14 guides total.
 - Launch kit with ready-to-post texts (Reddit, Koinly board, X): `docs/launch-posts.md`. Yasin posts them himself.
 - Bugs found by the mainnet check and fixed: transaction version 1 support (auto-upgrades
   `maxSupportedTransactionVersion`); mistyped Token-2022 program ID.
