@@ -88,6 +88,16 @@ describe('report', () => {
     expect(md).not.toContain('Koinly')
   })
 
+  it('states the period covered, counts staking rewards apart and totals each asset', () => {
+    const md = buildReport({ wallets: ['w'], stats, rows, tokens: SAMPLE_TOKENS, missing: [], generatedAt: new Date(0) })
+    expect(md).toContain('Period covered: 2025-01-08 to 2025-04-08')
+    expect(md).toContain('| Deposits | 1 |')
+    expect(md).toContain('| Staking rewards (income) | 2 |')
+    expect(md).toContain('## Assets in this export')
+    // CATZ: bought 3,512,000 and sold all of it.
+    expect(md).toContain('| CATZ | 3512000 | 3512000 |  | 2 |')
+  })
+
   it('every format has a distinct file name', () => {
     expect(new Set(Object.values(FORMATS).map((f) => f.filename)).size).toBe(Object.keys(FORMATS).length)
   })
