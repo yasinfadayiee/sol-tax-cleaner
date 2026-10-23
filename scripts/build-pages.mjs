@@ -94,7 +94,7 @@ function parse(file) {
   return { meta, body: m[2] }
 }
 
-function page({ title, description, url, body, jsonLd, cta = true }) {
+function page({ title, description, url, body, jsonLd, cta = true, image = `${SITE_URL}og.png` }) {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -107,8 +107,11 @@ function page({ title, description, url, body, jsonLd, cta = true }) {
 <meta property="og:description" content="${esc(description)}" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="${url}" />
-<meta property="og:image" content="${SITE_URL}og.png" />
+<meta property="og:image" content="${image}" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
 <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="${image}" />
 <link rel="apple-touch-icon" href="../apple-touch-icon.png" />
 <link rel="icon" type="image/svg+xml" href="../favicon.svg" />
 <link rel="stylesheet" href="../pages.css" />
@@ -187,6 +190,8 @@ for (const p of pages) {
     )}`
     body += `\n<aside class="cta-card"><p><strong>Fix this in your own history.</strong> Paste your public address and preview the cleaned rows free. Everything runs in your browser.</p><p><a class="button" href="../#analyse">Analyse your wallet free</a> <a href="../#sample">or try a sample wallet</a></p></aside>\n<h2>Related guides</h2>\n${guideList(related(p, guides))}\n<p><a href="../guides/">All guides</a></p>`
   }
+  // Per-guide social preview from scripts/brand/render.mjs, when one has been rendered.
+  const image = isGuide && existsSync(join(root, 'public', 'og', `${p.slug}.jpg`)) ? `${SITE_URL}og/${p.slug}.jpg` : undefined
   const jsonLd = isGuide && {
     '@context': 'https://schema.org',
     '@graph': [
@@ -195,7 +200,7 @@ for (const p of pages) {
         headline: p.heading,
         description: p.meta.description,
         url: p.url,
-        image: `${SITE_URL}og.png`,
+        image: image ?? `${SITE_URL}og.png`,
         datePublished: p.dates.published,
         dateModified: p.dates.modified,
         publisher: { '@type': 'Organization', name: APP_NAME, url: SITE_URL },
@@ -204,7 +209,7 @@ for (const p of pages) {
     ],
   }
   mkdirSync(join(dist, p.slug), { recursive: true })
-  writeFileSync(join(dist, p.slug, 'index.html'), page({ title: p.meta.title, description: p.meta.description, url: p.url, body, jsonLd, cta: !isGuide }))
+  writeFileSync(join(dist, p.slug, 'index.html'), page({ title: p.meta.title, description: p.meta.description, url: p.url, body, jsonLd, cta: !isGuide, image }))
 }
 
 mkdirSync(join(dist, 'guides'), { recursive: true })

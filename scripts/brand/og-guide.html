@@ -1,0 +1,22 @@
+<!doctype html>
+<!-- Template for public/og/<guide>.jpg (1200×630). render.mjs fills #title and #section per guide. -->
+<html><head><meta charset="utf-8">
+<link rel="stylesheet" href="../../node_modules/@fontsource-variable/inter/index.css">
+<style>
+body{margin:0;width:1200px;height:630px;overflow:hidden;font-family:'Inter Variable',sans-serif;color:#ececf4;
+background:radial-gradient(700px 500px at 95% 0%,rgb(157 134 255/.32),transparent 70%),radial-gradient(600px 400px at 0% 100%,rgb(47 224 173/.22),transparent 70%),#0b0b12;position:relative}
+body:before{content:'';position:absolute;inset:0;background-image:linear-gradient(#2a2a3a 1px,transparent 1px),linear-gradient(90deg,#2a2a3a 1px,transparent 1px);background-size:48px 48px;mask-image:radial-gradient(ellipse at 80% 30%,#000,transparent 70%);opacity:.55}
+main{position:absolute;inset:72px;display:flex;flex-direction:column}
+.brand{display:flex;align-items:center;gap:14px;font-weight:750;font-size:30px}
+.eyebrow{margin:auto 0 20px;font-size:22px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#9d86ff}
+h1{font-size:72px;line-height:1.05;letter-spacing:-.035em;font-weight:800;margin:0 0 auto;max-width:1000px;text-wrap:balance}
+.foot{display:flex;justify-content:space-between;align-items:center;font-size:22px;color:#a0a0b4}
+.bar{height:6px;width:180px;border-radius:99px;background:linear-gradient(120deg,#2fe0ad,#9d86ff)}
+</style></head><body>
+<main>
+ <div class="brand"><img src="../../public/favicon.svg" width="52" height="52">SolTax Cleaner</div>
+ <p class="eyebrow">Guide · <span id="section"></span></p>
+ <h1 id="title"></h1>
+ <div class="foot"><span>Clean Solana history for Koinly, CoinTracker, CoinLedger and Awaken</span><span class="bar"></span></div>
+</main>
+</body></html>
