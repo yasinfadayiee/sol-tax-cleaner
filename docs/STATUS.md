@@ -92,6 +92,10 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
   what paying unlocks). Lighthouse (gzip): landing perf 98, a11y/SEO 100; guides 100.
   Each guide has its own social preview `public/og/<slug>.jpg` (template `scripts/brand/og-guide.html`, rendered by
   `scripts/brand/render.mjs`; re-run after adding or retitling a guide).
+- Support + landing polish (2026-10-23, #29 and next PR): "Report a problem" (GitHub issues, `SUPPORT_URL`) in
+  footers and the payment-not-found message; "Source code" link (`REPO_URL`, the repo is public) in footers;
+  landing guides list cut to 6 + "Browse all guides" button; closing CTA band before the footer; before/after
+  labels top-aligned; hero buttons full width on phones.
 - Launch kit with ready-to-post texts (Reddit, Koinly board, X): `docs/launch-posts.md`. Yasin posts them himself.
 - Bugs found by the mainnet check and fixed: transaction version 1 support (auto-upgrades
   `maxSupportedTransactionVersion`); mistyped Token-2022 program ID.

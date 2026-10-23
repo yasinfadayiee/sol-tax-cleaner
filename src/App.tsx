@@ -1,4 +1,4 @@
-import { APP_NAME, MAX_WALLETS, PRICE_SOL, PRICE_USDC, SUPPORT_URL, UNLOCK_DAYS } from './config'
+import { APP_NAME, MAX_WALLETS, PRICE_SOL, PRICE_USDC, REPO_URL, SUPPORT_URL, UNLOCK_DAYS } from './config'
 import { FAQ } from './faq'
 import { Analyzer } from './ui/Analyzer'
 import { Icon, Logo, type IconName } from './ui/Icon'
@@ -309,7 +309,7 @@ export default function App() {
           <p className="eyebrow">Guides</p>
           <h2 id="guides-title">Fixes for common Solana import problems</h2>
           <ul className="guides">
-            {GUIDES.map((g) => (
+            {GUIDES.slice(0, 6).map((g) => (
               <li key={g.slug}>
                 <a href={`${base}${g.slug}/`}>
                   <Icon name="doc" size={18} />
@@ -320,8 +320,25 @@ export default function App() {
             ))}
           </ul>
           <p>
-            <a href={`${base}guides/`}>See all guides</a>
+            <a className="button secondary" href={`${base}guides/`}>
+              Browse all guides <Icon name="arrow" size={16} />
+            </a>
           </p>
+        </section>
+
+        <section className="final-cta" aria-labelledby="final-cta-title">
+          <h2 id="final-cta-title">See your own history cleaned up</h2>
+          <p className="muted">
+            The analysis and preview are free and run in your browser. Pay only when you want the full CSV.
+          </p>
+          <div className="hero-actions">
+            <a className="button primary" href="#analyse">
+              Analyse my wallet free <Icon name="arrow" size={18} />
+            </a>
+            <a className="button secondary" href="#sample">
+              Try a sample wallet
+            </a>
+          </div>
         </section>
       </main>
 
@@ -356,6 +373,9 @@ export default function App() {
             <h3>Help &amp; legal</h3>
             <a href={`${base}terms/`}>Terms</a>
             <a href={`${base}privacy/`}>Privacy</a>
+            <a href={REPO_URL} target="_blank" rel="noopener">
+              Source code
+            </a>
             <a href={SUPPORT_URL} target="_blank" rel="noopener">
               Report a problem
             </a>

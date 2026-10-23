@@ -126,7 +126,7 @@ ${cta ? '<p class="cta"><a class="button" href="../#analyse">Analyse your wallet
 <div><a class="brand" href="../"><img src="../favicon.svg" width="22" height="22" alt="" />${APP_NAME}</a><p>Clean Solana history for crypto tax tools. Runs in your browser. We don't calculate tax; this is not tax advice.</p></div>
 <nav aria-label="Product"><h3>Product</h3><a href="../#analyse">Analyse a wallet</a><a href="../#sample">Try the sample wallet</a><a href="../#pricing">Pricing</a><a href="../#faq">FAQ</a></nav>
 <nav aria-label="Guides"><h3>Guides</h3>${footerGuides}<a href="../guides/">All guides</a></nav>
-<nav aria-label="Help and legal"><h3>Help &amp; legal</h3><a href="../terms/">Terms</a><a href="../privacy/">Privacy</a><a href="https://github.com/yasinfadayiee/sol-tax-cleaner/issues/new" rel="noopener">Report a problem</a></nav>
+<nav aria-label="Help and legal"><h3>Help &amp; legal</h3><a href="../terms/">Terms</a><a href="../privacy/">Privacy</a><a href="https://github.com/yasinfadayiee/sol-tax-cleaner" rel="noopener">Source code</a><a href="https://github.com/yasinfadayiee/sol-tax-cleaner/issues/new" rel="noopener">Report a problem</a></nav>
 </div><div class="wrap footer-bottom"><p>© ${YEAR} ${APP_NAME}. Not affiliated with Koinly, CoinTracker, CoinLedger or Awaken.</p></div></footer>
 </body>
 </html>

@@ -13,8 +13,11 @@ export const PRICE_USDC = '39'
 /** Memo attached to payments; the unlock check looks for it. */
 export const MEMO_PREFIX = 'STC'
 
+/** Public source code; anyone can check that nothing leaves the browser. */
+export const REPO_URL = 'https://github.com/yasinfadayiee/sol-tax-cleaner'
+
 /** Where visitors report a problem or ask a question (public GitHub issues; no email needed). */
-export const SUPPORT_URL = 'https://github.com/yasinfadayiee/sol-tax-cleaner/issues/new'
+export const SUPPORT_URL = `${REPO_URL}/issues/new`
 
 export const MAX_WALLETS = 5
 export const PREVIEW_ROWS = 20
