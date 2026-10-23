@@ -94,7 +94,7 @@ Columns, in this order and spelled exactly:
 - Standalone fees go in the Sent columns with Tag `cost`, not in the Fee columns.
 - One tag per row, using only Koinly's allowed values.
 
-Also produce `report.md` and an on-screen report listing: counts per category, transactions marked
+Also produce `report.html` (a printable page built from the Markdown report) and an on-screen report listing: counts per category, transactions marked
 "needs review" with Solscan links, token-symbol overrides, and known limitations.
 
 ## 8. Payment and license (no server)

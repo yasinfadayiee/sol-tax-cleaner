@@ -56,7 +56,7 @@ export function buildReport(r: ReportInput): string {
     `## How to import into ${tool}`,
     '',
     ...format.importSteps.map((step, i) => `${i + 1}. ${step}`),
-    `${format.importSteps.length + 1}. Check the transactions listed below.`,
+    ...(reviewSigs.length ? [`${format.importSteps.length + 1}. Check the transactions listed below.`] : []),
     '',
   ]
 
