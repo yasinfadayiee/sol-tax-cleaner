@@ -59,41 +59,7 @@ export function Results({ analysis, onTokensChange }: { analysis: Analysis; onTo
         </p>
       )}
 
-      <h4>Preview (first {Math.min(PREVIEW_ROWS, rows.length)} of {rows.length} rows)</h4>
-      <div className="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Date (UTC)</th>
-              <th>Type</th>
-              <th>Sent</th>
-              <th>Received</th>
-              <th>Fee</th>
-              <th>Tx</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.slice(0, PREVIEW_ROWS).map((r, i) => (
-              <tr key={`${r.signature}-${i}`} className={r.needsReview ? 'review' : undefined}>
-                <td className="nowrap">{formatDate(r.blockTime)}</td>
-                <td>{label(r)}</td>
-                <td>{leg(r.sent, tokens)}</td>
-                <td>{leg(r.received, tokens)}</td>
-                <td>{r.fee ? `${formatAmount(r.fee, 9)} SOL` : ''}</td>
-                <td>
-                  {analysis.sample || r.tag === 'staking' ? (
-                    <span className="muted">{analysis.sample ? 'sample' : 'reward'}</span>
-                  ) : (
-                    <a href={`https://solscan.io/tx/${r.signature}`} target="_blank" rel="noreferrer">
-                      {r.signature.slice(0, 6)}…
-                    </a>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <Preview rows={rows} tokens={tokens} sample={analysis.sample} />
 
       <TokenNames tokens={tokens} onChange={onTokensChange} />
 
@@ -181,6 +147,97 @@ function Stat({ value, label }: { value: number; label: string }) {
       <span>{label}</span>
     </div>
   )
+}
+
+type Filter = 'all' | 'swap' | 'transfer' | 'fee' | 'staking' | 'review'
+
+const FILTERS: Array<{ id: Filter; name: string; match: (r: Row) => boolean }> = [
+  { id: 'all', name: 'All', match: () => true },
+  { id: 'swap', name: 'Swaps', match: (r) => r.kind === 'swap' },
+  { id: 'transfer', name: 'Deposits & withdrawals', match: (r) => (r.kind === 'deposit' || r.kind === 'withdrawal') && r.tag !== 'staking' },
+  { id: 'fee', name: 'Fees', match: (r) => r.kind === 'fee' },
+  { id: 'staking', name: 'Staking', match: (r) => r.tag === 'staking' },
+  { id: 'review', name: 'To check', match: (r) => r.needsReview },
+]
+
+/** The row preview: filter by type, and page through every row without downloading. */
+function Preview({ rows, tokens, sample }: { rows: Row[]; tokens: Map<string, TokenInfo>; sample?: boolean }) {
+  const [filter, setFilter] = useState<Filter>('all')
+  const [limit, setLimit] = useState(PREVIEW_ROWS)
+  const counts = useMemo(() => new Map(FILTERS.map((f) => [f.id, rows.filter(f.match).length])), [rows])
+  const shown = useMemo(() => rows.filter(FILTERS.find((f) => f.id === filter)!.match), [rows, filter])
+  const visible = shown.slice(0, limit)
+  const choose = (id: Filter) => {
+    setFilter(id)
+    setLimit(PREVIEW_ROWS)
+  }
+
+  return (
+    <>
+      <div className="preview-head">
+        <h4>Preview</h4>
+        <div className="format-picker filters" role="radiogroup" aria-label="Show rows">
+          {FILTERS.filter((f) => f.id === 'all' || f.id === filter || counts.get(f.id)).map((f) => (
+            <button key={f.id} type="button" role="radio" aria-checked={f.id === filter} className={f.id === filter ? 'chip on' : 'chip'} onClick={() => choose(f.id)}>
+              {f.name} <span className="count">{counts.get(f.id)!.toLocaleString()}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+      <div className="table-wrap rows-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Date (UTC)</th>
+              <th>Type</th>
+              <th>Sent</th>
+              <th>Received</th>
+              <th>Fee</th>
+              <th>Tx</th>
+            </tr>
+          </thead>
+          <tbody>
+            {visible.map((r, i) => (
+              <tr key={`${r.signature}-${i}`} className={r.needsReview ? 'review' : undefined}>
+                <td className="nowrap" data-label="Date">{formatDate(r.blockTime)}</td>
+                <td data-label="Type">
+                  <span className={`kind kind-${kindClass(r)}`}>{label(r)}</span>
+                </td>
+                <td data-label="Sent">{leg(r.sent, tokens)}</td>
+                <td data-label="Received">{leg(r.received, tokens)}</td>
+                <td data-label="Fee">{r.fee ? `${formatAmount(r.fee, 9)} SOL` : ''}</td>
+                <td data-label="Tx">
+                  {sample || r.tag === 'staking' ? (
+                    <span className="muted">{sample ? 'sample' : 'reward'}</span>
+                  ) : (
+                    <a href={`https://solscan.io/tx/${r.signature}`} target="_blank" rel="noreferrer">
+                      {r.signature.slice(0, 6)}…
+                    </a>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <div className="preview-foot">
+        <span className="muted small">
+          Showing {visible.length.toLocaleString()} of {shown.length.toLocaleString()} {filter === 'all' ? 'rows' : 'matching rows'}
+        </span>
+        {shown.length > visible.length && (
+          <button type="button" className="secondary small-btn" onClick={() => setLimit((n) => n + 100)}>
+            Show {Math.min(100, shown.length - visible.length).toLocaleString()} more
+          </button>
+        )}
+      </div>
+    </>
+  )
+}
+
+function kindClass(r: Row): string {
+  if (r.tag === 'staking') return 'staking'
+  if (r.kind === 'complex') return 'review'
+  return r.kind
 }
 
 function label(r: Row): string {

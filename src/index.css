@@ -1076,3 +1076,162 @@ button.chip.on {
   margin: 0 0 12px;
   padding-left: 20px;
 }
+
+.preview-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin: 24px 0 12px;
+}
+
+.preview-head h4 {
+  margin: 0;
+}
+
+.filters {
+  margin: 0;
+}
+
+.filters button.chip {
+  font-size: 0.85rem;
+  padding: 5px 12px;
+}
+
+.chip .count {
+  margin-left: 4px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.chip.on .count {
+  color: inherit;
+}
+
+.preview-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+button.small-btn {
+  padding: 7px 14px;
+  font-size: 0.9rem;
+}
+
+.kind {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: var(--surface-2);
+  color: var(--muted);
+}
+
+.kind-swap {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+}
+
+.kind-deposit,
+.kind-staking {
+  background: var(--good-bg);
+  color: var(--good);
+}
+
+.kind-withdrawal {
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  color: var(--text);
+}
+
+.kind-review {
+  background: var(--warn-bg);
+  color: var(--warn-ink);
+}
+
+/* On phones each row becomes a small card instead of a table that scrolls sideways. */
+@media (max-width: 560px) {
+  .rows-table {
+    border: 0;
+    overflow: visible;
+  }
+  .rows-table thead {
+    display: none;
+  }
+  .rows-table table,
+  .rows-table tbody,
+  .rows-table tr,
+  .rows-table td {
+    display: block;
+  }
+  .rows-table tr {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2px 12px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+  }
+  .rows-table tr.review {
+    background: var(--review);
+  }
+  .rows-table td {
+    padding: 0;
+    border: 0;
+    background: none !important;
+    white-space: normal;
+  }
+  .rows-table td:empty {
+    display: none;
+  }
+  .rows-table td[data-label='Date'] {
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+  .rows-table td[data-label='Type'] {
+    text-align: right;
+  }
+  .rows-table td[data-label='Sent'],
+  .rows-table td[data-label='Received'],
+  .rows-table td[data-label='Fee'] {
+    grid-column: 1 / -1;
+  }
+  .rows-table td[data-label='Sent']::before {
+    content: 'Sent ';
+    color: var(--muted);
+  }
+  .rows-table td[data-label='Received']::before {
+    content: 'Received ';
+    color: var(--muted);
+  }
+  .rows-table td[data-label='Fee']::before {
+    content: 'Fee ';
+    color: var(--muted);
+  }
+  .rows-table td[data-label='Fee'] {
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+  .rows-table td[data-label='Tx'] {
+    grid-column: 1 / -1;
+    text-align: left;
+    font-size: 0.82rem;
+  }
+}
+
+@media (max-width: 560px) {
+  .stats {
+    grid-template-columns: 1fr 1fr;
+  }
+  .stat:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}
