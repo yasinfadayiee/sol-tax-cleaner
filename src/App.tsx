@@ -199,6 +199,9 @@ export default function App() {
               <h3 className="small-caps">Typical import</h3>
               <div className="table-wrap">
                 <table>
+                  <thead className="sr-only">
+                    <tr><th scope="col">Type</th><th scope="col">Amount</th><th scope="col">How a tax tool reads it</th></tr>
+                  </thead>
                   <tbody>
                     <tr><td>Withdrawal</td><td>0.00203928 SOL</td><td className="bad">rent counted as a cost</td></tr>
                     <tr><td>Withdrawal</td><td>1 SOL</td><td className="bad">looks like a sale</td></tr>
@@ -215,6 +218,9 @@ export default function App() {
               <h3 className="small-caps">{APP_NAME}</h3>
               <div className="table-wrap good-wrap">
                 <table>
+                  <thead className="sr-only">
+                    <tr><th scope="col">Type</th><th scope="col">Amount</th><th scope="col">Fee</th></tr>
+                  </thead>
                   <tbody>
                     <tr><td>Swap</td><td>1 SOL → 150 USDC</td><td className="good">fee 0.000015 SOL</td></tr>
                   </tbody>
