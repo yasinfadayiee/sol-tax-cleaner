@@ -77,6 +77,10 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
   "What it handles" (`#coverage`, `COVERAGE` in `src/App.tsx`) linking each item to its guide.
   Guides show a visible breadcrumb and "Updated <date>" (from git history of the content file; Deploy checks out
   with fetch-depth 0), with datePublished/dateModified in JSON-LD and lastmod in sitemap.xml.
+- Stake-account payouts (2026-10-23): the first real-staker Mainnet check (run 39990683402) found 0.042 SOL missing:
+  validators (e.g. program RouterBmuRBk…) pay MEV tips / reward sharing straight into stake accounts in txs the
+  wallet isn't in. `fetchHistory` now scans stake accounts too, and a SOL-only inflow into a stake account paid by
+  someone else is a `staking`-tagged deposit (`Deltas.stakePayout`).
 - Launch kit with ready-to-post texts (Reddit, Koinly board, X): `docs/launch-posts.md`. Yasin posts them himself.
 - Bugs found by the mainnet check and fixed: transaction version 1 support (auto-upgrades
   `maxSupportedTransactionVersion`); mistyped Token-2022 program ID.

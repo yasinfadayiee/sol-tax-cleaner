@@ -75,6 +75,11 @@ export function classify(ref: TxRef, d: Deltas): Row[] {
     return [{ ...base, kind: 'swap', sent: out[0], received: inn[0], ...feeField, note }]
   }
 
+  // SOL paid into a stake account by a third party, with no transaction from the user: staking income.
+  if (d.stakePayout && out.length === 0 && inn.length === 1 && inn[0].mint === SOL) {
+    return [{ ...base, kind: 'deposit', received: inn[0], tag: 'staking', note: 'Paid into your stake account (MEV tips or validator reward sharing)' }]
+  }
+
   if (out.length === 0) {
     return inn.map((leg, i) => ({
       ...base,

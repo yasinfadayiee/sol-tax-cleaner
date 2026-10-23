@@ -47,6 +47,19 @@ describe('native staking', () => {
     expect(rows.map((r) => r.kind)).toEqual(['fee', 'fee'])
   })
 
+  it('exports SOL a third party pays into a stake account as staking income', () => {
+    // A validator's payout program (MEV tips, reward sharing) credits the stake account in a tx the user never signs.
+    const payout = tx({
+      accounts: [
+        { key: 'Payer111111111111111111111111111111111111111', pre: SOL1, post: SOL1 - 283_363 - 5000 },
+        { key: STAKE, pre: 5 * SOL1, post: 5 * SOL1 + 283_363 },
+      ],
+    })
+    const { rows } = processHistory([stakeTx, payout], [W])
+    expect(rows[1]).toMatchObject({ kind: 'deposit', tag: 'staking', received: { mint: 'SOL', amount: 283_363n } })
+    expect(rows[1].fee).toBeUndefined()
+  })
+
   it('ignores stake accounts the user does not control', () => {
     const other = withIx(tx({ accounts: [{ key: W, pre: SOL1, post: SOL1 - 5000 }, { key: STAKE, pre: SOL1, post: SOL1 }] }), [
       { program: 'stake', programId: STAKE_PROGRAM, parsed: { type: 'deactivate', info: { stakeAccount: STAKE, stakeAuthority: 'Someone' } } },
