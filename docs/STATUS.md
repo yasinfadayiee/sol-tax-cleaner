@@ -61,11 +61,23 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
 - SEO (2026-10-23): `/guides/` index page, "Related guides" block on every guide (closest by slug words), TechArticle +
   BreadcrumbList JSON-LD, Guides link in the guide header. 3 more guides: Solscan CSV export, Raydium/Orca/Meteora
   swaps (LP adds flagged for review), spam tokens and airdrops. 14 guides total.
+- Pro polish (2026-10-23, #17 #18): landing page prerendered to static HTML and hydrated (`src/entry-server.ts`,
+  `scripts/prerender.mjs`), WebApplication + FAQPage JSON-LD (FAQ lives in `src/faq.ts`), canonical, 404.html,
+  full footer, Guides nav link, tool chips in hero, CTA card on guides, payment auto-watches after QR (10 min),
+  grouped digits in preview, ETA in progress bar, axe-core WCAG AA clean, qrcode lazy-loaded.
+- **RPC finding (2026-10-23):** `api.mainnet-beta.solana.com` returns 403 "Access forbidden" to any request with a
+  browser Origin header, so real analysis on the live site needs a keyed RPC. Keyless alternatives tested (PublicNode,
+  dRPC, Ankr, OnFinality, BlockEden, Blast, Omnia) don't work: blocked `getTokenAccountsByOwner` or no full history.
+  Now: on refusal the analyser shows an "add a free RPC URL" step + guide `content/free-solana-rpc-url.md`.
+  `SITE_RPC_URL` (build var `VITE_RPC_URL` from repo variable `RPC_URL`) embeds a site key; visitor URL wins.
+  Browser tests from this sandbox go through a proxy that also 403s; check RPC from curl with an Origin header.
 - Launch kit with ready-to-post texts (Reddit, Koinly board, X): `docs/launch-posts.md`. Yasin posts them himself.
 - Bugs found by the mainnet check and fixed: transaction version 1 support (auto-upgrades
   `maxSupportedTransactionVersion`); mistyped Token-2022 program ID.
 
 ## In progress / next
+0. **Blocker for real users:** Yasin to get a free Helius key (domain-restricted to yasinfadayiee.github.io);
+   then set repo variable `RPC_URL` and redeploy.
 1. Watch the scheduled "Mainnet check"; fix any mismatches it reports.
 2. **Waiting on Yasin:**
    - Done 2026-10-23: Google Search Console verified (HTML tag in index.html) and sitemap.xml submitted.
