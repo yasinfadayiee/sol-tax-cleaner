@@ -90,6 +90,8 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
   kept in the phone header. Sample wallet stakes 2 SOL and gets 2 epoch rewards; results count staking rewards
   apart. Report adds "Period covered" and an "Assets in this export" totals table. FAQ +3 (tax year, big wallets,
   what paying unlocks). Lighthouse (gzip): landing perf 98, a11y/SEO 100; guides 100.
+  Each guide has its own social preview `public/og/<slug>.jpg` (template `scripts/brand/og-guide.html`, rendered by
+  `scripts/brand/render.mjs`; re-run after adding or retitling a guide).
 - Launch kit with ready-to-post texts (Reddit, Koinly board, X): `docs/launch-posts.md`. Yasin posts them himself.
 - Bugs found by the mainnet check and fixed: transaction version 1 support (auto-upgrades
   `maxSupportedTransactionVersion`); mistyped Token-2022 program ID.
