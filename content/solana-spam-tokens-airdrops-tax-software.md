@@ -1,6 +1,7 @@
 ---
 title: Solana spam tokens and airdrops in Koinly — clean them up
 description: Spam tokens and airdrops sent to your Solana wallet clutter Koinly with fake income and odd SOL rent. Here is how to spot and clean them before you import.
+category: accounts
 ---
 # Solana spam tokens and airdrops in your tax software
 

@@ -1,6 +1,7 @@
 ---
 title: pump.fun trades in Koinly or CoinTracker — fix rent and missing rows
 description: pump.fun buys open a new token account and pay rent and fees. See why tax tools mis-read them and how to export each buy and sell as one clean trade.
+category: trades
 ---
 # pump.fun trades in tax software
 

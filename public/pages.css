@@ -1,15 +1,18 @@
-:root{--bg:#f6f6fb;--surface:#fff;--text:#14141f;--muted:#5b5b6e;--border:#e3e3ee;--accent:#6c4cf5;--accent-ink:#fff;color-scheme:light dark;font-family:Inter,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;line-height:1.6}
+:root{--bg:#f6f6fb;--surface:#fff;--text:#14141f;--muted:#5b5b6e;--border:#e3e3ee;--accent:#6c4cf5;--accent-ink:#fff;color-scheme:light dark;font-family:'Inter Variable',Inter,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
 @media (prefers-color-scheme:dark){:root{--bg:#0b0b12;--surface:#14141e;--text:#ececf4;--muted:#a0a0b4;--border:#2a2a3a;--accent:#9d86ff;--accent-ink:#0b0b12}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text)}a{color:var(--accent)}
 .wrap{max-width:760px;margin:0 auto;padding:0 16px}
-.site-header{border-bottom:1px solid var(--border);background:var(--surface)}.site-header .wrap{display:flex;justify-content:space-between;align-items:center;min-height:56px;gap:16px}
-.brand{display:inline-flex;align-items:center;gap:10px;font-weight:750;color:var(--text);text-decoration:none}nav a{color:var(--muted);text-decoration:none}nav a.nav-cta{color:var(--accent-ink);background:var(--accent);padding:8px 14px;border-radius:999px;font-weight:600}
+.site-header{border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--surface) 88%,transparent);backdrop-filter:blur(10px);position:sticky;top:0;z-index:10}.site-header .wrap{display:flex;justify-content:space-between;align-items:center;min-height:56px;gap:16px}
+.brand{display:inline-flex;align-items:center;gap:10px;font-weight:750;color:var(--text);text-decoration:none;white-space:nowrap}nav a{color:var(--muted);text-decoration:none;white-space:nowrap}nav a:hover{color:var(--text)}nav a.nav-cta{color:var(--bg);background:var(--text);padding:8px 14px;border-radius:999px;font-weight:600}
 .prose{padding-top:32px;padding-bottom:48px}.prose h1{font-size:clamp(1.7rem,4vw,2.3rem);line-height:1.2;letter-spacing:-.02em}.prose h2{margin-top:32px}
 code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.9em}
 .cta{margin-top:32px}.button{display:inline-block;background:var(--accent);color:var(--accent-ink);padding:13px 22px;border-radius:12px;text-decoration:none;font-weight:600}
-.site-footer{border-top:1px solid var(--border);color:var(--muted);font-size:.875rem;padding:24px 0}
+.site-footer{border-top:1px solid var(--border);color:var(--muted);font-size:.875rem;padding:32px 0}.site-footer .wrap{max-width:1040px}.site-footer p{margin:0}.footer-grid{display:grid;grid-template-columns:1.6fr repeat(3,1fr);gap:32px}.footer-grid>div p{max-width:300px;margin-top:12px;line-height:1.5}.footer-grid nav{flex-direction:column;align-items:flex-start;gap:8px}.footer-grid h3{margin:0 0 4px;font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text)}.footer-grid nav a{white-space:normal}.footer-grid nav a:hover{color:var(--accent)}.footer-bottom{margin-top:28px;padding-top:20px;border-top:1px solid var(--border)}@media (max-width:760px){.footer-grid{grid-template-columns:1fr 1fr}.footer-grid>div{grid-column:1/-1}}
 nav{display:flex;align-items:center;gap:16px}
 .guide-list{list-style:none;padding:0;display:grid;gap:10px}.guide-list a{display:block;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;text-decoration:none;color:var(--text)}.guide-list a:hover{border-color:var(--accent)}.guide-list strong{display:block;color:var(--accent)}.guide-list span{display:block;color:var(--muted);font-size:.9rem;margin-top:2px}
 .cta-card{margin:36px 0 8px;padding:20px 22px;border-radius:14px;border:1px solid var(--accent);background:color-mix(in srgb,var(--accent) 7%,var(--surface))}.cta-card p{margin:0 0 12px}.cta-card p:last-child{margin:0;display:flex;flex-wrap:wrap;align-items:center;gap:14px}
 
 .crumbs{display:flex;gap:8px;align-items:center;font-size:.88rem;color:var(--muted);margin:0 0 12px}.crumbs a{color:var(--muted);text-decoration:none}.crumbs a:hover{color:var(--accent);text-decoration:underline}.prose .meta{color:var(--muted);font-size:.9rem;margin:-4px 0 20px}
+.lede{font-size:1.1rem;color:var(--muted)}.prose h2+.guide-list{margin-top:12px}
+.site-header .wrap{max-width:1040px}
+@media (max-width:640px){nav a.wide{display:none}}@media (max-width:400px){.site-header nav{gap:12px;font-size:.92rem}nav a.nav-cta{padding:7px 12px}}

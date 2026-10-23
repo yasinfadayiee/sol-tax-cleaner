@@ -1,6 +1,7 @@
 ---
 title: Solana rent not merged into transactions in Koinly — fix
 description: Koinly can show Solana token-account rent (0.00203928 SOL) as separate costs and refunds. Learn why, and how to export clean rows instead.
+category: accounts
 ---
 # Solana rent showing as separate transactions in Koinly
 

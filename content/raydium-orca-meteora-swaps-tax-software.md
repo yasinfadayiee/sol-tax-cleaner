@@ -1,6 +1,7 @@
 ---
 title: Raydium, Orca and Meteora swaps in Koinly or CoinTracker — fix
 description: Swaps on Raydium, Orca or Meteora often import as several rows or one-sided transfers. Learn why, and how to export one clean row per swap.
+category: trades
 ---
 # Raydium, Orca and Meteora swaps in your tax software
 

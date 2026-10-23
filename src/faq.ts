@@ -17,11 +17,23 @@ export const FAQ: Array<{ q: string; a: string }> = [
     a: 'Remove or exclude the Solana wallets your tax tool synced automatically for these addresses, then import our CSV as one custom wallet. Transfers between your own addresses are already netted out.',
   },
   {
+    q: 'Should I export only one tax year?',
+    a: 'No. Import your full history: your tax tool needs your earlier buys to work out the cost of what you sold this year. Then pick the year in the tax tool. The file covers every transaction since the wallet was created.',
+  },
+  {
+    q: 'How long does a big wallet take?',
+    a: 'Most wallets finish in a few minutes; very active trading wallets with tens of thousands of transactions can take longer, and the progress bar shows the time left. Everything fetched is cached in your browser, so running it again later only reads new transactions.',
+  },
+  {
     q: "What isn't included?",
     a: 'NFT-specific handling and price data (your tax tool adds prices). Native staking rewards are included, one row per stake account per epoch. The report lists anything that needs a manual look.',
   },
   {
     q: 'Why pay from my wallet, in SOL or USDC?',
     a: "Paying from your own wallet is also how the site recognises you, so there are no accounts, emails or licence keys. Pay in SOL, or in USDC if you'd rather have a fixed dollar price.",
+  },
+  {
+    q: 'What do I get after paying?',
+    a: 'The download unlocks right away in the same browser: every export format, as many re-exports as you like for a year, for up to five wallets. On another device, analyse the same addresses: the site finds your payment on-chain and unlocks there too.',
   },
 ]

@@ -1,6 +1,7 @@
 ---
 title: Import Solana DeFi history into CoinLedger with a clean CSV
 description: How to get Jupiter swaps, pump.fun trades and token-account rent into CoinLedger correctly using its universal import template.
+category: tools
 ---
 # Import Solana DeFi history into CoinLedger
 

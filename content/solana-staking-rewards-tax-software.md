@@ -1,6 +1,7 @@
 ---
 title: Solana staking rewards missing from your crypto tax software
 description: Native SOL staking rewards are paid every epoch without a transaction, so most tax tools never see them. Here is how to get them into Koinly, CoinTracker, CoinLedger or Awaken.
+category: accounts
 ---
 # Solana staking rewards missing from your tax software
 

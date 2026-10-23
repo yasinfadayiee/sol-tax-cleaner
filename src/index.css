@@ -115,6 +115,7 @@ nav a {
   color: var(--muted);
   text-decoration: none;
   font-size: 0.95rem;
+  white-space: nowrap;
 }
 
 nav a:hover {
@@ -901,6 +902,7 @@ td input {
 .footer-grid nav a {
   color: var(--muted);
   text-decoration: none;
+  white-space: normal;
 }
 
 .footer-grid nav a:hover {
@@ -966,7 +968,10 @@ td input {
   .pay-grid {
     grid-template-columns: 1fr;
   }
-  .site-header nav a:not(.nav-cta) {
+  .site-header nav {
+    gap: 14px;
+  }
+  .site-header nav a.wide {
     display: none;
   }
   .trust {
