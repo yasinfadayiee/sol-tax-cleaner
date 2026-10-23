@@ -3,6 +3,7 @@ import { PREVIEW_ROWS } from '../config'
 import { SOL, type Row } from '../engine/types'
 import { FORMAT_IDS, FORMATS, type FormatId } from '../export/formats'
 import { formatAmount, formatDate } from '../export/koinly'
+import { groupDigits } from './format'
 import { ambiguousTokens, buildReport } from '../export/report'
 import { loadOverrides, saveOverrides, type TokenInfo } from '../rpc/tokens'
 import { download } from './download'
@@ -192,7 +193,7 @@ function label(r: Row): string {
 function leg(l: Row['sent'], tokens: Map<string, TokenInfo>): string {
   if (!l) return ''
   const t = tokens.get(l.mint)
-  return `${formatAmount(l.amount, t?.decimals ?? (l.mint === SOL ? 9 : 0))} ${t?.symbol ?? l.mint.slice(0, 4)}`
+  return `${groupDigits(formatAmount(l.amount, t?.decimals ?? (l.mint === SOL ? 9 : 0)))} ${t?.symbol ?? l.mint.slice(0, 4)}`
 }
 
 function TokenNames({ tokens, onChange }: { tokens: Map<string, TokenInfo>; onChange: (t: Map<string, TokenInfo>) => void }) {

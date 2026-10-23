@@ -81,3 +81,13 @@ describe('report', () => {
     expect(md).toContain('could not be fetched')
   })
 })
+
+describe('groupDigits', () => {
+  it('groups the integer part only', async () => {
+    const { groupDigits } = await import('../src/ui/format')
+    expect(groupDigits('3512000')).toBe('3,512,000')
+    expect(groupDigits('1234.567891')).toBe('1,234.567891')
+    expect(groupDigits('0.000005')).toBe('0.000005')
+    expect(groupDigits('-1000')).toBe('-1,000')
+  })
+})

@@ -24,16 +24,17 @@ function load(): Promise<number | null> {
 
 /** Today's SOL price in USD, or null while loading or when the price service can't be reached. */
 export function useSolPrice(): number | null {
-  const [usd, setUsd] = useState<number | null>(() => {
-    try {
-      const v = Number(sessionStorage.getItem(KEY))
-      return v > 0 ? v : null
-    } catch {
-      return null
-    }
-  })
+  // Starts empty so the prerendered page and the first client render match; the cached price fills in right after.
+  const [usd, setUsd] = useState<number | null>(null)
   useEffect(() => {
     if (usd !== null) return
+    try {
+      const v = Number(sessionStorage.getItem(KEY))
+      // oxlint-disable-next-line react/set-state-in-effect -- must run after hydration, see above
+      if (v > 0) return setUsd(v)
+    } catch {
+      // storage may be blocked; fall through to a fresh fetch
+    }
     let live = true
     void load().then((v) => live && setUsd(v))
     return () => {

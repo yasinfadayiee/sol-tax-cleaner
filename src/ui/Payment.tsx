@@ -24,7 +24,7 @@ const terms: PaymentTerms = {
 }
 
 const POLL_MS = 5000
-const POLL_FOR_MS = 3 * 60 * 1000
+const POLL_FOR_MS = 10 * 60 * 1000
 
 type Status = 'checking' | 'unpaid' | 'waiting' | 'not-found' | 'error'
 
@@ -36,6 +36,13 @@ export function Payment({ wallets, rpc, onUnlocked }: { wallets: string[]; rpc: 
   const [copied, setCopied] = useState(false)
   const [currency, setCurrency] = useState<PayCurrency>('SOL')
   const polling = useRef(false)
+  const mounted = useRef(true)
+  useEffect(() => {
+    mounted.current = true
+    return () => {
+      mounted.current = false
+    }
+  }, [])
   const url = configured ? paymentUrl(terms, undefined, currency) : ''
   const price = currency === 'USDC' ? `${PRICE_USDC} USDC` : `${PRICE_SOL} SOL`
 
@@ -85,7 +92,7 @@ export function Payment({ wallets, rpc, onUnlocked }: { wallets: string[]; rpc: 
     polling.current = true
     setStatus('waiting')
     const until = Date.now() + POLL_FOR_MS
-    while (Date.now() < until) {
+    while (Date.now() < until && mounted.current) {
       if (await check()) {
         polling.current = false
         return
@@ -95,6 +102,15 @@ export function Payment({ wallets, rpc, onUnlocked }: { wallets: string[]; rpc: 
     polling.current = false
     setStatus('not-found')
   }
+
+  // Someone paying by scanning the QR on their phone never clicks anything here, so start watching for the
+  // payment as soon as we know there isn't one yet.
+  const autoStarted = useRef(false)
+  useEffect(() => {
+    if (status !== 'unpaid' || autoStarted.current) return
+    autoStarted.current = true
+    void waitForPayment()
+  })
 
   if (!configured) {
     return <p className="warn">Payments are not set up yet on this copy of the site.</p>
@@ -140,7 +156,7 @@ export function Payment({ wallets, rpc, onUnlocked }: { wallets: string[]; rpc: 
                 </a>
                 .
               </li>
-              <li>The download unlocks automatically, usually within 30 seconds.</li>
+              <li>The download unlocks automatically on this page, usually within 30 seconds of paying.</li>
             </ol>
             <p className="muted small">
               Paying by hand? Send exactly {price} to{' '}
@@ -157,7 +173,7 @@ export function Payment({ wallets, rpc, onUnlocked }: { wallets: string[]; rpc: 
             </p>
             <div className="actions">
               <button type="button" className="primary" onClick={() => void waitForPayment()} disabled={status === 'waiting'}>
-                {status === 'waiting' ? 'Waiting for your payment…' : 'I’ve paid, check now'}
+                {status === 'waiting' ? 'Watching for your payment…' : 'I’ve paid, check now'}
               </button>
             </div>
             {status === 'not-found' && (

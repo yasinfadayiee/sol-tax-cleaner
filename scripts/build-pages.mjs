@@ -183,6 +183,21 @@ writeFileSync(
   }),
 )
 
+// GitHub Pages serves 404.html for any missing path, at any depth, so its links must be absolute.
+const basePath = new URL(SITE_URL).pathname
+writeFileSync(
+  join(dist, '404.html'),
+  page({
+    title: `Page not found — ${APP_NAME}`,
+    description: 'This page does not exist.',
+    url: SITE_URL,
+    body: `<h1>Page not found</h1>\n<p>That page doesn't exist. It may have moved, or the link may be mistyped.</p>\n<p><a href="../">Go to the home page</a> or <a href="../guides/">browse the guides</a>.</p>`,
+  })
+    .replaceAll('href="../', `href="${basePath}`)
+    .replaceAll('src="../', `src="${basePath}`)
+    .replace('<link rel="canonical"', '<meta name="robots" content="noindex" />\n<link rel="canonical"'),
+)
+
 const urls = [SITE_URL, guidesUrl, ...pages.map((p) => p.url)]
 writeFileSync(
   join(dist, 'sitemap.xml'),

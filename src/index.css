@@ -510,6 +510,10 @@ h3 {
   margin-top: 24px;
 }
 
+.card > :first-child {
+  margin-top: 0;
+}
+
 .muted {
   color: var(--muted);
 }
