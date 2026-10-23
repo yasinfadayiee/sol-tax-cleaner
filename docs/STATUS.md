@@ -85,6 +85,13 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
   (`src/rpc/holdings.ts`) and compares them per asset with the rows (`reconcile` in `src/engine/reconcile.ts`);
   results show "Balance check passed" or the differing assets, and the report has a Balance check section. The
   Mainnet check uses the same code and always adds the staker wallet FtSe… on scheduled runs.
+- Polish round (2026-10-23, #27): guides index grouped by `category` front matter (tools / trades / accounts; build
+  fails without one), guide pages get self-hosted Inter, sticky header and the landing page's footer; Guides link
+  kept in the phone header. Sample wallet stakes 2 SOL and gets 2 epoch rewards; results count staking rewards
+  apart. Report adds "Period covered" and an "Assets in this export" totals table. FAQ +3 (tax year, big wallets,
+  what paying unlocks). Lighthouse (gzip): landing perf 98, a11y/SEO 100; guides 100.
+  Each guide has its own social preview `public/og/<slug>.jpg` (template `scripts/brand/og-guide.html`, rendered by
+  `scripts/brand/render.mjs`; re-run after adding or retitling a guide).
 - Launch kit with ready-to-post texts (Reddit, Koinly board, X): `docs/launch-posts.md`. Yasin posts them himself.
 - Bugs found by the mainnet check and fixed: transaction version 1 support (auto-upgrades
   `maxSupportedTransactionVersion`); mistyped Token-2022 program ID.
