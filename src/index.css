@@ -1300,3 +1300,34 @@ button.small-btn {
   grid-column: 1 / -1;
   background: color-mix(in srgb, var(--warn-bg) 45%, var(--surface));
 }
+
+.balance-check {
+  margin: 14px 0 0;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 0.92rem;
+}
+
+.balance-check.ok {
+  background: var(--good-bg);
+  color: var(--good);
+}
+
+.balance-check.ok strong,
+.balance-check.off strong {
+  color: inherit;
+}
+
+.balance-check.off {
+  background: var(--warn-bg);
+  color: var(--warn-ink);
+}
+
+.balance-check p {
+  margin: 0;
+}
+
+.balance-check ul {
+  margin: 6px 0 0;
+  padding-left: 20px;
+}

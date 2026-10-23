@@ -1,4 +1,4 @@
-import type { Stats } from '../engine'
+import type { BalanceCheck, Stats } from '../engine'
 import type { Row } from '../engine/types'
 import { FORMATS, type FormatId } from './formats'
 import { decimalsOf, formatAmount, formatDate, symbolOf, type TokenTable } from './koinly'
@@ -13,6 +13,7 @@ export interface ReportInput {
   generatedAt: Date
   format?: FormatId
   stakingIncomplete?: boolean
+  balanceCheck?: BalanceCheck
 }
 
 /** Tickers a tax tool may match to the wrong coin: unknown, or shared by several of the user's tokens. */
@@ -92,6 +93,28 @@ export function buildReport(r: ReportInput): string {
       lines.push(`- ${formatDate(first.blockTime)} — https://solscan.io/tx/${sig}`)
     }
     lines.push('')
+  }
+
+  const check = r.balanceCheck
+  if (check) {
+    lines.push('## Balance check', '')
+    if (!check.mismatches.length) {
+      lines.push(`For all ${check.matched} asset(s), the rows add up exactly to what the wallets and their accounts held when the report was made.`, '')
+    } else {
+      const amt = (mint: string, v: bigint) => {
+        const t = r.tokens.get(mint)
+        const s = formatAmount(v < 0n ? -v : v, t?.decimals ?? (mint === 'SOL' ? 9 : 0))
+        return `${v < 0n ? '-' : ''}${s}`
+      }
+      lines.push(
+        `${check.mismatches.length} asset(s) don't add up to what the accounts held when the report was made. A transaction during the analysis can cause this; running it again usually fixes it. Otherwise, add the difference by hand in ${tool}.`,
+        '',
+        '| Asset | Rows add up to | Held on-chain | Difference |',
+        '| --- | --- | --- | --- |',
+        ...check.mismatches.map((m) => `| ${r.tokens.get(m.asset)?.symbol ?? m.asset} | ${amt(m.asset, m.rows)} | ${amt(m.asset, m.onChain)} | ${amt(m.asset, m.onChain - m.rows)} |`),
+        '',
+      )
+    }
   }
 
   const ambiguous = ambiguousTokens(r.tokens)

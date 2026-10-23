@@ -31,7 +31,7 @@ export function Results({ analysis, onTokensChange }: { analysis: Analysis; onTo
   const rewards = rows.filter((r) => r.tag === 'staking').length
   const csv = () => format.toCsv(rows, tokens)
   const report = () =>
-    buildReport({ wallets: analysis.wallets, stats, rows, tokens, missing: analysis.missing, generatedAt: analysis.finishedAt, format: formatId, stakingIncomplete: analysis.stakingIncomplete })
+    buildReport({ wallets: analysis.wallets, stats, rows, tokens, missing: analysis.missing, generatedAt: analysis.finishedAt, format: formatId, stakingIncomplete: analysis.stakingIncomplete, balanceCheck: analysis.balanceCheck })
 
   return (
     <div className="results">
@@ -50,6 +50,8 @@ export function Results({ analysis, onTokensChange }: { analysis: Analysis; onTo
         <Stat value={stats.byKind.fee} label="fee-only rows" />
         <Stat value={stats.needsReview} label="to check by hand" />
       </div>
+      {analysis.balanceCheck && <BalanceCheckNote check={analysis.balanceCheck} tokens={tokens} />}
+
       {analysis.missing.length > 0 && (
         <p className="warn">
           {analysis.missing.length} transaction(s) could not be fetched. Run the analysis again (cached ones are instant) or use another RPC endpoint.
@@ -141,6 +143,39 @@ function savedFormat(): FormatId {
     // Fall through to the default.
   }
   return 'koinly'
+}
+
+function BalanceCheckNote({ check, tokens }: { check: NonNullable<Analysis['balanceCheck']>; tokens: Map<string, TokenInfo> }) {
+  const amount = (asset: string, v: bigint) => {
+    const t = tokens.get(asset)
+    const neg = v < 0n
+    const s = groupDigits(formatAmount(neg ? -v : v, t?.decimals ?? (asset === SOL ? 9 : 0)))
+    return `${neg ? '-' : ''}${s} ${t?.symbol ?? asset.slice(0, 4)}`
+  }
+  if (!check.mismatches.length) {
+    return (
+      <p className="balance-check ok">
+        <strong>Balance check passed.</strong> For all {check.matched.toLocaleString()} asset(s), the rows add up exactly to what your
+        wallets and their accounts hold right now.
+      </p>
+    )
+  }
+  return (
+    <div className="balance-check off">
+      <p>
+        <strong>Balance check: {check.mismatches.length} asset(s) don't add up</strong> to what your accounts hold now
+        {check.matched ? ` (${check.matched.toLocaleString()} do)` : ''}. This is usually a transaction that landed during the analysis, so run it
+        again. If it stays, the report lists the difference so you can add it by hand in your tax tool.
+      </p>
+      <ul>
+        {check.mismatches.slice(0, 10).map((m) => (
+          <li key={m.asset}>
+            {tokens.get(m.asset)?.symbol ?? m.asset.slice(0, 4)}: rows {amount(m.asset, m.rows)}, on-chain {amount(m.asset, m.onChain)}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
 }
 
 function Stat({ value, label }: { value: number; label: string }) {

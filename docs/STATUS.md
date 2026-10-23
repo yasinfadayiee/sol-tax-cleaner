@@ -32,7 +32,7 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
 - Export (`src/export`): Koinly CSV + Markdown report. License (`src/license`): Solana Pay URL + memo `STC-YYYY`.
 - UI (`src/ui`, `src/App.tsx`): landing page, analyser, results preview, token editor, payment with QR.
 - SEO/legal pages: `content/*.md` → `scripts/build-pages.mjs` (also sitemap/robots).
-- Tests: 81 unit tests pass (`npm test`). Browser smoke test with mocked RPC passed (desktop/mobile, light/dark).
+- Tests: 86 unit tests pass (`npm test`). Browser smoke test with mocked RPC passed (desktop/mobile, light/dark).
 - CI: `.github/workflows/deploy.yml` (lint+test+build, deploy to Pages) and `mainnet.yml`
   (`tests/mainnet.test.ts`: full history of 3 real Jupiter users, rows must reconcile to on-chain balances).
 - GitHub Pages is enabled: the Deploy workflow deployed successfully on 2026-10-22 (run 39779981052).
@@ -80,7 +80,11 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
 - Stake-account payouts (2026-10-23): the first real-staker Mainnet check (run 39990683402) found 0.042 SOL missing:
   validators (e.g. program RouterBmuRBk…) pay MEV tips / reward sharing straight into stake accounts in txs the
   wallet isn't in. `fetchHistory` now scans stake accounts too, and a SOL-only inflow into a stake account paid by
-  someone else is a `staking`-tagged deposit (`Deltas.stakePayout`).
+  someone else is a `staking`-tagged deposit (`Deltas.stakePayout`). Re-run reconciles exactly (run 39995075195, #25).
+- Balance check in results (2026-10-23): after analysis the site reads current balances of the wallets + estate
+  (`src/rpc/holdings.ts`) and compares them per asset with the rows (`reconcile` in `src/engine/reconcile.ts`);
+  results show "Balance check passed" or the differing assets, and the report has a Balance check section. The
+  Mainnet check uses the same code and always adds the staker wallet FtSe… on scheduled runs.
 - Launch kit with ready-to-post texts (Reddit, Koinly board, X): `docs/launch-posts.md`. Yasin posts them himself.
 - Bugs found by the mainnet check and fixed: transaction version 1 support (auto-upgrades
   `maxSupportedTransactionVersion`); mistyped Token-2022 program ID.

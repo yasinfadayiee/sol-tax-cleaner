@@ -4,6 +4,7 @@ import { newEstate, type Estate, type Row, type RowKind, type RpcTransaction } f
 
 export * from './types'
 export { classify } from './classify'
+export { netFromRows, reconcile, type BalanceCheck, type Mismatch } from './reconcile'
 export {
   accountKeys,
   collectDecimals,

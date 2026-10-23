@@ -1,9 +1,10 @@
 import { useCallback, useRef, useState } from 'react'
 import { SAMPLE_TOKENS, SAMPLE_WALLET, sampleResult } from '../demo/sample'
-import { collectDecimals, processHistory, withExtraRows, type Result } from '../engine'
+import { collectDecimals, ownedAccounts, processHistory, reconcile, withExtraRows, type BalanceCheck, type Result } from '../engine'
 import { makeCache } from '../rpc/cache'
 import { makeClient, type RpcClient } from '../rpc/client'
 import { fetchHistory, type Progress } from '../rpc/history'
+import { currentHoldings } from '../rpc/holdings'
 import { fetchStakingRewards } from '../rpc/staking'
 import { resolveTokens, type TokenInfo } from '../rpc/tokens'
 
@@ -15,6 +16,8 @@ export interface Analysis extends Result {
   finishedAt: Date
   /** Some staking rewards could not be read from the RPC. */
   stakingIncomplete?: boolean
+  /** Rows per asset compared with what the accounts hold now; missing if the balances could not be read. */
+  balanceCheck?: BalanceCheck
   /** True for the built-in sample wallet: no payment, free download. */
   sample?: boolean
 }
@@ -63,6 +66,10 @@ export function useAnalysis() {
       })
       const result = withExtraRows(base, rewards.rows)
       const tokens = await resolveTokens(rpc, collectDecimals(history.txs))
+      // A failed balance read only hides the check; the export is still complete.
+      const balanceCheck = await currentHoldings(rpc, wallets, ownedAccounts(result.estate))
+        .then((held) => reconcile(result.rows, held))
+        .catch(() => undefined)
       if (ctrl.signal.aborted) return
       setState({
         status: 'done',
@@ -74,6 +81,7 @@ export function useAnalysis() {
           rpc,
           finishedAt: new Date(),
           stakingIncomplete: 'failed' in rewards || rewards.failedEpochs.length > 0,
+          balanceCheck,
         },
       })
     } catch (e) {
