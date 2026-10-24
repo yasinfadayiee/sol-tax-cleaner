@@ -44,8 +44,9 @@ jobs:
           WEEKLY: ${{ inputs.weekly && '1' || '' }}
           TELEGRAM_TEST: ${{ inputs.telegram_test && '1' || '' }}
           # Owner's bot (from @BotFather) and their chat id; messages are skipped while either is missing.
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          # The owner saved them as SOLTAXBOT and CHATID.
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || secrets.SOLTAXBOT }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || secrets.CHATID }}
 
   fix:
     needs: check
@@ -81,8 +82,8 @@ jobs:
       - name: Tell the owner on Telegram
         if: always() && steps.token.outputs.set == 'true'
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || secrets.SOLTAXBOT }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || secrets.CHATID }}
           ISSUE: ${{ github.server_url }}/${{ github.repository }}/issues/${{ needs.check.outputs.new_alert }}
         run: |
           [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ] || exit 0
