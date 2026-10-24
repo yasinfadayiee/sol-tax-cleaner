@@ -1,0 +1,97 @@
+name: Weekly planning
+
+# Once a week Claude Opus acts as product manager: it reviews the site, the past week's automatic changes and
+# results, researches what Solana users search for, and rewrites the order and content of docs/ROADMAP.md.
+# It only edits the roadmap; the Daily improvement runs (Sonnet) carry the items out. Telegram gets a summary.
+on:
+  schedule:
+    - cron: '0 18 * * 0'
+  workflow_dispatch:
+
+concurrency:
+  group: improve
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  issues: read
+  pull-requests: read
+  actions: read
+  id-token: write
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || secrets.SOLTAXBOT }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || secrets.CHATID }}
+      SUMMARY: /tmp/stc-plan.txt
+    steps:
+      - id: token
+        run: echo "set=${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        if: steps.token.outputs.set == 'true'
+        with:
+          fetch-depth: 50
+
+      - uses: anthropics/claude-code-action@v1
+        if: steps.token.outputs.set == 'true'
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ github.token }}
+          claude_args: >-
+            --model opus --max-turns 40
+            --allowedTools "Read,Edit,Write,Glob,Grep,WebSearch,WebFetch,Bash(git log:*),Bash(git show:*),Bash(ls:*)"
+          prompt: |
+            You are the product manager of SolTax Cleaner (repository ${{ github.repository }}), a browser-only tool
+            that turns a Solana wallet's history into a clean CSV for crypto tax software. The goal is paying
+            customers from Google and AI search before the Jan-Apr tax season. The owner is not technical and does
+            not review changes; the "Daily improvement" workflow (Sonnet) does one docs/ROADMAP.md item per run,
+            three runs a day.
+
+            This week's planning:
+            1. Read AGENTS.md, docs/STATUS.md, docs/ROADMAP.md and the list of guides in content/.
+            2. Review the last week's automatic changes (`git log --since="8 days ago"`, `git show` on a few) for
+               quality: wrong claims, duplicate topics, weak pages. Add fix items for anything that needs it.
+            3. Research briefly (a few web searches) what Solana users ask about crypto tax software problems,
+               and which topics or competitor pages rank. Pick the topics most likely to bring buyers.
+            4. Rewrite the Backlog of docs/ROADMAP.md: highest value first, about 20 open items, each small enough
+               for one run and specific (slug, angle, what to link). Keep "Rules for every run" unless a rule
+               clearly needs fixing. Keep ticked items as they are.
+            Only edit docs/ROADMAP.md. Do not commit. Finally write 3-5 short lines in simple Persian for the owner
+            to /tmp/stc-plan.txt: what you found and what the next week will focus on.
+
+      - name: Publish the roadmap
+        id: publish
+        if: steps.token.outputs.set == 'true'
+        run: |
+          git add -A
+          changed=$(git diff --cached --name-only)
+          if [ -z "$changed" ]; then echo "result=nothing" >> "$GITHUB_OUTPUT"; exit 0; fi
+          if [ "$changed" != "docs/ROADMAP.md" ]; then echo "$changed"; echo "result=forbidden" >> "$GITHUB_OUTPUT"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Weekly planning: update roadmap"
+          git pull --rebase origin main
+          git push origin HEAD:main
+          echo "result=published" >> "$GITHUB_OUTPUT"
+
+      - name: Tell the owner on Telegram
+        if: always() && steps.token.outputs.set == 'true'
+        env:
+          RESULT: ${{ steps.publish.outputs.result }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ] || exit 0
+          summary=$(head -c 1200 "$SUMMARY" 2>/dev/null || true)
+          case "$RESULT" in
+            published) text="🧭 برنامه‌ی هفته‌ی بعد (Opus):
+          ${summary}" ;;
+            nothing) text="🧭 برنامه‌ریزی هفتگی: فهرست کارها تغییری لازم نداشت." ;;
+            *) text="⚠️ برنامه‌ریزی هفتگی کامل نشد (شاید سهمیه‌ی Claude تمام شده بود). $RUN_URL" ;;
+          esac
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${text}" \
+            --data-urlencode "disable_web_page_preview=true" > /dev/null
