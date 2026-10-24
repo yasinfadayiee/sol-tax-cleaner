@@ -8,7 +8,7 @@ export const MERCHANT_ADDRESS: string = import.meta.env.VITE_MERCHANT_ADDRESS ||
 export const PRICE_SOL = '0.25'
 
 /** The same unlock paid in USDC, for buyers who'd rather not price it in SOL. */
-export const PRICE_USDC = '39'
+export const PRICE_USDC = '29'
 
 /** Memo attached to payments; the unlock check looks for it. */
 export const MEMO_PREFIX = 'STC'

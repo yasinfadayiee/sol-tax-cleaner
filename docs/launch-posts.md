@@ -29,7 +29,7 @@ I got tired of fixing this by hand, so I built SolTax Cleaner:
 - Exports a CSV for Koinly, CoinTracker, CoinLedger or Awaken, plus a short report of anything that needs a manual look.
 - Native staking rewards are added too, one row per epoch.
 
-Analysis and preview are free. The full export is a one-time 0.25 SOL or 39 USDC for a year (up to 5 wallets).
+Analysis and preview are free. The full export is a one-time 0.25 SOL or 29 USDC for a year (up to 5 wallets).
 
 I tested it against real wallets and checked that the rows add up to the wallets' actual on-chain balances.
 Feedback is very welcome, especially transactions it gets wrong.

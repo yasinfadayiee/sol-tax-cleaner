@@ -21,5 +21,3 @@ If each balance change is imported separately, one trade becomes several unrelat
 ## How SolTax Cleaner fixes it
 
 It adds up everything that left and entered **all** of your accounts in the transaction. Temporary accounts, wrapped SOL and rent cancel out, which leaves exactly what you traded: one asset out, one asset in. That becomes one swap row, with the network fee in the fee column.
-
-[Analyse your wallet free](../#analyse) and compare the preview with what your tax tool shows.

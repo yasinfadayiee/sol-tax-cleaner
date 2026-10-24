@@ -16,5 +16,3 @@ When you place a limit order, your tokens move into the order program first. The
 - Fills that touch only your token account are found, as with DCA.
 - Each transaction is reduced to what actually left and entered your accounts.
 - The order deposit is exported as a withdrawal and the fill as a deposit, each with its own transaction hash. In Koinly you can merge the two into one trade, so the sale and the purchase are both recorded.
-
-[Analyse your wallet free](../#analyse).
