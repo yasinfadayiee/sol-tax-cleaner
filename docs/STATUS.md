@@ -117,7 +117,7 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
   sends every page), real README (was the Vite template), 4 buyer-intent guides (Solana taxes pillar, Koinly wrong
   balance, Phantom CSV export, Jupiter swap history). 18 guides. Next: more buyer-intent guides, custom domain later if Yasin can pay for one.
 - Telegram reports (2026-10-24): the daily check also messages Yasin in Persian on Telegram (sale, new alert,
-  recovery, weekly report, Claude fix done) when secrets `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` exist.
+  recovery, weekly report, Claude fix done) when secrets `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID` exist (Yasin saved them as `SOLTAXBOT`/`CHATID`; both names work).
   Test with the Daily check's `telegram_test` input.
 - Launch kit with ready-to-post texts (Reddit, Koinly board, X): `docs/launch-posts.md`. Yasin posts them himself.
 - Bugs found by the mainnet check and fixed: transaction version 1 support (auto-upgrades
