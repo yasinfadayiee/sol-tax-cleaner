@@ -109,7 +109,14 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
   merchant wallet (memo `STC-`, >= 0.2 SOL or >= 20 USDC, incl. its USDC token accounts). Opens a `sale` issue per
   new sale, one `alert` issue while broken (auto-closed when fixed), `weekly-report` issue on Mondays; issues
   @-mention Yasin so GitHub emails him. A new alert runs `anthropics/claude-code-action` once, only if the
-  secret `CLAUDE_CODE_OAUTH_TOKEN` exists (Yasin makes it with `claude setup-token`; not set yet).
+  secret `CLAUDE_CODE_OAUTH_TOKEN` exists (Yasin set it 2026-10-24 via `claude setup-token`; untested until the first alert).
+- Search/AI discovery (2026-10-24): Yasin finds Reddit too slow/restricted; focus is Google + AI search
+  (ChatGPT/Perplexity/Gemini). Added `llms.txt` and named AI crawlers in robots.txt (both from build-pages.mjs; note
+  crawlers read robots.txt at the host root, which we don't control on github.io), IndexNow ping after each deploy
+  (`scripts/indexnow.mjs`, key file `public/52a3f4cdf5b63aacb02b00a49c4ab214.txt`; Deploy's `indexnow_all` input
+  sends every page), real README (was the Vite template), 4 buyer-intent guides (Solana taxes pillar, Koinly wrong
+  balance, Phantom CSV export, Jupiter swap history). 18 guides. Next: Bing Webmaster Tools (Yasin, import from
+  Search Console), more buyer-intent guides, custom domain later if Yasin can pay for one.
 - Launch kit with ready-to-post texts (Reddit, Koinly board, X): `docs/launch-posts.md`. Yasin posts them himself.
 - Bugs found by the mainnet check and fixed: transaction version 1 support (auto-upgrades
   `maxSupportedTransactionVersion`); mistyped Token-2022 program ID.
@@ -122,8 +129,8 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
 1. Watch the scheduled "Mainnet check"; fix any mismatches it reports.
 2. **Waiting on Yasin:**
    - Done 2026-10-23: Google Search Console verified (HTML tag in index.html) and sitemap.xml submitted.
-   - Posting the Reddit / Koinly board texts in `docs/launch-posts.md`.
-   - Optional: secret `CLAUDE_CODE_OAUTH_TOKEN` so alerts get an automatic Claude fix attempt.
+   - Posting the Reddit / Koinly board texts in `docs/launch-posts.md` (Yasin 2026-10-24: Reddit too restrictive/slow; low priority).
+   - Bing Webmaster Tools: sign in, import the site from Google Search Console.
 3. Next product ideas, in order: privacy-friendly analytics
    (needs Yasin's signup), a real staker wallet in the mainnet check (candidates found 2026-10-23 from recent Stake
    program txs: FtSeRqHLd8PrDTMoaic4c9iQKBYb83s6YJewBxXo5wz1, 5z1vv82XM9mNqrQhttKnEf7ajGBN9s9NPGs4ajcxbA3J; run the

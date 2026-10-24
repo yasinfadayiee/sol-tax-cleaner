@@ -73,6 +73,8 @@ const INCLUDED = [
 ]
 
 const GUIDES = [
+  { slug: 'solana-crypto-taxes-transaction-history', title: 'Solana crypto taxes: get a correct history' },
+  { slug: 'koinly-solana-balance-wrong', title: 'Koinly shows the wrong Solana balance' },
   { slug: 'koinly-jupiter-dca-missing', title: 'Jupiter DCA trades missing in Koinly' },
   { slug: 'koinly-solana-rent-not-merged', title: 'Solana rent not merged into transactions' },
   { slug: 'cointracker-jupiter-limit-order-one-sided', title: 'Jupiter limit orders showing as one-sided' },
@@ -81,6 +83,8 @@ const GUIDES = [
   { slug: 'coinledger-solana-import', title: 'Import Solana DeFi history into CoinLedger' },
   { slug: 'pump-fun-trades-tax-software', title: 'pump.fun trades in tax software' },
   { slug: 'phantom-wallet-transactions-koinly', title: 'Phantom wallet history in Koinly' },
+  { slug: 'export-phantom-transaction-history-csv', title: 'Export Phantom transaction history to CSV' },
+  { slug: 'jupiter-swap-history-tax-csv', title: 'Jupiter swap history for taxes' },
   { slug: 'wrapped-sol-wsol-tax-software', title: 'Wrapped SOL (WSOL) showing in your tax tool' },
   { slug: 'solana-staking-rewards-tax-software', title: 'Solana staking rewards missing' },
   { slug: 'awaken-solana-csv-import', title: 'Import cleaned Solana history into Awaken' },
