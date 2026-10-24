@@ -37,7 +37,7 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
   (`tests/mainnet.test.ts`: full history of 3 real Jupiter users, rows must reconcile to on-chain balances).
 - GitHub Pages is enabled: the Deploy workflow deployed successfully on 2026-10-22 (run 39779981052).
 - Payments configured: `MERCHANT_ADDRESS` = C6fwRzwGVLBhBnLmiWqKgR25qBz4U3ysNuEKse519G6V (Yasin's public wallet).
-  Price 0.25 SOL or 39 USDC (#12), 365 days, up to 5 wallets; Yasin let Claude choose (below Koinly's $49 entry plan).
+  Price 0.25 SOL or 29 USDC (#12; USDC cut from 39 on 2026-10-24 to match SOL at ~$100), 365 days, up to 5 wallets; Yasin let Claude choose (below Koinly's $49 entry plan).
 - Mainnet check is green: all 3 real wallets reconcile exactly to on-chain balances (run 39780634996).
 - Design overhaul (2026-10-22): logo, gradient hero with a 3D 'rows merge into one' visual, trust strip, feature
   cards, pricing card, FAQ cards, guide cards, self-hosted Inter, og.png + apple-touch-icon (`scripts/brand/`).
@@ -96,6 +96,10 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
   footers and the payment-not-found message; "Source code" link (`REPO_URL`, the repo is public) in footers;
   landing guides list cut to 6 + "Browse all guides" button; closing CTA band before the footer; before/after
   labels top-aligned; hero buttons full width on phones.
+- Review round (2026-10-24, #31): analyser buttons use the site button style and go full width on phones; phone
+  before/after puts the tax tool's reading under the amount; footer rule lines up with content (landing + guides);
+  four guides lost a CTA line that sat right above the CTA box. USDC price 39 -> 29 (Yasin's choice) so it matches
+  0.25 SOL at ~$100; payments of the old amount still qualify (check is ">= price").
 - Launch kit with ready-to-post texts (Reddit, Koinly board, X): `docs/launch-posts.md`. Yasin posts them himself.
 - Bugs found by the mainnet check and fixed: transaction version 1 support (auto-upgrades
   `maxSupportedTransactionVersion`); mistyped Token-2022 program ID.

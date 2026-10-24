@@ -20,7 +20,7 @@ correctly, plus a short report of anything that still needs a human look.
 - Free: full analysis and summary, plus a preview of the first 20 rows.
 - Paid: full CSV export for up to 5 wallets, valid 12 months from payment.
 - Price and currency: `PRICE_SOL` in `src/config.ts` (set by the owner; around USD 29 equivalent).
-  Version 1 accepts SOL only.
+  Also payable in USDC (`PRICE_USDC`), kept close to the SOL price in dollars.
 
 ## 4. Data source
 - Default RPC: `https://api.mainnet-beta.solana.com` (public; about 100 requests per 10 s per IP and
