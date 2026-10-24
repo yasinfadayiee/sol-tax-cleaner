@@ -1,0 +1,72 @@
+name: Daily check
+
+# Autopilot without AI: checks the live site, its RPC key and the last Mainnet check, counts sales to the
+# merchant wallet, opens an issue per new sale, keeps an "alert" issue open while something is broken, and
+# posts a weekly report on Mondays. See scripts/monitor.mjs.
+#
+# Claude runs only when a new alert issue opens, and only if the CLAUDE_CODE_OAUTH_TOKEN secret is set
+# (made with `claude setup-token` on the owner's computer; uses the owner's Claude plan, no API bill).
+on:
+  schedule:
+    - cron: '30 7 * * *'
+  workflow_dispatch:
+    inputs:
+      weekly:
+        description: Also post the weekly report now
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  issues: write
+  actions: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      new_alert: ${{ steps.monitor.outputs.new_alert }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - id: monitor
+        run: node scripts/monitor.mjs
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          RPC_URL: ${{ vars.RPC_URL }}
+          WEEKLY: ${{ inputs.weekly && '1' || '' }}
+
+  fix:
+    needs: check
+    if: needs.check.outputs.new_alert != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      actions: read
+      id-token: write
+    steps:
+      - id: token
+        run: echo "set=${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        if: steps.token.outputs.set == 'true'
+        with:
+          fetch-depth: 0
+      - uses: anthropics/claude-code-action@v1
+        if: steps.token.outputs.set == 'true'
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          claude_args: '--max-turns 40'
+          prompt: |
+            The daily check of SolTax Cleaner opened issue #${{ needs.check.outputs.new_alert }} in
+            ${{ github.repository }}. Read it, then read AGENTS.md and docs/ only as needed.
+            Find the cause with as few steps as possible. If code can fix it, fix it on a new branch, run
+            `npm ci && npm run lint && npm test`, push and open a pull request that says "Fixes #${{ needs.check.outputs.new_alert }}".
+            If the cause is outside the code (Helius key or plan, GitHub Pages, RPC outage), change nothing.
+            Either way, comment once on the issue in simple Persian for the owner, who is not technical:
+            what broke, what you did, and the exact steps they must take, if any.

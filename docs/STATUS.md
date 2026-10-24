@@ -3,7 +3,7 @@
 This file is the hand-off between chat sessions. Read it (plus `AGENTS.md` and `docs/SPEC.md` only if the task
 needs them) instead of re-reading the whole codebase. **Update it at the end of every session.**
 
-Last updated: 2026-10-23
+Last updated: 2026-10-24
 
 ## The product
 SolTax Cleaner: a static, browser-only site. A Solana user pastes wallet address(es); the browser reads their full
@@ -24,6 +24,10 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
   or blockers (Yasin, 2026-10-22).
 - Claude may merge its own PRs into `main` and ship without asking (Yasin, 2026-10-22).
 - To save Claude usage, owner opens a new chat for each part of the project. Keep this file current.
+- Goal (2026-10-24): steady income above $1000/month as fast as possible, running on autopilot. Owner knows
+  nothing about crypto tax, so Claude decides product changes itself. Keep Claude usage low (Pro plan limits):
+  routine work runs in GitHub Actions with no AI; Claude runs only when a check fails (owner chose this,
+  not a weekly Claude run). Told the owner honestly: real income likely in tax season Jan-Apr 2027, no guarantee.
 
 ## Done
 - Engine (`src/engine`): estate accounting, classify (swap/deposit/withdrawal/fee/complex), fee folding.
@@ -100,6 +104,12 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
   before/after puts the tax tool's reading under the amount; footer rule lines up with content (landing + guides);
   four guides lost a CTA line that sat right above the CTA box. USDC price 39 -> 29 (Yasin's choice) so it matches
   0.25 SOL at ~$100; payments of the old amount still qualify (check is ">= price").
+- Autopilot (2026-10-24): `.github/workflows/monitor.yml` + `scripts/monitor.mjs` (plain Node, no AI) run daily:
+  site/guides/sitemap up, site RPC key answers with the site Origin, last Mainnet check not failed, sales to the
+  merchant wallet (memo `STC-`, >= 0.2 SOL or >= 20 USDC, incl. its USDC token accounts). Opens a `sale` issue per
+  new sale, one `alert` issue while broken (auto-closed when fixed), `weekly-report` issue on Mondays; issues
+  @-mention Yasin so GitHub emails him. A new alert runs `anthropics/claude-code-action` once, only if the
+  secret `CLAUDE_CODE_OAUTH_TOKEN` exists (Yasin makes it with `claude setup-token`; not set yet).
 - Launch kit with ready-to-post texts (Reddit, Koinly board, X): `docs/launch-posts.md`. Yasin posts them himself.
 - Bugs found by the mainnet check and fixed: transaction version 1 support (auto-upgrades
   `maxSupportedTransactionVersion`); mistyped Token-2022 program ID.
@@ -113,6 +123,7 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
 2. **Waiting on Yasin:**
    - Done 2026-10-23: Google Search Console verified (HTML tag in index.html) and sitemap.xml submitted.
    - Posting the Reddit / Koinly board texts in `docs/launch-posts.md`.
+   - Optional: secret `CLAUDE_CODE_OAUTH_TOKEN` so alerts get an automatic Claude fix attempt.
 3. Next product ideas, in order: privacy-friendly analytics
    (needs Yasin's signup), a real staker wallet in the mainnet check (candidates found 2026-10-23 from recent Stake
    program txs: FtSeRqHLd8PrDTMoaic4c9iQKBYb83s6YJewBxXo5wz1, 5z1vv82XM9mNqrQhttKnEf7ajGBN9s9NPGs4ajcxbA3J; run the
