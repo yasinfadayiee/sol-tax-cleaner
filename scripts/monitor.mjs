@@ -3,6 +3,7 @@
 //  - Which payments reached the merchant wallet (sales)?
 //  - Opens a GitHub issue for each new sale, keeps one "alert" issue open while something is broken,
 //    and posts a weekly report issue on Mondays. Issues mention the owner, so GitHub emails them.
+//  - Sends the same news, in Persian, to the owner's Telegram bot when TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID are set.
 import { appendFileSync } from 'node:fs'
 import { pathToFileURL } from 'node:url'
 
@@ -136,6 +137,22 @@ const createIssue = (title, body, label) => github('/issues', { method: 'POST', 
 const comment = (n, body) => github(`/issues/${n}/comments`, { method: 'POST', body: JSON.stringify({ body }) })
 const closeIssue = (n) => github(`/issues/${n}`, { method: 'PATCH', body: JSON.stringify({ state: 'closed', state_reason: 'completed' }) })
 
+/** Sends a plain-text message to the owner's Telegram bot; does nothing until both secrets are set. */
+export async function telegram(text) {
+  const token = process.env.TELEGRAM_BOT_TOKEN
+  const chat = process.env.TELEGRAM_CHAT_ID
+  if (!token || !chat) return
+  const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ chat_id: chat, text, disable_web_page_preview: true }),
+  })
+  // A Telegram problem must not stop the GitHub issues, so it is only logged.
+  if (!res.ok) console.error(`Telegram: HTTP ${res.status} ${await res.text()}`)
+}
+
+const ISSUES_URL = `https://github.com/${process.env.GITHUB_REPOSITORY ?? 'yasinfadayiee/sol-tax-cleaner'}/issues`
+
 async function lastRun(workflow) {
   try {
     const { workflow_runs: runs } = await github(`/actions/workflows/${workflow}/runs?per_page=1&exclude_pull_requests=true`)
@@ -172,6 +189,12 @@ async function main() {
 
   if (!process.env.GITHUB_ACTIONS) return // local dry run
 
+  if (process.env.TELEGRAM_TEST === '1') {
+    await telegram(
+      `✅ ربات گزارش SolTax Cleaner وصل شد.\n\nسایت: ${problems.length ? '❌ مشکل دارد' : 'سالم'}\nکل فروش تا امروز: ${sales ? summarize(sales).count : 'نامعلوم'}\n\nاز این به بعد فروش‌ها، هشدارها و گزارش هفتگی اینجا می‌آیند.`,
+    )
+  }
+
   // New sales since the last run (daily schedule; 26 h window so nothing slips between runs).
   if (sales) {
     for (const s of sales.filter((s) => s.time >= now - 26 * 3600).reverse()) {
@@ -183,6 +206,9 @@ async function main() {
         `@${OWNER} someone paid for SolTax Cleaner.\n\n- Amount: **${amount}**\n- Time: ${new Date(s.time * 1000).toISOString()}\n- Transaction: https://solscan.io/tx/${s.signature}\n\nAll-time sales: ${summarize(sales).count}`,
         'sale',
       )
+      await telegram(
+        `💰 فروش تازه!\n\nمبلغ: ${amount}\nزمان: ${new Date(s.time * 1000).toISOString().slice(0, 16).replace('T', ' ')} UTC\nتراکنش: https://solscan.io/tx/${s.signature}\n\nکل فروش تا امروز: ${summarize(sales).count}`,
+      )
     }
   }
 
@@ -193,12 +219,14 @@ async function main() {
     if (alert) await comment(alert.number, body)
     else {
       const issue = await createIssue('Site check failed', body, 'alert')
+      await telegram(`⚠️ چک روزانه مشکلی پیدا کرد:\n\n${problems.map((p) => `• ${p}`).join('\n')}\n\nجزئیات: ${issue.html_url}`)
       // Tells the workflow to call Claude once for this new alert (only if the owner set up a token).
       if (process.env.GITHUB_OUTPUT) appendFileSync(process.env.GITHUB_OUTPUT, `new_alert=${issue.number}\n`)
     }
   } else if (alert) {
     await comment(alert.number, 'All checks pass again. Closing.')
     await closeIssue(alert.number)
+    await telegram('✅ مشکل برطرف شد. همه‌ی چک‌ها دوباره سالم‌اند.')
   }
 
   // Weekly report on Mondays (UTC) or when run by hand with WEEKLY=1.
@@ -219,6 +247,19 @@ async function main() {
     ].join('\n')
     for (const old of await openIssues('weekly-report')) await closeIssue(old.number)
     await createIssue(`Weekly report ${new Date().toISOString().slice(0, 10)}`, body, 'weekly-report')
+    const fa = (s) => (s ? `${s.count} فروش (${s.sol} SOL + ${s.usdc} USDC)` : 'نامعلوم')
+    await telegram(
+      [
+        '📊 گزارش هفتگی SolTax Cleaner',
+        '',
+        `۷ روز گذشته: ${fa(week)}`,
+        `۳۰ روز گذشته: ${fa(month)}`,
+        `کل: ${fa(all)}`,
+        `سایت و کلید RPC: ${problems.length ? '❌ مشکل دارد' : '✅ سالم'}`,
+        '',
+        ISSUES_URL,
+      ].join('\n'),
+    )
   }
 }
 

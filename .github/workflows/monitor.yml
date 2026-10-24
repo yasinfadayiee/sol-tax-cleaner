@@ -15,6 +15,10 @@ on:
         description: Also post the weekly report now
         type: boolean
         default: false
+      telegram_test:
+        description: Send a test message to the Telegram bot
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -38,6 +42,10 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           RPC_URL: ${{ vars.RPC_URL }}
           WEEKLY: ${{ inputs.weekly && '1' || '' }}
+          TELEGRAM_TEST: ${{ inputs.telegram_test && '1' || '' }}
+          # Owner's bot (from @BotFather) and their chat id; messages are skipped while either is missing.
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
   fix:
     needs: check
@@ -70,3 +78,14 @@ jobs:
             If the cause is outside the code (Helius key or plan, GitHub Pages, RPC outage), change nothing.
             Either way, comment once on the issue in simple Persian for the owner, who is not technical:
             what broke, what you did, and the exact steps they must take, if any.
+      - name: Tell the owner on Telegram
+        if: always() && steps.token.outputs.set == 'true'
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ISSUE: ${{ github.server_url }}/${{ github.repository }}/issues/${{ needs.check.outputs.new_alert }}
+        run: |
+          [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ] || exit 0
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=🤖 Claude مشکل را بررسی کرد. نتیجه و کارهای لازم: ${ISSUE}" > /dev/null
