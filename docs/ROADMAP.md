@@ -23,7 +23,7 @@ correct and safe on its own.
 - Write a one-line Persian summary of what you did (simple words, for the owner) to the summary file the prompt names.
 
 ## Backlog
-- [ ] Guide: Koinly Solana wallet sync vs CSV import — which to use and how to avoid duplicates (`koinly-solana-sync-vs-csv-import`).
+- [x] (2026-10-24) Guide: Koinly Solana wallet sync vs CSV import — which to use and how to avoid duplicates (`koinly-solana-sync-vs-csv-import`).
 - [ ] Guide: Export Solflare wallet transaction history to CSV for taxes (`export-solflare-transaction-history-csv`).
 - [ ] Guide: "Missing purchase history" warnings for Solana tokens in Koinly — causes and fix (`koinly-missing-purchase-history-solana`).
 - [ ] Guide: Transfers between your own Solana wallets showing as income or disposals — import several wallets as one (`transfers-between-own-solana-wallets-tax`).

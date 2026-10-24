@@ -91,6 +91,7 @@ const GUIDES = [
   { slug: 'solscan-csv-export-tax-software', title: 'Why a Solscan CSV export imports badly' },
   { slug: 'raydium-orca-meteora-swaps-tax-software', title: 'Raydium, Orca and Meteora swaps' },
   { slug: 'solana-spam-tokens-airdrops-tax-software', title: 'Spam tokens and airdrops in your tax tool' },
+  { slug: 'koinly-solana-sync-vs-csv-import', title: 'Koinly wallet sync vs CSV import' },
 ]
 
 export default function App() {
