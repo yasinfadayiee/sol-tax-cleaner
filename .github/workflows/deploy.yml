@@ -5,6 +5,11 @@ on:
     branches: [main]
   pull_request:
   workflow_dispatch:
+    inputs:
+      indexnow_all:
+        description: Send every page to IndexNow (Bing), not only pages changed today
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -48,3 +53,19 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  # Tell Bing/IndexNow which pages changed. Never fails the deploy.
+  indexnow:
+    needs: deploy
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node scripts/indexnow.mjs
+        env:
+          ALL: ${{ inputs.indexnow_all && '1' || '' }}

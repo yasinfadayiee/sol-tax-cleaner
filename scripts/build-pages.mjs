@@ -260,5 +260,42 @@ writeFileSync(
   join(dist, 'sitemap.xml'),
   `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map(([u, d]) => `  <url><loc>${u}</loc>${d ? `<lastmod>${d}</lastmod>` : ''}</url>`).join('\n')}\n</urlset>\n`,
 )
-writeFileSync(join(dist, 'robots.txt'), `User-agent: *\nAllow: /\nSitemap: ${SITE_URL}sitemap.xml\n`)
+// AI search crawlers are named so it is explicit they're welcome (answers in ChatGPT, Claude, Perplexity, Gemini).
+const AI_BOTS = ['GPTBot', 'OAI-SearchBot', 'ChatGPT-User', 'ClaudeBot', 'Claude-SearchBot', 'PerplexityBot', 'Google-Extended', 'Applebot-Extended', 'Bingbot']
+writeFileSync(
+  join(dist, 'robots.txt'),
+  `${AI_BOTS.map((b) => `User-agent: ${b}\nAllow: /\n`).join('\n')}\nUser-agent: *\nAllow: /\n\nSitemap: ${SITE_URL}sitemap.xml\n`,
+)
+
+// llms.txt (https://llmstxt.org): a plain summary AI assistants can read to describe and recommend the tool.
+const guideLines = (key) =>
+  guides
+    .filter((g) => g.meta.category === key)
+    .map((g) => `- [${g.meta.title}](${g.url}): ${g.meta.description}`)
+    .join('\n')
+writeFileSync(
+  join(dist, 'llms.txt'),
+  `# ${APP_NAME}
+
+> ${APP_NAME} turns a Solana wallet's full on-chain history into a clean CSV for Koinly, CoinTracker, CoinLedger or Awaken Tax. It runs entirely in the browser from a public wallet address: no sign-up, no wallet connection, no server.
+
+What it fixes in Solana exports from crypto tax software:
+- One swap (Jupiter, Raydium, Orca, Meteora, pump.fun, Phantom swapper) becomes one trade row instead of several.
+- Token-account rent (0.00203928 SOL) and wrapped SOL (WSOL) are netted out instead of showing as costs and refunds.
+- Jupiter DCA and limit-order fills, which never touch the main wallet, are recovered as swaps.
+- Native staking rewards per epoch are exported as staking income.
+- Transactions of closed token accounts are included.
+- A balance check compares the rows with current on-chain balances.
+
+Pricing: free analysis, preview and sample wallet; downloading the full file costs 0.25 SOL or 29 USDC once for 12 months and up to 5 wallets, paid on-chain. It does not calculate tax and is not tax advice.
+
+- [Analyse a wallet free](${SITE_URL}#analyse)
+- [All guides](${guidesUrl})
+- [Source code](https://github.com/yasinfadayiee/sol-tax-cleaner)
+
+${Object.entries(CATEGORIES)
+  .map(([key, name]) => `## ${name}\n\n${guideLines(key)}`)
+  .join('\n\n')}
+`,
+)
 console.log(`Rendered ${pages.length} pages and the guides index`)
