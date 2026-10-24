@@ -128,6 +128,13 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
   Weekly planning (`plan.yml`, Sundays 18:00 UTC, Opus, Yasin's choice): reviews last week's auto commits, does a
   little web research, rewrites the ROADMAP backlog (~20 items); may only change docs/ROADMAP.md. If Yasin hits
   Pro limits, drop the 11:00 UTC run first.
+  Usage savers (2026-10-24, Yasin: least usage, best output): `scripts/context-pack.mjs` writes one briefing
+  (/tmp/stc-context.md: next item, rules, README product facts, every guide) so Sonnet runs need fewer turns (cap 25);
+  the planner reads it too (Opus cap 30, max 4 web searches). Free, no-AI `maintain.yml` (19:00 UTC daily): renders
+  missing guide og images (`render.mjs` ONLY_MISSING=1, Playwright 1.63.0) and runs `scripts/seo-check.mjs`
+  (long/short meta descriptions, broken guide links, orphan guides counted on built pages, guides missing from the
+  landing list, duplicate titles), adding one "Fix (auto-check) [auto:key]" item per problem type to the top of
+  the ROADMAP backlog. The improvement run may not edit `scripts/`.
 - Launch kit with ready-to-post texts (Reddit, Koinly board, X): `docs/launch-posts.md`. Yasin posts them himself.
 - Bugs found by the mainnet check and fixed: transaction version 1 support (auto-upgrades
   `maxSupportedTransactionVersion`); mistyped Token-2022 program ID.
