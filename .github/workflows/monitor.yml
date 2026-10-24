@@ -70,7 +70,8 @@ jobs:
         if: steps.token.outputs.set == 'true'
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          claude_args: '--max-turns 40'
+          github_token: ${{ github.token }}
+          claude_args: '--model sonnet --max-turns 40'
           prompt: |
             The daily check of SolTax Cleaner opened issue #${{ needs.check.outputs.new_alert }} in
             ${{ github.repository }}. Read it, then read AGENTS.md and docs/ only as needed.
