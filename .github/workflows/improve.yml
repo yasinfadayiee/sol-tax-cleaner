@@ -1,17 +1,20 @@
 name: Daily improvement
 
-# Once a day Claude does the next item of docs/ROADMAP.md (a new guide, FAQ, copy or link polish), then this
+# Three times a day Claude does the next item of docs/ROADMAP.md (a new guide, FAQ, copy or link polish), then this
 # workflow checks the change itself before it goes live:
 #   - only allowed paths changed (no workflows, payments, config or dependencies),
 #   - lint, tests and the full build pass.
 # If all is well it commits to main, starts a deploy and sends the owner a Persian summary on Telegram;
 # otherwise nothing is published and the owner is told.
 #
-# Uses the owner's Claude plan through CLAUDE_CODE_OAUTH_TOKEN (no API bill). To stay well inside Pro limits it
-# runs once a day at night in Iran, on the Sonnet model, with a turn cap.
+# Uses the owner's Claude plan through CLAUDE_CODE_OAUTH_TOKEN (no API bill). To stay inside Pro limits each run
+# is one small item on Sonnet with a turn cap, and runs sit in separate 5-hour usage windows, two of them at night
+# in Iran (UTC+3:30). The weekly Opus planner (plan.yml) decides what goes into the roadmap.
 on:
   schedule:
-    - cron: '30 22 * * *'
+    - cron: '0 20 * * *'
+    - cron: '0 1 * * *'
+    - cron: '0 11 * * *'
   workflow_dispatch:
 
 concurrency:
@@ -81,6 +84,7 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           item=$(git diff --cached docs/ROADMAP.md | grep -m1 '^+- \[x\]' | cut -c8- | cut -c1-120)
           git commit -m "Daily improvement: ${item:-roadmap item}"
+          git pull --rebase origin main
           git push origin HEAD:main
           # Pushes made with the workflow token don't start other workflows, so start the deploy explicitly.
           gh workflow run deploy.yml --ref main
