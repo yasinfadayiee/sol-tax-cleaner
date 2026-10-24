@@ -119,6 +119,12 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
 - Telegram reports (2026-10-24): the daily check also messages Yasin in Persian on Telegram (sale, new alert,
   recovery, weekly report, Claude fix done) when secrets `TELEGRAM_BOT_TOKEN`/`TELEGRAM_CHAT_ID` exist (Yasin saved them as `SOLTAXBOT`/`CHATID`; both names work).
   Test with the Daily check's `telegram_test` input.
+- Daily improvement (2026-10-24, Yasin wants the site to improve itself daily without him): `.github/workflows/improve.yml`
+  runs at 22:30 UTC (night in Iran) on Sonnet, max 30 turns, via `CLAUDE_CODE_OAUTH_TOKEN`. Claude does the first
+  unchecked item of `docs/ROADMAP.md` (guides, FAQ, links, copy), adds new items when <5 remain. The workflow then
+  rejects changes to .github/, src/license/, src/config.ts, package files, monitor/indexnow scripts; reruns
+  lint/test/build; commits to main as github-actions; dispatches Deploy; Telegram summary in Persian. New guides
+  made by it use the default og.png (no Playwright in that job). Steer it by editing ROADMAP.md.
 - Launch kit with ready-to-post texts (Reddit, Koinly board, X): `docs/launch-posts.md`. Yasin posts them himself.
 - Bugs found by the mainnet check and fixed: transaction version 1 support (auto-upgrades
   `maxSupportedTransactionVersion`); mistyped Token-2022 program ID.
