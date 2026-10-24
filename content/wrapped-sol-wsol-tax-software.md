@@ -16,5 +16,3 @@ Solana programs trade tokens, and SOL itself isn't a token. To swap SOL, apps wr
 Wrapped SOL is counted as SOL. Because the temporary WSOL account belongs to you, wrapping and unwrapping cancel out and only the SOL you actually traded remains. A swap from SOL to USDC is exported as SOL sent and USDC received, with no WSOL rows at all.
 
 If you hold WSOL in a long-lived token account, its balance still counts as SOL in the export, so totals reconcile with what your wallet holds on-chain.
-
-[Analyse your wallet free](../#analyse) to check your own history.

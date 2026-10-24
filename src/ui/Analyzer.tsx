@@ -83,7 +83,7 @@ export function Analyzer() {
           </div>
         ))}
         {wallets.length < MAX_WALLETS && (
-          <button type="button" className="link" onClick={() => setWallets([...wallets, ''])}>
+          <button type="button" className="link add-wallet" onClick={() => setWallets([...wallets, ''])}>
             + Add another wallet you own (up to {MAX_WALLETS})
           </button>
         )}
