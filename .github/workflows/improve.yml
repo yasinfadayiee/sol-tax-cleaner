@@ -32,7 +32,7 @@ jobs:
     env:
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || secrets.SOLTAXBOT }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || secrets.CHATID }}
-      SUMMARY: ${{ runner.temp }}/summary.txt
+      SUMMARY: /tmp/stc-summary.txt
     steps:
       - id: token
         run: echo "set=${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}" >> "$GITHUB_OUTPUT"
@@ -61,7 +61,7 @@ jobs:
             checkout). Read docs/ROADMAP.md and follow its rules exactly: do the first unchecked Backlog item only,
             tick it with today's date, then run `npm run lint`, `npm test` and `npm run build` and fix anything you
             broke. Do not commit, push or open pull requests; the workflow does that after its own checks.
-            Finally write a one-line summary in simple Persian for the owner to ${{ runner.temp }}/summary.txt.
+            Finally write a one-line summary in simple Persian for the owner to /tmp/stc-summary.txt.
 
       - name: Check and publish
         id: publish
