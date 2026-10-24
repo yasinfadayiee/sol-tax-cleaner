@@ -8,14 +8,17 @@ correct and safe on its own.
 
 ## Rules for every run
 - One item per run, small and complete. Never half-finish an item.
-- Read `AGENTS.md` first. Follow its hard rules (no backend, no tax calculation, "not tax advice", no secrets).
-- Never claim a feature the product doesn't have. Check `docs/SPEC.md`, `docs/STATUS.md` and `src/` before writing
-  what the tool does. If unsure, leave the claim out.
+- Hard rules from `AGENTS.md`: no backend, never calculate tax, say "not tax advice", no secrets.
+- Never claim a feature the product doesn't have. The briefing's product facts are safe; for anything else, grep
+  `docs/SPEC.md` or `src/` for that one claim (don't read whole folders). If unsure, leave the claim out.
+- Save turns: start from the briefing file, open only the files the item names or must change, and run the checks
+  once at the end as one command: `npm run lint && npm test && npm run build`.
 - Never invent facts about other products (Koinly, CoinTracker, Phantom, Jupiter...). Keep statements about them
   general unless an existing guide already states them.
 - The Terms exclude US customers: don't write US-specific tax content (IRS forms, 1099-DA, US deadlines).
-- Do not touch `.github/`, `src/license/`, `src/config.ts`, `package.json`, `package-lock.json`,
-  `scripts/monitor.mjs`, `scripts/indexnow.mjs`. The workflow rejects changes there.
+- Do not touch `.github/`, `scripts/`, `src/license/`, `src/config.ts`, `package.json`, `package-lock.json`.
+  The workflow rejects changes there.
+- "Fix (auto-check)" items come from the free daily SEO check (`scripts/seo-check.mjs`); fix exactly the pages listed.
 - New guides: `content/<slug>.md` with `title`, `description` (under 160 characters) and `category`
   (tools / trades / accounts) front matter, an H1, short sections, links to 2-3 related guides with `../<slug>/`,
   and a link to `../#analyse`. Also add it to `GUIDES` in `src/App.tsx` (end of the list). No duplicate topics:

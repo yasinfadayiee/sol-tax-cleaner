@@ -35,13 +35,21 @@ jobs:
         with:
           fetch-depth: 50
 
+      - uses: actions/setup-node@v4
+        if: steps.token.outputs.set == 'true'
+        with:
+          node-version: 22
+      - name: Write the briefing
+        if: steps.token.outputs.set == 'true'
+        run: node scripts/context-pack.mjs /tmp/stc-context.md
+
       - uses: anthropics/claude-code-action@v1
         if: steps.token.outputs.set == 'true'
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ github.token }}
           claude_args: >-
-            --model opus --max-turns 40
+            --model opus --max-turns 30
             --allowedTools "Read,Edit,Write,Glob,Grep,WebSearch,WebFetch,Bash(git log:*),Bash(git show:*),Bash(ls:*)"
           prompt: |
             You are the product manager of SolTax Cleaner (repository ${{ github.repository }}), a browser-only tool
@@ -51,10 +59,12 @@ jobs:
             three runs a day.
 
             This week's planning:
-            1. Read AGENTS.md, docs/STATUS.md, docs/ROADMAP.md and the list of guides in content/.
+            Be economical: this runs on the owner's limited plan.
+            1. Read /tmp/stc-context.md (rules, product facts, every guide with its description) and
+               docs/ROADMAP.md. Open other files only when a decision needs them.
             2. Review the last week's automatic changes (`git log --since="8 days ago"`, `git show` on a few) for
                quality: wrong claims, duplicate topics, weak pages. Add fix items for anything that needs it.
-            3. Research briefly (a few web searches) what Solana users ask about crypto tax software problems,
+            3. Research briefly (at most 4 web searches) what Solana users ask about crypto tax software problems,
                and which topics or competitor pages rank. Pick the topics most likely to bring buyers.
             4. Rewrite the Backlog of docs/ROADMAP.md: highest value first, about 20 open items, each small enough
                for one run and specific (slug, angle, what to link). Keep "Rules for every run" unless a rule
