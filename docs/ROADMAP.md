@@ -25,6 +25,9 @@ correct and safe on its own.
   (tools / trades / accounts) front matter, an H1, short sections, links to 2-3 related guides with `../<slug>/`,
   and a link to `../#analyse`. Also add it to `GUIDES` in `src/App.tsx` (end of the list). No duplicate topics:
   check `content/` first.
+- Pictures: to add an AI picture to a guide, queue it in `docs/IMAGES.md` (see the rules there) and add a roadmap
+  item to place it later; only reference `../img/<name>.jpg` once it is ticked there (the build fails otherwise).
+  At most one picture per guide, only where it explains something.
 - When fewer than 5 items are unchecked, add 5 new, specific items at the end of "Backlog" (search topics real
   Solana users type, or concrete polish found while working), then do the first unchecked item.
 - Write a one-line Persian summary of what you did (simple words, for the owner) to the summary file the prompt names.

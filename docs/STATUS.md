@@ -140,8 +140,10 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
   `context-pack.mjs` together with results (sales count, last weekly report) that plan/review collect with `gh`.
   Daily Opus review (`review.yml`, 16:23 UTC, skips when nothing was published) fixes Sonnet's work and logs lessons;
   the weekly planner rewrites Strategy/Rules learned. Agents may edit only content/src copy, ROADMAP and AGENT.md.
-  Yasin has Gemini Pro + ChatGPT Plus (consumer plans, no API): not usable from Actions; images stay template-rendered
-  unless he adds an API key.
+  Yasin has Gemini Pro + ChatGPT Plus (consumer plans, no API, no connector exists). He chose the API route:
+  `docs/IMAGES.md` is an image queue; `maintain.yml` runs `scripts/gen-images.mjs` (Gemini `gemini-2.5-flash-image`,
+  up to 3/day, sharp -> public/img/<name>.jpg 1200x675) only when secret `GEMINI_API_KEY` exists. Guides show one
+  with a line `![alt](../img/<name>.jpg)`; build-pages fails if the file is missing. Waiting on Yasin for the key.
 - Launch kit with ready-to-post texts (Reddit, Koinly board, X): `docs/launch-posts.md`. Yasin posts them himself.
 - Bugs found by the mainnet check and fixed: transaction version 1 support (auto-upgrades
   `maxSupportedTransactionVersion`); mistyped Token-2022 program ID.
