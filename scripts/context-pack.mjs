@@ -1,7 +1,9 @@
 // Writes one compact briefing for a Daily improvement run (path in argv[2], default /tmp/stc-context.md):
 // the roadmap rules, the item to do, every guide's slug/title/description and the product facts from the README.
+// Also the agent playbook (docs/AGENT.md) and, when a workflow collected them, the latest results
+// (/tmp/stc-results.md: sales so far, last weekly report).
 // Claude reads this single file instead of exploring the repo, which saves turns and Claude plan usage.
-import { readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { loadGuides } from './seo-check.mjs'
 
@@ -12,6 +14,9 @@ const next = roadmap.split('\n').find((l) => l.startsWith('- [ ] ')) ?? '(no ope
 const open = roadmap.split('\n').filter((l) => l.startsWith('- [ ] ')).length
 const readme = readFileSync(join(root, 'README.md'), 'utf8')
 const facts = readme.slice(readme.indexOf('Crypto tax software'), readme.indexOf('## Popular guides')).trim()
+const agent = readFileSync(join(root, 'docs', 'AGENT.md'), 'utf8').replace(/^# .*\n/, '').trim()
+const resultsFile = '/tmp/stc-results.md'
+const results = existsSync(resultsFile) ? readFileSync(resultsFile, 'utf8').trim() : ''
 const guides = loadGuides()
   .map((g) => `- \`${g.slug}\` [${g.meta.category}] ${g.meta.title} — ${g.meta.description}`)
   .join('\n')
@@ -29,6 +34,9 @@ ${next}
 ## Rules
 ${rules}
 
+## Agent playbook (docs/AGENT.md)
+${agent.replace(/^## /gm, '### ')}
+${results ? `\n## Latest results\n${results}\n` : ''}
 ## Product facts (README; only claim what is here or in src/ and docs/SPEC.md)
 ${facts}
 

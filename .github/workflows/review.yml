@@ -52,6 +52,16 @@ jobs:
           cache: npm
       - if: steps.todo.outputs.run == 'true'
         run: npm ci
+      - name: Collect results
+        if: steps.todo.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          {
+            echo "Sales so far: $(gh issue list --label sale --state all --limit 500 --json number --jq length)"
+            echo "Last weekly report:"
+            gh issue list --label weekly-report --state all --limit 1 --json body --jq '.[0].body // "none yet"' | head -c 1500
+          } > /tmp/stc-results.md || true
       - name: Write the briefing
         if: steps.todo.outputs.run == 'true'
         run: node scripts/context-pack.mjs /tmp/stc-context.md
@@ -69,7 +79,7 @@ jobs:
             small site improvements three times a day from docs/ROADMAP.md and publishes them without human review.
             Your job today is quality control of what it published. Be economical: this runs on the owner's
             limited plan.
-            1. Read /tmp/stc-context.md (rules and product facts). List today's changes with
+            1. Read /tmp/stc-context.md (rules, agent playbook, product facts). List today's changes with
                `git log --since="25 hours ago" --author="github-actions" --grep="^Daily improvement" --stat`
                and read each with `git show`.
             2. Judge each change as a demanding editor: claims the product doesn't support (grep docs/SPEC.md or
@@ -79,6 +89,8 @@ jobs:
             3. Fix small problems yourself, in place, following the roadmap rules. For anything bigger than a few
                edits, add a specific "Fix (review): ..." item at the top of the Backlog in docs/ROADMAP.md instead.
                If everything is good, change nothing.
+               When you fixed something, append one dated line to "Lessons" in docs/AGENT.md saying what went
+               wrong, so the planner can turn repeated mistakes into rules.
             4. If you edited files, run `npm run lint && npm test && npm run build` once at the end.
             Do not touch .github/, scripts/, src/license/, src/config.ts, package.json or package-lock.json.
             Do not commit, push or open pull requests.

@@ -135,6 +135,13 @@ Free analysis and preview; download unlocks after paying SOL to the owner's wall
   (long/short meta descriptions, broken guide links, orphan guides counted on built pages, guides missing from the
   landing list, duplicate titles), adding one "Fix (auto-check) [auto:key]" item per problem type to the top of
   the ROADMAP backlog. The improvement run may not edit `scripts/`.
+- Self-improving agent (2026-10-25, Yasin: an agent that works daily toward $1000/month and gets better by itself):
+  `docs/AGENT.md` is the agent's playbook (mission, strategy, rules learned, lessons), included in every briefing by
+  `context-pack.mjs` together with results (sales count, last weekly report) that plan/review collect with `gh`.
+  Daily Opus review (`review.yml`, 16:23 UTC, skips when nothing was published) fixes Sonnet's work and logs lessons;
+  the weekly planner rewrites Strategy/Rules learned. Agents may edit only content/src copy, ROADMAP and AGENT.md.
+  Yasin has Gemini Pro + ChatGPT Plus (consumer plans, no API): not usable from Actions; images stay template-rendered
+  unless he adds an API key.
 - Launch kit with ready-to-post texts (Reddit, Koinly board, X): `docs/launch-posts.md`. Yasin posts them himself.
 - Bugs found by the mainnet check and fixed: transaction version 1 support (auto-upgrades
   `maxSupportedTransactionVersion`); mistyped Token-2022 program ID.
