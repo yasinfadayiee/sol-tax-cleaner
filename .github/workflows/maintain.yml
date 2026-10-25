@@ -43,6 +43,8 @@ jobs:
           ONLY_MISSING=1 node scripts/brand/render.mjs
 
       - name: Make queued images (Gemini)
+        id: images
+        continue-on-error: true
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
@@ -76,16 +78,19 @@ jobs:
           echo "items=$items" >> "$GITHUB_OUTPUT"
 
       - name: Tell the owner on Telegram
-        if: steps.publish.outputs.images != '' || failure()
+        if: steps.publish.outputs.images != '' || steps.images.outcome == 'failure' || failure()
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || secrets.SOLTAXBOT }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || secrets.CHATID }}
           IMAGES: ${{ steps.publish.outputs.images }}
+          IMAGES_FAILED: ${{ steps.images.outcome == 'failure' }}
           ITEMS: ${{ steps.publish.outputs.items }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ] || exit 0
-          if [ -n "$IMAGES" ]; then
+          if [ "$IMAGES_FAILED" = "true" ]; then
+            text="🖼 ساخت عکس با Gemini خطا داد (شاید کلید درست نیست یا حساب Gemini پرداخت لازم دارد). بقیه‌ی نگهداری انجام شد. $RUN_URL"
+          elif [ -n "$IMAGES" ]; then
             text="🧹 نگهداری رایگان امروز (بدون Claude): ${IMAGES} تصویر ساخته شد، ${ITEMS} مشکل سئو پیدا و به فهرست کارها اضافه شد."
           else
             text="⚠️ نگهداری روزانه خطا داد: $RUN_URL"

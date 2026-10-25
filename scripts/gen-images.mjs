@@ -48,3 +48,5 @@ for (const [line, name, prompt] of open) {
 }
 writeFileSync(queueFile, queue)
 console.log(`${made} image(s) made, ${open.length - made} failed.`)
+// A failure fails this step so the owner hears about it; the workflow carries on with the rest of the upkeep.
+if (made < open.length) process.exit(1)
