@@ -82,7 +82,7 @@ const GUIDES = [
   { slug: 'cointracker-solana-transactions-wrong', title: 'Solana transactions wrong in CoinTracker' },
   { slug: 'coinledger-solana-import', title: 'Import Solana DeFi history into CoinLedger' },
   { slug: 'pump-fun-trades-tax-software', title: 'pump.fun trades in tax software' },
-  { slug: 'phantom-wallet-transactions-koinly', title: 'Phantom wallet history in Koinly' },
+  { slug: 'phantom-wallet-transactions-koinly', title: 'Phantom wallet in Koinly — fix split swaps and duplicates' },
   { slug: 'export-phantom-transaction-history-csv', title: 'Export Phantom transaction history to CSV' },
   { slug: 'jupiter-swap-history-tax-csv', title: 'Jupiter swap history for taxes' },
   { slug: 'wrapped-sol-wsol-tax-software', title: 'Wrapped SOL (WSOL) showing in your tax tool' },
