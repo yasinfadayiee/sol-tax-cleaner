@@ -15,6 +15,8 @@ In Phantom, open the account menu and copy the **Solana** address. It is public 
 
 Paste the address on the [analyser](../#analyse). It reads the address's full history straight from the Solana network in your browser: swaps from Phantom's swapper and Jupiter, transfers, staking, closed token accounts. Each swap becomes one row; rent and wrapped SOL are netted out.
 
+To read the full history you need a Solana RPC URL; see [how to get a free one in 2 minutes](../free-solana-rpc-url/).
+
 If you have several Phantom accounts, add up to five addresses. Transfers between your own accounts cancel out.
 
 ## 3. Pick the format

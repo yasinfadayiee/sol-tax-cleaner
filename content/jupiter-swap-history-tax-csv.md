@@ -13,6 +13,8 @@ Jupiter is the most used swap aggregator on Solana, so for many people "Solana t
 - **DCA orders missing.** Each DCA fill is executed by a keeper from an order account, without your wallet: [Jupiter DCA trades missing](../koinly-jupiter-dca-missing/).
 - **Limit orders look one-sided.** The tokens arrive but the payment seems to be missing: [limit orders show as one-sided receives](../cointracker-jupiter-limit-order-one-sided/).
 
+Swaps on other venues have the same problems: see [Raydium, Orca and Meteora swaps](../raydium-orca-meteora-swaps-tax-software/) and [pump.fun trades](../pump-fun-trades-tax-software/).
+
 ## What a clean export looks like
 
 - Each swap is one trade row: what you sent, what you received, and the network fee.
