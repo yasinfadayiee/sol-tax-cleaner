@@ -28,7 +28,7 @@ correct and safe on its own.
 - Write a one-line Persian summary of what you did (simple words, for the owner) to the summary file the prompt names.
 
 ## Backlog
-- [ ] Fix (auto-check) [auto:desc-long] meta description over 160 characters (Google cuts it); shorten to 120-160, problem first: `free-solana-rpc-url`, `koinly-solana-balance-wrong`, `phantom-wallet-transactions-koinly`, `solana-crypto-taxes-transaction-history`, `solana-staking-rewards-tax-software`.
+- [x] (2026-10-25) Fix (auto-check) [auto:desc-long] meta description over 160 characters (Google cuts it); shorten to 120-160, problem first: `free-solana-rpc-url`, `koinly-solana-balance-wrong`, `phantom-wallet-transactions-koinly`, `solana-crypto-taxes-transaction-history`, `solana-staking-rewards-tax-software`.
 - [ ] Fix (auto-check) [auto:orphans] guides no other guide links to; add one natural link to each from the most related guide: `free-solana-rpc-url`, `pump-fun-trades-tax-software`, `raydium-orca-meteora-swaps-tax-software`.
 - [x] (2026-10-24) Guide: Koinly Solana wallet sync vs CSV import — which to use and how to avoid duplicates (`koinly-solana-sync-vs-csv-import`).
 - [ ] Fix (duplicate topic): `phantom-wallet-transactions-koinly` and `export-phantom-transaction-history-csv` say almost the same thing. Make the Koinly page Koinly-only: retitle to "Phantom wallet in Koinly — fix split swaps, rent rows and duplicates", replace the generic list with Koinly steps (remove the synced Phantom/Solana wallet, import as one custom wallet, compare the balance) and drop CoinTracker/CoinLedger from its description. Link each page to the other once. Do not change either slug.

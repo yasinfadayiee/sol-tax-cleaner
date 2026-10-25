@@ -1,6 +1,6 @@
 ---
 title: Solana crypto taxes — how to get a correct transaction history
-description: Your Solana tax report is only as good as its transaction history. What usually goes wrong with Solana wallets in tax software, and how to export a clean, complete CSV.
+description: A Solana tax report is only as good as its history. See what goes wrong with Solana wallets in tax software and how to export a clean CSV.
 category: tools
 ---
 # Solana crypto taxes: start with a correct transaction history

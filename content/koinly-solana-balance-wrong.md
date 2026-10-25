@@ -1,6 +1,6 @@
 ---
 title: Koinly shows the wrong Solana balance — find the missing transactions
-description: If Koinly's Solana balance doesn't match your wallet, transactions are missing or duplicated. The usual causes on Solana and how to rebuild a history that reconciles.
+description: Koinly's Solana balance not matching your wallet means missing or duplicated transactions. Common causes and how to rebuild a history that reconciles.
 category: tools
 ---
 # Koinly shows the wrong Solana balance
