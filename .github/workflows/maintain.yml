@@ -2,6 +2,7 @@ name: Daily maintenance
 
 # Free upkeep with no AI and no Claude usage, every day before the improvement runs:
 #   - renders a social preview image for every guide that doesn't have one yet (Playwright),
+#   - makes the pictures queued in docs/IMAGES.md with Gemini, when the GEMINI_API_KEY secret exists,
 #   - runs the SEO check (scripts/seo-check.mjs) and puts any problem it finds at the top of docs/ROADMAP.md,
 #     so the next Claude run fixes a real problem instead of searching for one.
 # Commits to main, starts a deploy when the site changed, and tells the owner on Telegram only when it did something.
@@ -41,6 +42,17 @@ jobs:
           npx playwright install --with-deps chromium
           ONLY_MISSING=1 node scripts/brand/render.mjs
 
+      - name: Make queued images (Gemini)
+        id: images
+        continue-on-error: true
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          [ -n "$GEMINI_API_KEY" ] || { echo "No GEMINI_API_KEY secret; skipping."; exit 0; }
+          grep -q '^- \[ \] ' docs/IMAGES.md || { echo "Image queue is empty."; exit 0; }
+          npm i --no-save sharp@0.34.4
+          node scripts/gen-images.mjs
+
       - name: SEO check
         run: |
           npm run build > /dev/null
@@ -51,10 +63,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          git add public/og docs/ROADMAP.md
+          git add public/og public/img docs/ROADMAP.md docs/IMAGES.md
           changed=$(git diff --cached --name-only)
           [ -z "$changed" ] && exit 0
-          images=$(echo "$changed" | grep -c '^public/og/' || true)
+          images=$(echo "$changed" | grep -cE '^public/(og|img)/' || true)
           items=$(git diff --cached docs/ROADMAP.md | grep -c '^+- \[ \] Fix (auto-check)' || true)
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -66,17 +78,20 @@ jobs:
           echo "items=$items" >> "$GITHUB_OUTPUT"
 
       - name: Tell the owner on Telegram
-        if: steps.publish.outputs.images != '' || failure()
+        if: steps.publish.outputs.images != '' || steps.images.outcome == 'failure' || failure()
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || secrets.SOLTAXBOT }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || secrets.CHATID }}
           IMAGES: ${{ steps.publish.outputs.images }}
+          IMAGES_FAILED: ${{ steps.images.outcome == 'failure' }}
           ITEMS: ${{ steps.publish.outputs.items }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ] || exit 0
-          if [ -n "$IMAGES" ]; then
-            text="🧹 نگهداری رایگان امروز (بدون Claude): ${IMAGES} تصویر برای راهنماهای تازه ساخته شد، ${ITEMS} مشکل سئو پیدا و به فهرست کارها اضافه شد."
+          if [ "$IMAGES_FAILED" = "true" ]; then
+            text="🖼 ساخت عکس با Gemini خطا داد (شاید کلید درست نیست یا حساب Gemini پرداخت لازم دارد). بقیه‌ی نگهداری انجام شد. $RUN_URL"
+          elif [ -n "$IMAGES" ]; then
+            text="🧹 نگهداری رایگان امروز (بدون Claude): ${IMAGES} تصویر ساخته شد، ${ITEMS} مشکل سئو پیدا و به فهرست کارها اضافه شد."
           else
             text="⚠️ نگهداری روزانه خطا داد: $RUN_URL"
           fi

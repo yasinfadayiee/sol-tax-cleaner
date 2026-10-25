@@ -58,9 +58,17 @@ export function markdown(md) {
   for (const raw of md.split('\n')) {
     const line = raw.trimEnd()
     const h = /^(#{1,3}) (.*)$/.exec(line)
+    // An image on its own line: ![alt](../img/<name>.jpg), made by scripts/gen-images.mjs. The build fails when the
+    // file doesn't exist yet, so an improvement run can't publish a page with a broken picture.
+    const img = /^!\[([^\]]*)\]\(\.\.\/img\/([\w-]+\.jpg)\)$/.exec(line)
     const ul = /^- (.*)$/.exec(line)
     const ol = /^\d+\. (.*)$/.exec(line)
-    if (h) {
+    if (img) {
+      flushPara()
+      flushList()
+      if (!existsSync(join(root, 'public', 'img', img[2]))) throw new Error(`Image public/img/${img[2]} does not exist yet`)
+      out.push(`<figure><img src="../img/${img[2]}" alt="${esc(img[1])}" width="1200" height="675" loading="lazy" decoding="async" /></figure>`)
+    } else if (h) {
       flushPara()
       flushList()
       out.push(`<h${h[1].length}>${inline(h[2])}</h${h[1].length}>`)
