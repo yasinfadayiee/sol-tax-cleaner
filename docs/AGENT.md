@@ -18,14 +18,26 @@ Search impressions are not available to the agent yet. Judge each week by: sales
 buyer question no other page answers, then site quality (SEO check clean, no wrong claims).
 
 ## Strategy (planner keeps this current; a few lines)
-- Until the first sales: grow buyer-intent pages (people whose tax tool is wrong right now), make every guide
-  lead to the analyser and the free sample, and keep the site fast and trustworthy.
-- Prefer one excellent page over two thin ones. Cover a problem fully, then link it from related guides.
+Updated 2026-10-25. 0 sales so far; 21 guides, none ranking yet as far as we know.
+- Koinly is where most buyers are. Koinly's own forum and feedback boards show what Solana users actually hit:
+  "missing purchase history" warnings, a wallet that stops syncing or loses older token-account transactions,
+  memecoin swaps left as a separate send and receive when a token has no price, and staking balances. Write one
+  page per error message, using the words people type ("missing purchase history", "not syncing"), and say early
+  on that our file fixes exactly that.
+- Every guide is a door to the free analysis. It ends with one clear next step: paste your public address, see
+  every row and the balance check for free, pay only to download.
+- Prefer one excellent page over two thin ones. Before a new guide, compare it with the closest existing one; if
+  they would overlap, improve the old page instead. Link each new page from the hub page and one related guide.
+- Stay inside what the product does: swaps, rent, wrapped SOL, Jupiter DCA/limit fills, native staking, closed
+  token accounts, own-wallet transfers, failed-transaction fees. NFTs, liquidity pools, lending and liquid staking
+  are not covered (SPEC §10 and src/engine/): don't write pages about them.
 - From December: freshen the top guides for the new tax year and make the paid step as clear as possible.
 
 ## Rules learned (planner adds a rule when a mistake repeats; keep it short)
 - Never invent facts about other products; keep statements about them general.
 - Every claim about our tool must be in the README, docs/SPEC.md or src/.
+- No two pages (or two roadmap items) on the same topic. Two Phantom export pages were written; the planner also
+  queued a meta-description fix the daily SEO check had already done. Check `content/` and ticked items first.
 
 ## Lessons (reviewer appends one dated line when it fixes something; planner prunes to the last ~15)
 - 2026-10-25: Sonnet's first guides and meta fixes were accurate and clean; keep the item specs this specific.
