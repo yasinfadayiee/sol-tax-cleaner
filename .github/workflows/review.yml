@@ -1,0 +1,131 @@
+name: Daily review
+
+# Once a day Claude Opus acts as project manager over the Sonnet "Daily improvement" runs: it reads what they
+# published in the last 24 hours and fixes anything not good enough (wrong or invented claims, weak or duplicate
+# pages, broken links, bad wording). Bigger problems go to the top of docs/ROADMAP.md for the next Sonnet run.
+# Skips without calling Claude when no improvement was published, so quiet days cost nothing.
+# Same guardrails as improve.yml: allowed paths only, lint/test/build must pass, then commit, deploy, Telegram.
+on:
+  schedule:
+    - cron: '23 16 * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: improve
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  actions: write
+  issues: read
+  pull-requests: read
+  id-token: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || secrets.SOLTAXBOT }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID || secrets.CHATID }}
+      SUMMARY: /tmp/stc-review.txt
+    steps:
+      - id: token
+        run: echo "set=${{ secrets.CLAUDE_CODE_OAUTH_TOKEN != '' }}" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        if: steps.token.outputs.set == 'true'
+        with:
+          fetch-depth: 0
+
+      - name: Anything to review?
+        id: todo
+        if: steps.token.outputs.set == 'true'
+        run: |
+          commits=$(git log --since="25 hours ago" --author="github-actions" --grep="^Daily improvement" --format=%h)
+          echo "$commits"
+          if [ -n "$commits" ]; then echo "run=true" >> "$GITHUB_OUTPUT"; else echo "run=false" >> "$GITHUB_OUTPUT"; fi
+
+      - uses: actions/setup-node@v4
+        if: steps.todo.outputs.run == 'true'
+        with:
+          node-version: 22
+          cache: npm
+      - if: steps.todo.outputs.run == 'true'
+        run: npm ci
+      - name: Write the briefing
+        if: steps.todo.outputs.run == 'true'
+        run: node scripts/context-pack.mjs /tmp/stc-context.md
+
+      - uses: anthropics/claude-code-action@v1
+        if: steps.todo.outputs.run == 'true'
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          github_token: ${{ github.token }}
+          claude_args: >-
+            --model opus --max-turns 20
+            --allowedTools "Read,Edit,Write,Glob,Grep,Bash(git log:*),Bash(git show:*),Bash(npm run lint),Bash(npm test),Bash(npm run build),Bash(git diff:*)"
+          prompt: |
+            You are the project manager of SolTax Cleaner; the working directory is its repository. Sonnet makes
+            small site improvements three times a day from docs/ROADMAP.md and publishes them without human review.
+            Your job today is quality control of what it published. Be economical: this runs on the owner's
+            limited plan.
+            1. Read /tmp/stc-context.md (rules and product facts). List today's changes with
+               `git log --since="25 hours ago" --author="github-actions" --grep="^Daily improvement" --stat`
+               and read each with `git show`.
+            2. Judge each change as a demanding editor: claims the product doesn't support (grep docs/SPEC.md or
+               src/ for the one claim), invented facts about other products, US-specific tax content, tax advice,
+               duplicate topics, broken `../<slug>/` links, a guide missing from GUIDES in src/App.tsx, unclear or
+               padded writing, a meta description that doesn't start with the reader's problem.
+            3. Fix small problems yourself, in place, following the roadmap rules. For anything bigger than a few
+               edits, add a specific "Fix (review): ..." item at the top of the Backlog in docs/ROADMAP.md instead.
+               If everything is good, change nothing.
+            4. If you edited files, run `npm run lint && npm test && npm run build` once at the end.
+            Do not touch .github/, scripts/, src/license/, src/config.ts, package.json or package-lock.json.
+            Do not commit, push or open pull requests.
+            Finally write 1-3 short lines in simple Persian for the owner to /tmp/stc-review.txt: what you checked,
+            what you fixed or queued, or that the work was good.
+
+      - name: Check and publish
+        id: publish
+        if: steps.todo.outputs.run == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git add -A
+          changed=$(git diff --cached --name-only)
+          if [ -z "$changed" ]; then echo "result=nothing" >> "$GITHUB_OUTPUT"; exit 0; fi
+          echo "$changed"
+          if echo "$changed" | grep -qE '^(\.github/|src/license/|src/config\.ts$|package(-lock)?\.json$|scripts/)'; then
+            echo "result=forbidden" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if ! (npm run lint && npm test && npm run build); then echo "result=failed" >> "$GITHUB_OUTPUT"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Daily review: fixes to recent improvements"
+          git pull --rebase origin main
+          git push origin HEAD:main
+          # Pushes made with the workflow token don't start other workflows, so start the deploy explicitly.
+          gh workflow run deploy.yml --ref main
+          echo "result=published" >> "$GITHUB_OUTPUT"
+
+      - name: Tell the owner on Telegram
+        if: always() && steps.todo.outputs.run == 'true'
+        env:
+          RESULT: ${{ steps.publish.outputs.result }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          [ -n "$TELEGRAM_BOT_TOKEN" ] && [ -n "$TELEGRAM_CHAT_ID" ] || exit 0
+          summary=$(head -c 800 "$SUMMARY" 2>/dev/null || true)
+          case "$RESULT" in
+            published) text="🔍 بازبینی Opus، اصلاح‌ها منتشر شد:
+          ${summary}" ;;
+            nothing) text="🔍 بازبینی Opus:
+          ${summary:-کارهای امروز خوب بود و اصلاحی لازم نشد.}" ;;
+            forbidden) text="⛔️ بازبینی امروز به بخش‌های حساس دست زده بود و منتشر نشد. $RUN_URL" ;;
+            failed) text="⚠️ اصلاح‌های بازبینی امروز تست‌ها را رد کرد و منتشر نشد. $RUN_URL" ;;
+            *) text="⚠️ بازبینی Opus امروز کامل نشد (شاید سهمیه‌ی Claude تمام شده بود). $RUN_URL" ;;
+          esac
+          curl -sS -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${text}" \
+            --data-urlencode "disable_web_page_preview=true" > /dev/null

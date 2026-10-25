@@ -1,7 +1,9 @@
 # Daily improvement roadmap
 
 Read by the "Daily improvement" workflow (`.github/workflows/improve.yml`, three runs a day, Sonnet). The weekly
-"Weekly planning" workflow (`plan.yml`, Opus) reorders and refills the Backlog. Each improvement run, Claude does the **first
+"Weekly planning" workflow (`plan.yml`, Opus) reorders and refills the Backlog. The daily "Daily review" workflow
+(`review.yml`, Opus) checks what the improvement runs published, fixes small problems and adds "Fix (review)"
+items at the top of the Backlog. Each improvement run, Claude does the **first
 unchecked item only**, ticks it (`- [x]`, with the date), and stops. Goal: more visitors from Google and AI search
 who become paying customers. The owner is not technical and does not review changes, so every change must be
 correct and safe on its own.
