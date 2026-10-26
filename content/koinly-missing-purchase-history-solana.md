@@ -1,6 +1,6 @@
 ---
 title: Koinly "missing purchase history" on a Solana token — find where it came from
-description: Koinly says a Solana token has missing purchase history? It saw you send out more than you received. Find the missing buy: split swaps, DCA fills, closed accounts.
+description: Koinly says a Solana token has missing purchase history? It saw more go out than come in. Find the missing buy: split swaps, DCA fills, closed accounts.
 category: tools
 ---
 # Koinly "missing purchase history" on a Solana token
