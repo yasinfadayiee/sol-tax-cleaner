@@ -21,7 +21,7 @@ Only your **public** Solana address. In Phantom, tap your account name and copy 
 ## Steps in Koinly
 
 1. Paste the address on the [analyser](../#analyse), run the free analysis and choose the Koinly format.
-2. Download the file.
+2. Check the preview and the balance check for free, then pay once to download the file.
 3. In Koinly, remove the synced Phantom/Solana wallet, so the same transactions are not counted twice.
 4. Import the file as one custom wallet.
 5. Compare the balance Koinly shows with your wallet. The analyser also checks the rows against current on-chain balances, asset by asset.

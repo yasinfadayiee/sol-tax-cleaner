@@ -21,7 +21,7 @@ Pick the token with the warning, open its transactions in Koinly, and compare th
 
 1. Paste your public address (and your other wallets, up to five in one analysis) on the [analyser](../#analyse) and run the free analysis.
 2. Find the token in the results and check the **balance check**. It compares the rebuilt rows with your current on-chain balance for each asset.
-3. If the rows add up, download the Koinly file. In Koinly, remove the synced Solana wallet (or its transactions) and import the file into one custom wallet, so nothing is counted twice.
+3. If the rows add up, pay once to download the Koinly file. In Koinly, remove the synced Solana wallet (or its transactions) and import the file into one custom wallet, so nothing is counted twice.
 4. Check the token again in Koinly. The buy should now be there as a trade, so the warning for that token should be gone.
 
 If the warning stays, the token probably came from somewhere outside Solana, such as an exchange or another chain. Add that history to Koinly separately.
