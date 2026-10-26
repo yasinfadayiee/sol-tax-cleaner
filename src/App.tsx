@@ -92,6 +92,7 @@ const GUIDES = [
   { slug: 'raydium-orca-meteora-swaps-tax-software', title: 'Raydium, Orca and Meteora swaps' },
   { slug: 'solana-spam-tokens-airdrops-tax-software', title: 'Spam tokens and airdrops in your tax tool' },
   { slug: 'koinly-solana-sync-vs-csv-import', title: 'Koinly wallet sync vs CSV import' },
+  { slug: 'koinly-missing-purchase-history-solana', title: 'Koinly "missing purchase history" on a Solana token' },
 ]
 
 export default function App() {
