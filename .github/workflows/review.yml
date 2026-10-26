@@ -1,13 +1,13 @@
 name: Daily review
 
-# Once a day Claude Opus acts as project manager over the Sonnet "Daily improvement" runs: it reads what they
-# published in the last 24 hours and fixes anything not good enough (wrong or invented claims, weak or duplicate
+# Twice a week (Mon, Thu) Claude Opus acts as project manager over the Sonnet "Daily improvement" runs: it reads what they
+# published in the last days and fixes anything not good enough (wrong or invented claims, weak or duplicate
 # pages, broken links, bad wording). Bigger problems go to the top of docs/ROADMAP.md for the next Sonnet run.
 # Skips without calling Claude when no improvement was published, so quiet days cost nothing.
 # Same guardrails as improve.yml: allowed paths only, lint/test/build must pass, then commit, deploy, Telegram.
 on:
   schedule:
-    - cron: '23 16 * * *'
+    - cron: '23 16 * * 1,4'
   workflow_dispatch:
 
 concurrency:
@@ -41,7 +41,7 @@ jobs:
         id: todo
         if: steps.token.outputs.set == 'true'
         run: |
-          commits=$(git log --since="25 hours ago" --author="github-actions" --grep="^Daily improvement" --format=%h)
+          commits=$(git log --since="97 hours ago" --author="github-actions" --grep="^Daily improvement" --format=%h)
           echo "$commits"
           if [ -n "$commits" ]; then echo "run=true" >> "$GITHUB_OUTPUT"; else echo "run=false" >> "$GITHUB_OUTPUT"; fi
 
@@ -80,7 +80,7 @@ jobs:
             Your job today is quality control of what it published. Be economical: this runs on the owner's
             limited plan.
             1. Read /tmp/stc-context.md (rules, agent playbook, product facts). List today's changes with
-               `git log --since="25 hours ago" --author="github-actions" --grep="^Daily improvement" --stat`
+               `git log --since="97 hours ago" --author="github-actions" --grep="^Daily improvement" --stat`
                and read each with `git show`.
             2. Judge each change as a demanding editor: claims the product doesn't support (grep docs/SPEC.md or
                src/ for the one claim), invented facts about other products, US-specific tax content, tax advice,

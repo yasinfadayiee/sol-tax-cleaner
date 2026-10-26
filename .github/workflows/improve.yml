@@ -1,6 +1,6 @@
 name: Daily improvement
 
-# Three times a day Claude does the next item of docs/ROADMAP.md (a new guide, FAQ, copy or link polish), then this
+# Once a day Claude does the next item of docs/ROADMAP.md (a new guide, FAQ, copy or link polish), then this
 # workflow checks the change itself before it goes live:
 #   - only allowed paths changed (no workflows, payments, config or dependencies),
 #   - lint, tests and the full build pass.
@@ -12,9 +12,9 @@ name: Daily improvement
 # in Iran (UTC+3:30). The weekly Opus planner (plan.yml) decides what goes into the roadmap.
 on:
   schedule:
+    # 2026-10-26 portfolio focus: AgedSocials (the earning project) gets the Claude budget; SolTax runs once a
+    # day until tax season (Jan-Apr) shows whether it sells. Night in Iran (23:30).
     - cron: '0 20 * * *'
-    - cron: '0 1 * * *'
-    - cron: '0 11 * * *'
   workflow_dispatch:
 
 concurrency:
