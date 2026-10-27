@@ -1,6 +1,6 @@
 name: Daily improvement
 
-# Once a day Claude does the next item of docs/ROADMAP.md (a new guide, FAQ, copy or link polish), then this
+# Twice a day Claude does the next item of docs/ROADMAP.md (a new guide, FAQ, copy or link polish), then this
 # workflow checks the change itself before it goes live:
 #   - only allowed paths changed (no workflows, payments, config or dependencies),
 #   - lint, tests and the full build pass.
@@ -14,7 +14,9 @@ on:
   schedule:
     # 2026-10-26 portfolio focus: AgedSocials (the earning project) gets the Claude budget; SolTax runs once a
     # day until tax season (Jan-Apr) shows whether it sells. Night in Iran (23:30).
+    # 2026-10-27: owner no longer uses the second Claude account itself, so this runs twice a day to use its limit.
     - cron: '0 20 * * *'
+    - cron: '0 8 * * *'
   workflow_dispatch:
 
 concurrency:
