@@ -59,7 +59,7 @@ const COVERAGE: Array<{ title: string; text: string; guide?: string; review?: bo
   { title: 'Raydium, Orca, Meteora', text: 'Pool swaps as one row each.', guide: 'raydium-orca-meteora-swaps-tax-software' },
   { title: 'Native staking rewards', text: 'One income row per stake account per epoch.', guide: 'solana-staking-rewards-tax-software' },
   { title: 'Rent and wrapped SOL', text: 'Token-account rent and WSOL wrapping cancel out instead of looking like trades.', guide: 'wrapped-sol-wsol-tax-software' },
-  { title: 'Your own wallets', text: `Transfers between up to ${MAX_WALLETS} of your addresses are netted out.` },
+  { title: 'Your own wallets', text: `Transfers between up to ${MAX_WALLETS} of your addresses are netted out.`, guide: 'transfers-between-own-solana-wallets-tax' },
   { title: 'Failed transactions', text: 'Kept as a fee-only row, because the fee was still paid.' },
   { title: 'Spam tokens and airdrops', text: 'Plain deposits, with a note when a stranger paid the rent.', guide: 'solana-spam-tokens-airdrops-tax-software' },
   { title: 'Liquidity adds and removals', text: 'Moves of three or more assets are exported per asset and listed for you to check.', review: true },
@@ -94,6 +94,7 @@ const GUIDES = [
   { slug: 'koinly-solana-sync-vs-csv-import', title: 'Koinly wallet sync vs CSV import' },
   { slug: 'koinly-missing-purchase-history-solana', title: 'Koinly "missing purchase history" on a Solana token' },
   { slug: 'koinly-solana-wallet-not-syncing', title: 'Koinly Solana wallet not syncing' },
+  { slug: 'transfers-between-own-solana-wallets-tax', title: 'Transfers between your own wallets as income or sales' },
 ]
 
 export default function App() {
