@@ -33,7 +33,7 @@ correct and safe on its own.
 - Write a one-line Persian summary of what you did (simple words, for the owner) to the summary file the prompt names.
 
 ## Backlog
-- [ ] Fix (auto-check) [auto:orphans] guides no other guide links to; add one natural link to each from the most related guide: `solana-memecoin-trading-records`, `transfers-between-own-solana-wallets-tax`.
+- [x] (2026-10-28) Fix (auto-check) [auto:orphans] guides no other guide links to; add one natural link to each from the most related guide: `solana-memecoin-trading-records`, `transfers-between-own-solana-wallets-tax`.
 - [x] (2026-10-26) Fix (auto-check) [auto:desc-long] meta description over 160 characters (Google cuts it); shorten to 120-160, problem first: `koinly-missing-purchase-history-solana`.
 - [x] (2026-10-25) Fix (auto-check) [auto:desc-long] meta description over 160 characters (Google cuts it); shorten to 120-160, problem first: `free-solana-rpc-url`, `koinly-solana-balance-wrong`, `phantom-wallet-transactions-koinly`, `solana-crypto-taxes-transaction-history`, `solana-staking-rewards-tax-software`.
 - [x] (2026-10-25) Fix (auto-check) [auto:orphans] guides no other guide links to; add one natural link to each from the most related guide: `free-solana-rpc-url`, `pump-fun-trades-tax-software`, `raydium-orca-meteora-swaps-tax-software`.

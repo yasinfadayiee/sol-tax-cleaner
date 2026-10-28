@@ -22,5 +22,6 @@ Anyone can send a token to your address. The sender pays the rent for the new to
 1. [Analyse your wallet free](../#analyse) and look for deposits of tokens you don't recognise.
 2. Download the CSV and import it as one custom wallet.
 3. In your tax tool, ignore or hide the spam tokens, and tag real airdrops as airdrops if that's how they're treated where you live.
+4. If you hold several wallets, add them all in one analysis so transfers between them don't look like income: [transfers between your own Solana wallets](../transfers-between-own-solana-wallets-tax/).
 
 SolTax Cleaner doesn't calculate tax and isn't tax advice.

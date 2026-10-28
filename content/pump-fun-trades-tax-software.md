@@ -27,3 +27,5 @@ When you later sell everything and close the account, the rent comes back. A too
 Coins without a well-known ticker are listed in the report with their mint address, so you can check that your tax tool matched the right token.
 
 [Try the sample wallet](../#sample) to see a pump.fun buy and sell exported, or analyse your own address.
+
+Trading many small memecoins? See [memecoin trading on Solana: complete records](../solana-memecoin-trading-records/).
