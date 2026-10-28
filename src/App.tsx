@@ -95,6 +95,7 @@ const GUIDES = [
   { slug: 'koinly-missing-purchase-history-solana', title: 'Koinly "missing purchase history" on a Solana token' },
   { slug: 'koinly-solana-wallet-not-syncing', title: 'Koinly Solana wallet not syncing' },
   { slug: 'transfers-between-own-solana-wallets-tax', title: 'Transfers between your own wallets as income or sales' },
+  { slug: 'solana-memecoin-trading-records', title: 'Memecoin trading on Solana: complete records' },
 ]
 
 export default function App() {
