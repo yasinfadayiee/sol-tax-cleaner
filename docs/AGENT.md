@@ -42,3 +42,4 @@ Updated 2026-10-25. 0 sales so far; 21 guides, none ranking yet as far as we kno
 ## Lessons (reviewer appends one dated line when it fixes something; planner prunes to the last ~15)
 - 2026-10-25: Sonnet's first guides and meta fixes were accurate and clean; keep the item specs this specific.
 - 2026-10-26: Two guides (`phantom-wallet-transactions-koinly`, `koinly-missing-purchase-history-solana`) said "download the file" with no word that download is the paid step; every how-to must say preview is free and you pay once to download.
+- 2026-10-29: The CTA pass appended "does not calculate tax" under a page that already said it (cointracker page, now repeated), and an older step ("Download the CSV" in the spam-tokens guide) still hid the paid step; when adding a closing section, remove lines it duplicates and check every "download" step on the page.

@@ -23,7 +23,7 @@ Solana apps move funds through several accounts in one transaction: a temporary 
 2. Add a wallet using the CoinTracker CSV option and upload the file.
 3. Check the short report for anything flagged for a manual look.
 
-SolTax Cleaner doesn't calculate tax. It gives CoinTracker clean rows to work from.
+SolTax Cleaner gives CoinTracker clean rows to work from.
 
 ## Next step
 
