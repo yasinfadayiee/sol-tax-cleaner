@@ -23,3 +23,7 @@ Koinly warns about "missing purchase history" or shows a SOL or token balance th
 4. Re-check Koinly's balance for that wallet; it should now match your real wallet.
 
 If some asset still differs, the report lists it so you can review the specific transactions.
+
+## Next step
+
+Paste your public address in the [free analysis](../#analyse) and check the preview of every row and the balance check. You pay only to download the full file. SolTax Cleaner is not tax advice and does not calculate tax.

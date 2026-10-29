@@ -24,4 +24,4 @@ Swaps on other venues have the same problems: see [Raydium, Orca and Meteora swa
 
 ## How to get it
 
-Paste your public address on the [analyser](../#analyse) and preview the rows free. Filter the preview by type to check your swaps, then download the file for your tax tool.
+Paste your public address in the [free analysis](../#analyse) and check the preview of every row and the balance check. You pay only to download the full file. SolTax Cleaner is not tax advice and does not calculate tax.

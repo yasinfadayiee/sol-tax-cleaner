@@ -24,3 +24,7 @@ Solana apps move funds through several accounts in one transaction: a temporary 
 3. Check the short report for anything flagged for a manual look.
 
 SolTax Cleaner doesn't calculate tax. It gives CoinTracker clean rows to work from.
+
+## Next step
+
+Paste your public address in the [free analysis](../#analyse) and check the preview of every row and the balance check. You pay only to download the full file. SolTax Cleaner is not tax advice and does not calculate tax.

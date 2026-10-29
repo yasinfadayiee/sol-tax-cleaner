@@ -16,3 +16,7 @@ Rent never leaves you. It moves from your wallet into a token account that you o
 ## How SolTax Cleaner fixes it
 
 It treats your wallet and all of your token accounts as one pot. SOL moving between them cancels out, so a token purchase becomes a single swap row with only the real network fee.
+
+## Next step
+
+Paste your public address in the [free analysis](../#analyse) and check the preview of every row and the balance check. You pay only to download the full file. SolTax Cleaner is not tax advice and does not calculate tax.
